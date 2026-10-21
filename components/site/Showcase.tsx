@@ -6,11 +6,11 @@ import { SMIC } from '@/lib/rules/reference';
 import { minimumSalary } from '@/lib/rules/salary';
 
 const ITEMS = [
-  { id: 'missions', name: 'Ce que tu feras', fact: 'Chaque mission dit d’où elle vient : écrite dans l’annonce, déduite, ou inconnue.', field: 'var(--tint-6)' },
-  { id: 'salaire', name: 'Ton salaire minimum', fact: 'Calculé au centime sur le SMIC en vigueur, pour ton âge et ton année.', field: 'var(--tint-5)' },
-  { id: 'rythme', name: 'Ton rythme', fact: 'Comparé à celui de ton école avant que tu postules.', field: 'var(--surface)' },
-  { id: 'pieges', name: 'Les pièges', fact: 'Les écoles qui publient de fausses offres pour remplir leurs formations sont signalées.', field: 'var(--ink)' },
-  { id: 'equipe', name: 'À qui écrire', fact: 'Le service à viser, les postes à chercher et un message de 300 caractères.', field: 'var(--tint-6)' },
+  { id: 'missions', name: 'Ce que tu feras', fact: 'Chaque info dit d’où elle vient : écrite, déduite ou inconnue.', field: 'var(--tint-6)' },
+  { id: 'salaire', name: 'Ton salaire minimum', fact: 'Au centime, pour ton âge et ton année.', field: 'var(--tint-5)' },
+  { id: 'rythme', name: 'Ton rythme', fact: 'Comparé à celui de ton école.', field: 'var(--surface)' },
+  { id: 'pieges', name: 'Les pièges', fact: 'Les fausses offres d’écoles sont signalées.', field: 'var(--ink)' },
+  { id: 'equipe', name: 'À qui écrire', fact: 'Le service à viser et un message prêt.', field: 'var(--tint-6)' },
 ] as const;
 
 type ItemId = (typeof ITEMS)[number]['id'];

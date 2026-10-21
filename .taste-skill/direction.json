@@ -2,7 +2,7 @@
  "version": 1,
  "at": "2026-10-21T19:13:26.769Z",
  "seed": 1214231901,
- "redraws": 1,
+ "redraws": 4,
  "input": {
   "brief": "Décode: a free web app for French 18-25s looking for a work-study contract (alternance); paste any job offer and it is translated into plain words, with your legal minimum salary, the school rhythm fit and how to reach the team on LinkedIn",
   "sector": "consumer-app",
@@ -146,30 +146,27 @@
   }
  },
  "palette": {
-  "id": "white-mint-tiles",
-  "name": "Greys and mint",
+  "id": "offwhite-bottle-yellow",
+  "name": "Bottle ink, yellow",
   "tags": [
    "mono-accent"
   ],
-  "bg": "#ffffff",
-  "surface": "#f3f3f3",
-  "ink": "#232323",
-  "muted": "#6e6e6e",
-  "accent": "#a1ffcb",
-  "accentInk": "#232323",
+  "bg": "#f7f7f7",
+  "surface": "#ebebeb",
+  "ink": "#0d2a1c",
+  "muted": "#5f6b64",
+  "accent": "#f6e016",
+  "accentInk": "#0d2a1c",
   "fields": [
    {
-    "bg": "#a1ffcb",
-    "ink": "#232323"
-   },
-   {
-    "bg": "#232323",
-    "ink": "#ffffff"
+    "bg": "#f6e016",
+    "ink": "#0d2a1c"
    }
   ],
-  "note": "White, near-black and two greys fill a board of flat tiles. Mint floods a few whole tiles (one statement, one figure, the closing call to action) and appears nowhere else.",
+  "note": "Off-white ground with all type in a near-black bottle green instead of black. Yellow is the only saturated note: the button or one small object on most screens, and one later section that turns fully yellow.",
   "seenIn": [
-   "aww-aspen-search"
+   "aww-leo-parpeix-portfolio-2026",
+   "opl-wild-as"
   ]
  },
  "photos": {

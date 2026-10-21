@@ -73,5 +73,7 @@ export interface OfferPage {
   page: number;
   pageSize: number;
   /** Les offres viennent-elles d'une vraie base ou des exemples fictifs ? */
-  mode: 'base' | 'exemples';
+  mode: 'base' | 'direct' | 'exemples';
+  /** Dernière page qu'on peut demander, quand la source limite la pagination. */
+  maxPage?: number;
 }

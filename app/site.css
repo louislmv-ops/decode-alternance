@@ -173,8 +173,7 @@
   .hero-fragment {
     left: 16px;
     top: 72px;
-    width: 640px;
-    max-width: none;
+    width: calc(100% - 32px);
   }
 }
 
@@ -750,20 +749,20 @@
 }
 
 @media (max-width: 760px) {
+  /* Sur téléphone, chaque gros plan tient entier dans sa tuile : rien n'est coupé. */
   .board__grid {
     grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 28vw;
+    grid-auto-rows: 30vw;
     gap: 6px;
   }
   .tile--head {
     grid-column: 1 / -1;
-    grid-row: auto / span 2;
+    grid-row: auto / span 1;
   }
-
   .tile--pepite,
   .tile--query {
     grid-column: 1 / -1;
-    grid-row: auto / span 3;
+    grid-row: auto / span 2;
   }
   .tile--rythme,
   .tile--chrono,
@@ -772,7 +771,7 @@
   .tile--relance,
   .tile--certitude {
     grid-column: auto / span 1;
-    grid-row: auto / span 3;
+    grid-row: auto / span 2;
   }
   .tile__caption {
     left: 14px;
@@ -780,24 +779,36 @@
     bottom: 14px;
   }
   .tile .tile__zoom--pepite {
-    font-size: 32px;
-    padding: 24px 0 0 20px;
+    font-size: 20px;
+    gap: 10px;
+    padding: 20px 0 0 16px;
   }
   .tile .tile__zoom--chrono {
-    font-size: 96px;
+    font-size: 64px;
+    padding-left: 12px;
+    margin-top: 8px;
   }
   .tile .tile__zoom--week {
-    font-size: 26px;
+    font-size: 13px;
+    padding: 16px 0 0 14px;
   }
   .tile .tile__zoom--query {
-    font-size: 30px;
+    font-size: 18px;
+    padding: 20px 0 0 16px;
   }
   .tile .tile__zoom--figure {
-    font-size: 44px;
+    font-size: 28px;
+    padding: 14px 0 0 14px;
   }
   .tile .tile__zoom--alert,
   .tile .tile__zoom--toggle {
-    font-size: 24px;
+    font-size: 15px;
+    padding: 16px 0 0 14px;
+  }
+  .tile .tile__zoom--chips {
+    font-size: 13px;
+    flex-wrap: wrap;
+    padding: 16px 14px 0 14px;
   }
 }
 
@@ -1019,7 +1030,8 @@
       100% 100%,
       0 100%
     );
-    padding: 56px 20px 36px;
+    /* La carte suivante remonte de 40 px : on garde la place pour que son onglet ne couvre pas la réponse. */
+    padding: 56px 20px 64px;
   }
   .faq__tab {
     left: calc(var(--n) * 44px + 16px);

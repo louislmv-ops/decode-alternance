@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { Board } from '@/components/site/Board';
 import { Faq } from '@/components/site/Faq';
 import { HeroFragment } from '@/components/site/HeroFragment';
-import { Journey } from '@/components/site/Journey';
 import { Pricing } from '@/components/site/Pricing';
 import { Showcase } from '@/components/site/Showcase';
 import { SiteFooter } from '@/components/site/SiteFooter';
@@ -20,8 +19,7 @@ export default function Home() {
               <br /> en clair.
             </h1>
             <p className="hero__lead">
-              Colle n’importe quelle offre. Décode te dit ce que tu feras vraiment, ton salaire minimum garanti et à qui écrire dans
-              l’équipe.
+              Colle une offre. On te dit ce que tu feras, ton salaire minimum et à qui écrire.
             </p>
             <div className="hero__actions">
               <Link href="/decoder" className="btn">
@@ -40,7 +38,6 @@ export default function Home() {
         </section>
 
         <Showcase />
-        <Journey />
         <svg className="band" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
           <polygon points="20,0 1000,0 980,40 0,40" />
         </svg>

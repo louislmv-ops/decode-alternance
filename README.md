@@ -37,10 +37,14 @@ Voir `.env.example`. Les trois qui changent tout :
 | Variable | Sans elle |
 | --- | --- |
 | `ANTHROPIC_API_KEY` | Le bouton « Décoder » est désactivé ; seuls les exemples sont traduits. |
-| `DATABASE_URL` | La page Offres montre les exemples fictifs. |
-| `FRANCE_TRAVAIL_CLIENT_ID` et `_SECRET` | La collecte saute France Travail. |
+| `DATABASE_URL` | La page Offres interroge France Travail en direct si ses identifiants sont là, sinon montre les exemples fictifs. |
+| `FRANCE_TRAVAIL_CLIENT_ID` et `_SECRET` | Pas de vraies offres sans base ; la collecte saute France Travail. |
 
 ## Brancher les vraies offres
+
+Le plus court : créer une application sur francetravail.io abonnée à l’API Offres d’emploi v2, puis mettre `FRANCE_TRAVAIL_CLIENT_ID` et `FRANCE_TRAVAIL_CLIENT_SECRET` dans Vercel. Sans base, chaque recherche interroge l’API en direct (cache de 10 minutes) : toutes les offres d’apprentissage et de professionnalisation publiées sur France Travail, à jour sans collecte. Limites : pas de sites carrière, pas de dédoublonnage, et l’API ne pagine pas au-delà de 3 150 offres par recherche (il faut alors filtrer).
+
+Avec une base, en plus des sites carrière :
 
 1. Créer une base Postgres et lancer `psql "$DATABASE_URL" -f db/schema.sql`.
 2. Créer un compte sur francetravail.io et une application abonnée à l’API Offres d’emploi v2. Mettre les identifiants dans `.env.local`.

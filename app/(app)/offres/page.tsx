@@ -42,7 +42,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
   const pepites = rows.filter((r) => r.h.pepite).length;
   const from = result.total === 0 ? 0 : (result.page - 1) * result.pageSize + 1;
   const to = Math.min(result.total, result.page * result.pageSize);
-  const pages = Math.max(1, Math.ceil(result.total / result.pageSize));
+  const pages = Math.min(result.maxPage ?? Infinity, Math.max(1, Math.ceil(result.total / result.pageSize)));
 
   return (
     <div className="screen">
@@ -68,10 +68,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       </div>
 
       {result.mode === 'exemples' && (
-        <p className="notice">
-          Ces offres sont des exemples fictifs : la collecte des vraies offres n’est pas encore branchée sur ce site. Tu peux déjà
-          décoder n’importe quelle offre en la collant.
-        </p>
+        <p className="notice">Exemples fictifs : les vraies offres ne sont pas encore branchées. Tu peux déjà coller n’importe quelle offre.</p>
       )}
 
       <form className="filters" action="/offres" method="get" role="search">
@@ -113,10 +110,12 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           <input type="checkbox" name="grandes" value="1" defaultChecked={filters.bigCompany} />
           Grandes entreprises
         </label>
-        <label className="ui-check">
-          <input type="checkbox" name="direct" value="1" defaultChecked={filters.direct} />
-          Direct entreprise
-        </label>
+        {result.mode !== 'direct' && (
+          <label className="ui-check">
+            <input type="checkbox" name="direct" value="1" defaultChecked={filters.direct} />
+            Direct entreprise
+          </label>
+        )}
         <button type="submit" className="ui-btn">
           Filtrer
         </button>
