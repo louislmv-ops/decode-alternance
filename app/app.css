@@ -1755,9 +1755,26 @@
     flex: 1 1 auto;
     min-height: 44px;
   }
+  .filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .filters__search,
+  .filters label:nth-of-type(2),
+  .filters .ui-btn {
+    grid-column: 1 / -1;
+  }
   .filters .ui-select {
+    width: 100%;
     max-width: none;
-    flex: 1 1 140px;
+  }
+  .filters .ui-check {
+    min-height: 44px;
+  }
+  .filters .ui-btn,
+  .filters .ui-input,
+  .filters .ui-select {
+    min-height: 44px;
   }
   .offer-row {
     grid-template-columns: minmax(0, 1fr) auto;

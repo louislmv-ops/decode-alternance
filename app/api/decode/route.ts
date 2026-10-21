@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { decodeOffer, DecodeError, isDecodeConfigured, MAX_OFFER_CHARS } from '@/lib/decode/claude';
-import { findDecode, findOffer } from '@/lib/offers/repository';
+import { findDecode, findOffer, rememberDecode } from '@/lib/offers/repository';
 import { isDatabaseConfigured, saveDecode } from '@/lib/offers/store';
 import { allow, clientKey } from '@/lib/rate-limit';
 
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       if (!offer) return Response.json({ error: 'Cette offre n’existe plus.' }, { status: 404 });
       const { decoded, model } = await decodeOffer(`${offer.title}\n${offer.company ?? ''}\n${offer.city ?? ''}\n\n${offer.description}`);
       if (isDatabaseConfigured() && !offer.id.startsWith('exemple:')) await saveDecode(offer.id, decoded, model);
+      else rememberDecode(offer.id, decoded);
       return Response.json({ decoded, cached: false });
     }
     // Le texte collé n'est ni gardé ni enregistré : il sert à la traduction et c'est tout.

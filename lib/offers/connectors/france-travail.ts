@@ -16,7 +16,7 @@ import {
 import type { Offer, OfferContract } from '../types';
 
 const TOKEN_URL = 'https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire';
-const API = 'https://api.francetravail.io/partenaire/offresdemploi/v2';
+export const API = 'https://api.francetravail.io/partenaire/offresdemploi/v2';
 const SCOPE = 'api_offresdemploiv2 o2dsoffre';
 /** L'API rend 150 offres au plus par appel et refuse de paginer au-delà de la 3 150e. */
 const PAGE = 150;
@@ -27,7 +27,7 @@ export const DEPARTMENTS = [
   '2A', '2B', '971', '972', '973', '974', '976',
 ];
 
-interface FtOffer {
+export interface FtOffer {
   id: string;
   intitule: string;
   description?: string;
@@ -55,6 +55,15 @@ export async function getToken(clientId: string, clientSecret: string): Promise<
   return token;
 }
 
+let cachedToken: { value: string; until: number } | null = null;
+
+/** Le jeton est valable environ 25 minutes : on le garde 20 minutes. */
+export async function cachedFtToken(clientId: string, clientSecret: string): Promise<string> {
+  if (cachedToken && cachedToken.until > Date.now()) return cachedToken.value;
+  cachedToken = { value: await getToken(clientId, clientSecret), until: Date.now() + 20 * 60_000 };
+  return cachedToken.value;
+}
+
 /** Codes de nature de contrat dont le libellé parle d'apprentissage ou de professionnalisation, lus dans le référentiel. */
 export async function alternanceNatureCodes(token: string): Promise<string[]> {
   const res = await fetchText(`${API}/referentiel/naturesContrats`, {
@@ -65,7 +74,7 @@ export async function alternanceNatureCodes(token: string): Promise<string[]> {
   return items.filter((n) => /apprentissage|professionnalisation/i.test(n.libelle)).map((n) => n.code);
 }
 
-function toOffer(o: FtOffer): Offer {
+export function toOffer(o: FtOffer): Offer {
   const description = o.description ?? '';
   const company = o.entreprise?.nom?.trim() || null;
   const city = o.lieuTravail?.libelle?.replace(/^\d+\s*-\s*/, '').trim() || null;

@@ -7,13 +7,13 @@
    ========================================================================== */
 
 :root {
-  --bg: #ffffff;
-  --surface: #f3f3f3;
-  --ink: #232323;
-  --muted: #646464;
-  --accent: #a1ffcb;
-  --accent-ink: #232323;
-  --field-2: #232323;
+  --bg: #f7f7f5;
+  --surface: #ebebe8;
+  --ink: #141414;
+  --muted: #5e5e5b;
+  --accent: #f6e016;
+  --accent-ink: #141414;
+  --field-2: #141414;
   --field-2-ink: #ffffff;
 
   /* Les fonctions de l'appli : alerte et prudence, jamais décoratives. */
@@ -25,15 +25,15 @@
   --positive: #1f7a4d;
 
   /* Teintes du parcours, du plus sombre au plus clair, dans la teinte de la menthe. */
-  --tint-1: #0f3d29;
-  --tint-2: #17573a;
-  --tint-3: #23774f;
-  --tint-4: #3aa06c;
-  --tint-5: #74d9a2;
-  --tint-6: #a1ffcb;
+  --tint-1: #141414;
+  --tint-2: #2c2c2a;
+  --tint-3: #4a4a46;
+  --tint-4: #d9c50f;
+  --tint-5: #f6e016;
+  --tint-6: #faef7c;
 
   /* L'appli (style « Achromatic ledger ») : un fond de papier, des cartes blanches. */
-  --ground: #f4f4f2;
+  --ground: #f2f2ef;
   --card: #ffffff;
   --border: #e6e6e3;
   --rule: #efefec;

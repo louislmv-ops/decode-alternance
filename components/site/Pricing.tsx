@@ -11,7 +11,7 @@ const PLANS = [
     name: 'Gratuit',
     price: '0 €',
     period: 'pour toujours',
-    text: 'Toutes les offres, leur traduction en clair, ton salaire minimum, la méthode LinkedIn et le suivi de tes candidatures. Pendant la bêta, tout le site est gratuit.',
+    text: 'Les offres, leur traduction, ton salaire minimum, LinkedIn et ton suivi.',
     action: { label: 'Commencer gratuitement', href: '/decoder' },
   },
   {
@@ -19,7 +19,7 @@ const PLANS = [
     name: 'Pass Saison',
     price: '9,99 €',
     period: 'pour 3 mois, sans renouvellement',
-    text: 'Après la bêta : les alertes sur les nouvelles pépites, la comparaison de plusieurs offres, un message adapté à chaque personne et tes statistiques détaillées. Rien n’est facturé aujourd’hui.',
+    text: 'Après la bêta : alertes pépites, comparaison d’offres, statistiques. Rien n’est facturé aujourd’hui.',
     action: { label: 'Essayer pendant la bêta', href: '/decoder' },
   },
   {
@@ -27,7 +27,7 @@ const PLANS = [
     name: 'Écoles',
     price: 'Sur devis',
     period: 'pour les CFA et les écoles',
-    text: 'Décode pour tous tes étudiants, et un tableau de bord pour voir qui cherche encore et qui approche de la limite des 3 mois.',
+    text: 'Décode pour tous tes étudiants, avec un suivi de leur recherche.',
     action: CONTACT ? { label: 'Écrire à l’équipe', href: `mailto:${CONTACT}?subject=${encodeURIComponent('Décode pour notre école')}` } : null,
   },
 ] as const;
