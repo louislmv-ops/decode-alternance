@@ -1,0 +1,317 @@
+'use client';
+
+import { useState } from 'react';
+import { CopyButton } from '@/components/offer/CopyButton';
+import { useProfile } from '@/components/useProfile';
+import { formatEuros } from '@/lib/format';
+import {
+  APPRENTISSAGE_RATES,
+  APPRENTI_EXEMPTION_SOURCE,
+  EMPLOYER_AID_2026,
+  EMPLOYER_PARTICIPATION,
+  PROFESSIONNALISATION_RATES,
+  SMIC,
+} from '@/lib/rules/reference';
+import { DIPLOMA_LEVELS, employerFigures, type CompanySize, type DiplomaLevel } from '@/lib/rules/employer';
+import { apprenticeNetThresholdCents, clampYear, minimumSalary, type ContractKind } from '@/lib/rules/salary';
+
+const smicDate = new Date(SMIC.since).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+const ordinal = (y: number) => `${y}${y === 1 ? 're' : 'e'}`;
+
+export function SalaryView() {
+  const [profile, saveProfile] = useProfile();
+  const [draft, setDraft] = useState<{ contract: ContractKind; age: number; year: 1 | 2 | 3; hasBacPro: boolean } | null>(null);
+  const [size, setSize] = useState<CompanySize>('moins-de-250');
+  const [level, setLevel] = useState<DiplomaLevel | null>(null);
+  const [disabled, setDisabled] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const input = draft ?? { contract: profile.contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro };
+  const lvl = level ?? profile.level;
+  const set = (patch: Partial<typeof input>) => {
+    setDraft({ ...input, ...patch });
+    setSaved(false);
+  };
+
+  const m = minimumSalary(input);
+  const employer = employerFigures({ contract: input.contract, size, level: lvl, disabledWorker: disabled });
+  const yearly = m.cents * 12;
+  const remaining = yearly - employer.aidCents + employer.participationCents;
+  const levelLabel = DIPLOMA_LEVELS.find((l) => l.level === lvl)?.label ?? '';
+
+  const pitch =
+    input.contract === 'apprentissage'
+      ? `En m’embauchant en apprentissage (${levelLabel.toLowerCase()}), votre entreprise peut recevoir jusqu’à ${formatEuros(employer.aidCents, 0)} d’aide de l’État la première année (${size === 'moins-de-250' ? 'entreprise de moins de 250 salariés' : 'entreprise de 250 salariés et plus'}, décret n° 2026-168 du 6 mars 2026). Mon salaire minimum légal est de ${formatEuros(m.cents)} brut par mois.${employer.participationCents ? ` Une participation de ${formatEuros(employer.participationCents, 0)} à la formation est due pour ce niveau de diplôme.` : ''} Ma formation est financée par l’OPCO de l’entreprise.`
+      : `En contrat de professionnalisation, mon salaire minimum légal est de ${formatEuros(m.cents)} brut par mois et ma formation est prise en charge par l’OPCO de l’entreprise.`;
+
+  return (
+    <div className="screen">
+      <div className="title-row">
+        <div>
+          <h1>Mon salaire minimum</h1>
+          <p className="title-row__sub">
+            Calculé sur le SMIC du {smicDate} ({formatEuros(SMIC.hourlyCents)} brut de l’heure) et le Code du travail.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="ui-btn ui-btn--primary"
+          onClick={() => {
+            saveProfile({ ...profile, ...input, level: lvl });
+            setSaved(true);
+          }}
+          disabled={saved}
+        >
+          {saved ? 'Enregistré dans ton profil' : 'Garder dans mon profil'}
+        </button>
+      </div>
+
+      <div className="salary">
+        <section className="panel salary__answer" aria-labelledby="answer-title">
+          <h2 id="answer-title" className="sr-only">
+            Ton minimum
+          </h2>
+          <div className="salary__controls">
+            <div className="ui-field">
+              <span className="ui-label" id="contract-l">
+                Contrat
+              </span>
+              <div className="ui-segmented" role="group" aria-labelledby="contract-l">
+                <button type="button" aria-pressed={input.contract === 'apprentissage'} onClick={() => set({ contract: 'apprentissage' })}>
+                  Apprentissage
+                </button>
+                <button type="button" aria-pressed={input.contract === 'professionnalisation'} onClick={() => set({ contract: 'professionnalisation' })}>
+                  Contrat pro
+                </button>
+              </div>
+            </div>
+            <div className="ui-field">
+              <label className="ui-label" htmlFor="age-input">
+                Ton âge {input.contract === 'apprentissage' ? 'au début du contrat' : 'à la signature'}
+              </label>
+              <input
+                id="age-input"
+                className="ui-input ui-input--short num"
+                type="number"
+                min={15}
+                max={60}
+                value={input.age}
+                onChange={(e) => set({ age: Math.max(15, Math.min(60, Number(e.target.value) || 15)) })}
+              />
+            </div>
+            {input.contract === 'apprentissage' ? (
+              <div className="ui-field">
+                <span className="ui-label" id="year-l">
+                  Année de contrat
+                </span>
+                <div className="ui-segmented" role="group" aria-labelledby="year-l">
+                  {([1, 2, 3] as const).map((y) => (
+                    <button key={y} type="button" aria-pressed={input.year === y} onClick={() => set({ year: clampYear(y) })}>
+                      {ordinal(y)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <label className="ui-check">
+                <input type="checkbox" checked={input.hasBacPro} onChange={(e) => set({ hasBacPro: e.target.checked })} />
+                J’ai au moins un bac pro ou un titre de même niveau
+              </label>
+            )}
+          </div>
+
+          <p className="salary__figure num" aria-live="polite">
+            {formatEuros(m.cents)}
+            <span className="ui-unit"> brut par mois</span>
+          </p>
+          <p className="salary__line">
+            {m.rate} % du SMIC · {m.bracket}
+            {input.contract === 'apprentissage' ? ` · ${ordinal(input.year)} année` : input.hasBacPro ? ' · avec bac pro' : ''}
+          </p>
+          <ul className="bullets salary__notes">
+            {input.contract === 'apprentissage' && (
+              <li>
+                Sous {formatEuros(apprenticeNetThresholdCents())} brut (50 % du SMIC), ton net est égal à ton brut. Au-dessus, des
+                cotisations sont prélevées sur la part qui dépasse.
+              </li>
+            )}
+            {m.conventionMayRaise && <li>La convention collective de l’entreprise peut prévoir plus : c’est alors elle qui s’applique.</li>}
+            <li>C’est un minimum : rien n’empêche l’entreprise de payer plus, et ça se demande.</li>
+          </ul>
+        </section>
+
+        <section className="panel salary__grid" aria-labelledby="grid-title">
+          <div className="panel__head">
+            <h2 id="grid-title">{input.contract === 'apprentissage' ? 'La grille de l’apprentissage' : 'La grille du contrat pro'}</h2>
+            <span className="panel__meta">en % du SMIC</span>
+          </div>
+          {input.contract === 'apprentissage' ? (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Âge</th>
+                  <th scope="col" className="num">
+                    1re année
+                  </th>
+                  <th scope="col" className="num">
+                    2e année
+                  </th>
+                  <th scope="col" className="num">
+                    3e année
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {APPRENTISSAGE_RATES.map((row) => (
+                  <tr key={row.label}>
+                    <th scope="row">{row.label}</th>
+                    {row.byYear.map((rate, i) => {
+                      const here = m.bracket === row.label && input.year === i + 1;
+                      return (
+                        <td key={i} className="num">
+                          <span className={here ? 'hl' : undefined}>{rate} %</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Âge</th>
+                  <th scope="col" className="num">
+                    Sans bac pro
+                  </th>
+                  <th scope="col" className="num">
+                    Avec bac pro
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {PROFESSIONNALISATION_RATES.map((row) => (
+                  <tr key={row.label}>
+                    <th scope="row">{row.label}</th>
+                    {[row.base, row.withBac].map((rate, i) => {
+                      const here = m.bracket === row.label && input.hasBacPro === (i === 1);
+                      return (
+                        <td key={i} className="num">
+                          <span className={here ? 'hl' : undefined}>{rate} %</span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {input.contract === 'apprentissage' && (
+            <dl className="kv salary__next">
+              <div>
+                <dt>Sur 12 mois</dt>
+                <dd className="num">{formatEuros(m.cents * 12)} brut</dd>
+              </div>
+              {input.year < 3 && (
+                <div>
+                  <dt>{ordinal(input.year + 1)} année</dt>
+                  <dd className="num">
+                    {formatEuros(minimumSalary({ ...input, year: clampYear(input.year + 1) }).cents)} brut par mois (
+                    {minimumSalary({ ...input, year: clampYear(input.year + 1) }).rate} % du SMIC)
+                  </dd>
+                </div>
+              )}
+              <div>
+                <dt>Anniversaire</dt>
+                <dd>À 18 et à 21 ans, ton taux monte le 1er jour du mois qui suit ton anniversaire.</dd>
+              </div>
+            </dl>
+          )}
+        </section>
+      </div>
+
+      <section className="panel" aria-labelledby="employer-title">
+        <div className="panel__head">
+          <h2 id="employer-title">Ce que tu coûtes vraiment à une entreprise</h2>
+          <span className="panel__meta">la 1re année · contrats conclus en 2026</span>
+        </div>
+        <p className="panel__lead">
+          Sur La bonne alternance, 74 % des candidatures du début 2026 étaient spontanées. Face à une PME, montre ce que ton
+          embauche lui coûte vraiment, aides comprises.
+        </p>
+        <div className="employer">
+          <div className="employer__controls">
+            <label className="ui-field">
+              <span className="ui-label">Taille de l’entreprise</span>
+              <select className="ui-select" value={size} onChange={(e) => setSize(e.target.value as CompanySize)}>
+                <option value="moins-de-250">Moins de 250 salariés</option>
+                <option value="250-et-plus">250 salariés et plus</option>
+              </select>
+            </label>
+            <label className="ui-field">
+              <span className="ui-label">Diplôme préparé</span>
+              <select className="ui-select" value={lvl} onChange={(e) => setLevel(Number(e.target.value) as DiplomaLevel)}>
+                {DIPLOMA_LEVELS.map((l) => (
+                  <option key={l.level} value={l.level}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {input.contract === 'apprentissage' && (
+              <label className="ui-check">
+                <input type="checkbox" checked={disabled} onChange={(e) => setDisabled(e.target.checked)} />
+                Je suis reconnu(e) travailleur handicapé
+              </label>
+            )}
+          </div>
+          <table className="table employer__table">
+            <tbody>
+              <tr>
+                <th scope="row">Ton salaire minimum sur 12 mois</th>
+                <td className="num">{formatEuros(yearly, 0)}</td>
+              </tr>
+              <tr>
+                <th scope="row">{employer.aidLabel}</th>
+                <td className="num">{employer.aidCents > 0 ? `−${formatEuros(employer.aidCents, 0)}` : '0 €'}</td>
+              </tr>
+              <tr>
+                <th scope="row">Participation à ta formation (bac+3 et plus)</th>
+                <td className="num">{employer.participationCents > 0 ? `+${formatEuros(employer.participationCents, 0)}` : '0 €'}</td>
+              </tr>
+              <tr className="table__total">
+                <th scope="row">Reste pour l’entreprise, hors cotisations patronales</th>
+                <td className="num">{formatEuros(remaining, 0)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="message">
+          <p className="ui-label">À glisser dans ta candidature spontanée</p>
+          <p className="message__text">{pitch}</p>
+          <div className="message__foot">
+            <span>Montants maximaux : l’aide réelle dépend du contrat signé.</span>
+            <CopyButton text={pitch} label="Copier" />
+          </div>
+        </div>
+      </section>
+
+      <section className="panel" aria-labelledby="sources-title">
+        <div className="panel__head">
+          <h2 id="sources-title">Sources</h2>
+        </div>
+        <ul className="sources">
+          <li>SMIC : {SMIC.source}.</li>
+          <li>Apprentissage : article D6222-26 du Code du travail. Contrat pro : articles L6325-8 et D6325-15.</li>
+          <li>Net d’un apprenti : {APPRENTI_EXEMPTION_SOURCE}.</li>
+          <li>
+            Aides à l’employeur : {EMPLOYER_AID_2026.source}. Montants pour les contrats conclus du 8 mars au 31 décembre 2026, sous
+            réserve des conditions de l’ASP.
+          </li>
+          <li>Participation de {formatEuros(EMPLOYER_PARTICIPATION.cents, 0)} : {EMPLOYER_PARTICIPATION.source}.</li>
+        </ul>
+      </section>
+    </div>
+  );
+}
