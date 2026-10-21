@@ -1,0 +1,67 @@
+'use client';
+
+import { useState } from 'react';
+import type { DecodedOffer } from '@/lib/decode/schema';
+import { DecodedView, type OfferMeta } from './DecodedView';
+
+/** Une offre pas encore traduite : son texte brut, et le bouton qui demande la traduction. */
+export function UndecodedOffer({ offer, description }: { offer: OfferMeta; description: string }) {
+  const [state, setState] = useState<{ status: 'idle' | 'loading' } | { status: 'error'; message: string } | { status: 'done'; decoded: DecodedOffer }>({
+    status: 'idle',
+  });
+
+  if (state.status === 'done') return <DecodedView decoded={state.decoded} offer={offer} />;
+
+  async function decode() {
+    setState({ status: 'loading' });
+    try {
+      const res = await fetch('/api/decode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ offerId: offer.id }),
+      });
+      const data = (await res.json()) as { decoded?: DecodedOffer; error?: string };
+      if (!res.ok || !data.decoded) throw new Error(data.error ?? 'La traduction a échoué.');
+      setState({ status: 'done', decoded: data.decoded });
+    } catch (error) {
+      setState({ status: 'error', message: (error as Error).message });
+    }
+  }
+
+  return (
+    <div className="screen">
+      <div className="title-row">
+        <div>
+          <h1>{offer.title}</h1>
+          <p className="title-row__sub">{[offer.company ?? 'Entreprise non nommée', offer.city, offer.sourceLabel].filter(Boolean).join(' · ')}</p>
+        </div>
+        <div className="title-row__actions">
+          <button type="button" className="ui-btn ui-btn--primary" onClick={decode} disabled={state.status === 'loading'}>
+            {state.status === 'loading' ? 'Traduction en cours…' : 'Traduire cette offre'}
+          </button>
+        </div>
+      </div>
+      {state.status === 'error' && (
+        <p className="notice notice--error" role="alert">
+          {state.message}
+        </p>
+      )}
+      {state.status === 'loading' && (
+        <p className="notice" role="status">
+          Décode lit l’annonce. Ça prend en général une vingtaine de secondes.
+        </p>
+      )}
+      <section className="panel" aria-labelledby="raw-title">
+        <div className="panel__head">
+          <h2 id="raw-title">L’annonce telle qu’elle est publiée</h2>
+          {/^https?:\/\//.test(offer.sourceUrl) && (
+            <a className="panel__link" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer">
+              Voir sur le site d’origine
+            </a>
+          )}
+        </div>
+        <p className="raw-text">{description}</p>
+      </section>
+    </div>
+  );
+}
