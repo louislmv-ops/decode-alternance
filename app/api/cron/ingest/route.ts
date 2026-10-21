@@ -1,7 +1,8 @@
 import { departmentsForSlot, runIngest, SLOTS } from '@/lib/offers/ingest';
 import { isDatabaseConfigured } from '@/lib/offers/store';
 
-// Appelé par le cron de vercel.json toutes les deux heures. Vercel envoie CRON_SECRET en Bearer.
+// Collecte d'une tranche de départements par appel, pour un cron externe ou un plan Vercel Pro
+// (la collecte quotidienne passe par GitHub Actions). Le secret CRON_SECRET est attendu en Bearer.
 export const maxDuration = 300;
 
 export async function GET(request: Request) {

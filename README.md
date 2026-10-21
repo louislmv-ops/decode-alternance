@@ -45,7 +45,7 @@ Voir `.env.example`. Les trois qui changent tout :
 1. Créer une base Postgres et lancer `psql "$DATABASE_URL" -f db/schema.sql`.
 2. Créer un compte sur francetravail.io et une application abonnée à l’API Offres d’emploi v2. Mettre les identifiants dans `.env.local`.
 3. Tester sur deux départements : `pnpm ingest --dep 35,56`. Le script affiche le nombre d’offres lues.
-4. En production (Vercel), définir `CRON_SECRET` : `vercel.json` appelle `/api/cron/ingest` toutes les deux heures, et chaque passage traite un douzième des départements. Chaque département est donc relu une fois par jour. Une offre qui n’est plus revue pendant 36 h est retirée.
+4. Collecte quotidienne : le workflow GitHub Actions `.github/workflows/ingest.yml` lance `pnpm ingest` chaque jour à 4 h 17 (UTC), et on peut le lancer à la main depuis l’onglet Actions. Créer les secrets `DATABASE_URL`, `FRANCE_TRAVAIL_CLIENT_ID`, `FRANCE_TRAVAIL_CLIENT_SECRET` et `BOT_CONTACT` dans les réglages du dépôt. Une offre qui n’est plus revue pendant 36 h est retirée. Le plan Hobby de Vercel n’autorise qu’un cron par jour et des fonctions courtes, d’où ce choix ; la route `/api/cron/ingest` (une tranche de départements par appel, protégée par `CRON_SECRET`) reste disponible pour un plan Pro.
 
 Points à vérifier au premier lancement, que je n’ai pas pu tester depuis l’environnement de développement (aucun accès réseau sortant) : l’adresse du jeton OAuth, le nom du scope et le format des réponses de l’API France Travail. Le connecteur lit les codes de contrat d’alternance dans le référentiel de l’API plutôt que de les coder en dur.
 
