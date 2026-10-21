@@ -1,0 +1,32 @@
+# Collecte quotidienne des offres. Elle tourne sur GitHub Actions plutôt qu'en cron Vercel :
+# le plan Hobby de Vercel limite les crons à un par jour et les fonctions à quelques minutes,
+# alors qu'une collecte complète de France Travail prend plus longtemps.
+# Secrets à créer dans Settings → Secrets and variables → Actions :
+# DATABASE_URL, FRANCE_TRAVAIL_CLIENT_ID, FRANCE_TRAVAIL_CLIENT_SECRET, BOT_CONTACT.
+name: Collecte des offres
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      FRANCE_TRAVAIL_CLIENT_ID: ${{ secrets.FRANCE_TRAVAIL_CLIENT_ID }}
+      FRANCE_TRAVAIL_CLIENT_SECRET: ${{ secrets.FRANCE_TRAVAIL_CLIENT_SECRET }}
+      BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Collecte
+        if: ${{ env.DATABASE_URL != '' }}
+        run: pnpm ingest
