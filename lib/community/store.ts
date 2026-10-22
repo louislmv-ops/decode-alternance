@@ -7,6 +7,7 @@ import { db } from '@/lib/offers/store';
 import { FEED_PAGE, REPORTS_TO_HIDE, type Member, type Post, type PostKind } from './shared';
 
 export { KIND_LABELS, KINDS, POST_MAX, type Member, type Post, type PostKind } from './shared';
+export { ensureSchema as ensureCommunitySchema };
 
 export const MemberInput = z.object({
   handle: z
@@ -19,6 +20,19 @@ export const MemberInput = z.object({
   domain: z.string().trim().max(40).default(''),
   city: z.string().trim().max(40).default(''),
   school: z.string().trim().max(60).default(''),
+  formation: z.string().trim().max(80).default(''),
+  level: z.number().int().min(3).max(7).nullable().default(null),
+  rhythm: z.string().trim().max(60).default(''),
+  startMonth: z.string().regex(/^\d{4}-\d{2}$/).nullable().default(null),
+  seeking: z.boolean().default(false),
+  visibleToCompanies: z.boolean().default(false),
+  skills: z.array(z.string().trim().min(1).max(30)).max(8).default([]),
+  linkedin: z
+    .string()
+    .trim()
+    .max(200)
+    .refine((v) => v === '' || /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/in\/[^\s/]+\/?$/i.test(v), 'Lien LinkedIn de profil attendu (https://www.linkedin.com/in/...)')
+    .default(''),
 });
 export type MemberInput = z.infer<typeof MemberInput>;
 
@@ -40,6 +54,16 @@ function ensureSchema(): Promise<void> {
       banned boolean not null default false,
       created_at timestamptz not null default now()
     )`;
+    // La carte alternant, ajoutée après coup : chaque colonne est créée si elle manque.
+    await s`alter table members
+      add column if not exists formation text not null default '',
+      add column if not exists level int,
+      add column if not exists rhythm text not null default '',
+      add column if not exists start_month text,
+      add column if not exists seeking boolean not null default false,
+      add column if not exists visible_to_companies boolean not null default false,
+      add column if not exists skills text[] not null default '{}',
+      add column if not exists linkedin text not null default ''`;
     await s`create table if not exists posts (
       id uuid primary key default gen_random_uuid(),
       author_id uuid not null references members(account_id) on delete cascade,
@@ -86,6 +110,14 @@ interface MemberRow {
   city: string;
   school: string;
   banned: boolean;
+  formation: string;
+  level: number | null;
+  rhythm: string;
+  start_month: string | null;
+  seeking: boolean;
+  visible_to_companies: boolean;
+  skills: string[];
+  linkedin: string;
   followers: number;
   following: number;
   posts: number;
@@ -103,6 +135,14 @@ function toMember(r: MemberRow): Member {
     followers: r.followers,
     following: r.following,
     posts: r.posts,
+    formation: r.formation,
+    level: r.level,
+    rhythm: r.rhythm,
+    startMonth: r.start_month,
+    seeking: r.seeking,
+    visibleToCompanies: r.visible_to_companies,
+    skills: r.skills ?? [],
+    linkedin: r.linkedin,
   };
 }
 
@@ -131,10 +171,14 @@ export async function saveMember(accountId: string, input: MemberInput): Promise
   await ensureSchema();
   const s = db();
   try {
-    await s`insert into members (account_id, handle, name, bio, domain, city, school)
-      values (${accountId}, ${input.handle}, ${input.name}, ${input.bio}, ${input.domain}, ${input.city}, ${input.school})
+    await s`insert into members (account_id, handle, name, bio, domain, city, school, formation, level, rhythm, start_month, seeking, visible_to_companies, skills, linkedin)
+      values (${accountId}, ${input.handle}, ${input.name}, ${input.bio}, ${input.domain}, ${input.city}, ${input.school},
+        ${input.formation}, ${input.level}, ${input.rhythm}, ${input.startMonth}, ${input.seeking}, ${input.visibleToCompanies},
+        ${input.skills}, ${input.linkedin})
       on conflict (account_id) do update set handle = excluded.handle, name = excluded.name, bio = excluded.bio,
-        domain = excluded.domain, city = excluded.city, school = excluded.school`;
+        domain = excluded.domain, city = excluded.city, school = excluded.school, formation = excluded.formation,
+        level = excluded.level, rhythm = excluded.rhythm, start_month = excluded.start_month, seeking = excluded.seeking,
+        visible_to_companies = excluded.visible_to_companies, skills = excluded.skills, linkedin = excluded.linkedin`;
   } catch (error) {
     if ((error as { code?: string }).code === '23505') throw new HandleTaken();
     throw error;

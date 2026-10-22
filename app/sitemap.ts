@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ['/decoder', 0.8],
     ['/salaire', 0.8],
     ['/equipe', 0.7],
+    ['/entreprises', 0.6],
     ['/mentions-legales', 0.2],
   ];
   return pages.map(([path, priority]) => ({ url: `${SITE_URL}${path}`, changeFrequency: 'daily', priority }));
