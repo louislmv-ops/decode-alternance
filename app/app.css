@@ -1925,3 +1925,31 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ---------- Compatibilité avec ton profil ---------- */
+
+.match {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--sky);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.match--full {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.match-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  padding: 14px 18px;
+  border-radius: var(--r-card);
+  background: var(--sky);
+  font-size: 15px;
+}

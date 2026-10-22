@@ -9,7 +9,13 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const offer = await findOffer(decodeURIComponent((await params).id));
-  return { title: offer ? offer.title : 'Offre introuvable', robots: offer?.source === 'exemple' ? { index: false } : undefined };
+  if (!offer) return { title: 'Offre introuvable', robots: { index: false } };
+  const where = [offer.company, offer.city].filter(Boolean).join(', ');
+  return {
+    title: offer.title,
+    description: `Alternance ${offer.title}${where ? ` chez ${where}` : ''} : missions en clair, salaire comparé à ton minimum et qui contacter.`,
+    robots: offer.source === 'exemple' ? { index: false } : undefined,
+  };
 }
 
 export default async function OfferPage({ params }: Props) {
@@ -28,6 +34,8 @@ export default async function OfferPage({ params }: Props) {
     salaryCents: offer.salaryMonthlyCents,
     schoolFlags: offer.schoolFlags,
     isExample: offer.source === 'exemple',
+    department: offer.department,
+    diplomaLevel: offer.diplomaLevel,
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };
 

@@ -11,7 +11,9 @@ import { RHYTHMS } from '@/lib/profile';
 import { apprenticeNetThresholdCents, comparePay, minimumSalary } from '@/lib/rules/salary';
 import { IconOut } from '@/components/app/Icons';
 import { CopyButton } from './CopyButton';
+import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
+import type { DiplomaLevel } from '@/lib/rules/employer';
 
 export interface OfferMeta {
   id: string;
@@ -24,6 +26,8 @@ export interface OfferMeta {
   schoolFlags: string[];
   isExample: boolean;
   contract: string | null;
+  department: string | null;
+  diplomaLevel: DiplomaLevel | null;
 }
 
 const CERTITUDE: Record<Certitude, string> = { dit: 'Dit', deduit: 'Déduit', inconnu: 'Inconnu' };
@@ -128,6 +132,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         rhythm={decoded.contrat.rythme}
         contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
       />
+      {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
 
       <div className="detail">
         <div className="detail__main">

@@ -6,11 +6,14 @@ import './site.css';
 import './app.css';
 import { Matcher } from '@/components/Matcher';
 import { Reveal } from '@/components/Reveal';
+import { SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: { default: 'Décode : l’alternance, en clair', template: '%s · Décode' },
   description:
-    'Colle n’importe quelle offre d’alternance : Décode te dit ce que tu feras vraiment, ton salaire minimum garanti et à qui écrire dans l’équipe.',
+    'Les offres d’alternance traduites : ce que tu feras vraiment, ton salaire minimum garanti, les fausses offres d’écoles écartées et qui contacter dans l’équipe.',
+  metadataBase: new URL(SITE_URL),
+  openGraph: { type: 'website', locale: 'fr_FR', siteName: 'Décode' },
 };
 
 export const viewport: Viewport = {

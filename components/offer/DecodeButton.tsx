@@ -5,6 +5,7 @@ import type { DecodedOffer } from '@/lib/decode/schema';
 import { useProfile } from '@/components/useProfile';
 import { minimumSalary } from '@/lib/rules/salary';
 import { DecodedView, type OfferMeta } from './DecodedView';
+import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
 
 /** Une offre pas encore traduite : son texte brut, et le bouton qui demande la traduction. */
@@ -47,6 +48,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         </div>
       </div>
       <OfferFacts payCents={offer.salaryCents} minimumCents={minimum.cents} company={offer.company} place={offer.city} rhythm={null} contract={offer.contract} />
+      <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
       {state.status === 'idle' && (
         <p className="decode-pitch">
           Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.

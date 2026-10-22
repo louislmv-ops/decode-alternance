@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { TrackerView } from '@/components/tools/TrackerView';
 
-export const metadata: Metadata = { title: 'Mon suivi' };
+export const metadata: Metadata = { title: 'Mon suivi', robots: { index: false } };
 
 export default function TrackerPage() {
   return <TrackerView />;
