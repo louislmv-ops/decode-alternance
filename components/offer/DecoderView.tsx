@@ -52,7 +52,7 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
       <div className="title-row">
         <div>
           <h1>Décoder une offre</h1>
-          <p className="title-row__sub">Colle le texte d’une annonce trouvée n’importe où : Indeed, LinkedIn, Welcome to the Jungle, le site d’une entreprise.</p>
+          <p className="title-row__sub">Colle une offre trouvée n’importe où.</p>
         </div>
       </div>
 
@@ -81,13 +81,12 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
           </div>
           {!aiEnabled && (
             <p className="notice">
-              La traduction par l’IA n’est pas encore activée sur ce site. En attendant, ouvre un des exemples à droite : ils montrent
-              exactement ce que tu obtiendras.
+              Bientôt disponible. En attendant, ouvre un exemple.
             </p>
           )}
           {state.status === 'loading' && (
             <p className="notice" role="status">
-              Décode lit l’annonce. Ça prend en général une vingtaine de secondes.
+              Lecture de l’annonce… environ 20 secondes.
             </p>
           )}
           {state.status === 'error' && (
@@ -95,23 +94,10 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
               {state.message}
             </p>
           )}
-          <p className="panel__note">
-            Le texte est envoyé à notre fournisseur d’IA pour être traduit, puis Décode ne le garde pas. Évite d’y coller tes
-            coordonnées.
-          </p>
+          <p className="panel__note">Traduit par une IA, rien n’est gardé.</p>
         </form>
 
         <section className="panel decoder__examples" aria-labelledby="examples-title">
-          <div className="panel__head">
-            <h2 id="get-title">Ce que tu obtiens</h2>
-          </div>
-          <ul className="bullets decoder__get">
-            <li>Les missions en phrases simples, avec leur source : dit, déduit ou inconnu</li>
-            <li>Une semaine probable et ce que tu vas apprendre</li>
-            <li>Le salaire comparé à ton minimum légal</li>
-            <li>Les pièges signalés : offre d’école, frais, flou sur le contrat</li>
-            <li>Le service à viser, les questions à poser et ton message LinkedIn</li>
-          </ul>
           <div className="panel__head decoder__examples-head">
             <h2 id="examples-title">Essaie avec un exemple</h2>
             <span className="panel__meta">Offres fictives</span>

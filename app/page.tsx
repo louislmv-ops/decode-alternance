@@ -61,7 +61,7 @@ async function latestOffers(): Promise<OfferPage | null> {
 export default async function Home() {
   const [page, jar] = await Promise.all([latestOffers(), cookies()]);
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
-  const latest = (page?.offers ?? []).slice(0, 6).map((offer) => ({ offer, h: highlights(offer, profile) }));
+  const latest = (page?.offers ?? []).slice(0, 4).map((offer) => ({ offer, h: highlights(offer, profile) }));
 
   return (
     <>
@@ -174,11 +174,8 @@ export default async function Home() {
         <section className="free band" aria-labelledby="free-title">
           <div className="free__box" data-reveal>
             <h2 id="free-title" className="section-title">
-              Gratuit. Sans compte.
+              Gratuit. Vraiment.
             </h2>
-            <p className="free__text">
-              Offres, décodage et alertes compris. Ton profil reste à toi.
-            </p>
             <Link href="/offres" className="btn btn--light">
               Voir les offres
             </Link>

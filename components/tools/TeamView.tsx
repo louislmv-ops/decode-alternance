@@ -46,7 +46,7 @@ export function TeamView({ initial }: { initial: { company: string; service: str
       <div className="title-row">
         <div>
           <h1>Trouver l’équipe</h1>
-          <p className="title-row__sub">Les recherches à lancer toi-même sur LinkedIn pour joindre le service qui recrute, et quoi lui écrire.</p>
+          <p className="title-row__sub">Les bonnes personnes à contacter, et quoi leur écrire.</p>
         </div>
       </div>
 
@@ -120,14 +120,13 @@ export function TeamView({ initial }: { initial: { company: string; service: str
               <CopyButton text={relance} label="Copier" />
             </div>
           </div>
-          <p className="panel__note">Remplace la question par la tienne : une vraie question sur le poste obtient plus de réponses qu’une demande générale.</p>
         </section>
       </div>
 
-      <section className="panel" aria-labelledby="method-title">
-        <div className="panel__head">
+      <details className="panel fold" aria-labelledby="method-title">
+        <summary className="panel__head fold__head">
           <h2 id="method-title">La méthode</h2>
-        </div>
+        </summary>
         <ol className="method">
           {STEPS.map((s) => (
             <li key={s.title}>
@@ -136,8 +135,7 @@ export function TeamView({ initial }: { initial: { company: string; service: str
             </li>
           ))}
         </ol>
-        <p className="panel__note">Décode ne lit rien sur LinkedIn et n’écrit à personne à ta place : c’est toi qui cherches et qui envoies.</p>
-      </section>
+      </details>
     </div>
   );
 }

@@ -49,9 +49,7 @@ export function SalaryView() {
       <div className="title-row">
         <div>
           <h1>Mon salaire minimum</h1>
-          <p className="title-row__sub">
-            Calculé sur le SMIC du {smicDate} ({formatEuros(SMIC.hourlyCents)} brut de l’heure) et le Code du travail.
-          </p>
+          <p className="title-row__sub">SMIC au {smicDate}.</p>
         </div>
         <button
           type="button"
@@ -130,21 +128,18 @@ export function SalaryView() {
           </p>
           <ul className="bullets salary__notes">
             {input.contract === 'apprentissage' && (
-              <li>
-                Sous {formatEuros(apprenticeNetThresholdCents())} brut (50 % du SMIC), ton net est égal à ton brut. Au-dessus, des
-                cotisations sont prélevées sur la part qui dépasse.
-              </li>
+              <li>Sous {formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net = ton brut.</li>
             )}
-            {m.conventionMayRaise && <li>La convention collective de l’entreprise peut prévoir plus : c’est alors elle qui s’applique.</li>}
-            <li>C’est un minimum : rien n’empêche l’entreprise de payer plus, et ça se demande.</li>
+            {m.conventionMayRaise && <li>La convention de l’entreprise peut prévoir plus.</li>}
+            <li>C’est un minimum : ça se négocie.</li>
           </ul>
         </section>
 
-        <section className="panel salary__grid" aria-labelledby="grid-title">
-          <div className="panel__head">
+        <details className="panel fold salary__grid" aria-labelledby="grid-title">
+          <summary className="panel__head fold__head">
             <h2 id="grid-title">{input.contract === 'apprentissage' ? 'La grille de l’apprentissage' : 'La grille du contrat pro'}</h2>
             <span className="panel__meta">en % du SMIC</span>
-          </div>
+          </summary>
           {input.contract === 'apprentissage' ? (
             <table className="table">
               <thead>
@@ -228,18 +223,15 @@ export function SalaryView() {
               </div>
             </dl>
           )}
-        </section>
+        </details>
       </div>
 
-      <section className="panel" aria-labelledby="employer-title">
-        <div className="panel__head">
-          <h2 id="employer-title">Ce que tu coûtes vraiment à une entreprise</h2>
+      <details className="panel fold" aria-labelledby="employer-title">
+        <summary className="panel__head fold__head">
+          <h2 id="employer-title">Ce que tu coûtes à une entreprise</h2>
           <span className="panel__meta">la 1re année · contrats conclus en 2026</span>
-        </div>
-        <p className="panel__lead">
-          Sur La bonne alternance, 74 % des candidatures du début 2026 étaient spontanées. Face à une PME, montre ce que ton
-          embauche lui coûte vraiment, aides comprises.
-        </p>
+        </summary>
+        <p className="panel__lead">L’argument qui fait mouche en candidature spontanée.</p>
         <div className="employer">
           <div className="employer__controls">
             <label className="ui-field">
@@ -295,12 +287,12 @@ export function SalaryView() {
             <CopyButton text={pitch} label="Copier" />
           </div>
         </div>
-      </section>
+      </details>
 
-      <section className="panel" aria-labelledby="sources-title">
-        <div className="panel__head">
+      <details className="panel fold" aria-labelledby="sources-title">
+        <summary className="panel__head fold__head">
           <h2 id="sources-title">Sources</h2>
-        </div>
+        </summary>
         <ul className="sources">
           <li>SMIC : {SMIC.source}.</li>
           <li>Apprentissage : article D6222-26 du Code du travail. Contrat pro : articles L6325-8 et D6325-15.</li>
@@ -311,7 +303,7 @@ export function SalaryView() {
           </li>
           <li>Participation de {formatEuros(EMPLOYER_PARTICIPATION.cents, 0)} : {EMPLOYER_PARTICIPATION.source}.</li>
         </ul>
-      </section>
+      </details>
     </div>
   );
 }

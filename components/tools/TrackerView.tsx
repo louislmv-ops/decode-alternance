@@ -32,7 +32,7 @@ export function TrackerView() {
           <h1>Mon suivi</h1>
           <p className="title-row__sub">
             {apps.length === 0
-              ? 'Ajoute tes candidatures pour savoir qui relancer et ce qui t’apporte des réponses.'
+              ? 'Qui relancer, ce qui marche.'
               : due.length > 0
                 ? `${due.length} relance${due.length > 1 ? 's' : ''} à faire aujourd’hui · ${s.sent} candidature${s.sent > 1 ? 's' : ''} envoyée${s.sent > 1 ? 's' : ''}`
                 : `Aucune relance à faire aujourd’hui · ${s.sent} candidature${s.sent > 1 ? 's' : ''} envoyée${s.sent > 1 ? 's' : ''}`}
@@ -44,13 +44,13 @@ export function TrackerView() {
         <section className="panel tracker__due" aria-labelledby="due-title">
           <div className="panel__head">
             <h2 id="due-title">À relancer</h2>
-            <span className="panel__meta">7 jours sans réponse, une seule relance</span>
+            <span className="panel__meta">après 7 jours</span>
           </div>
           {due.length === 0 ? (
             <p className="empty">
               {apps.some((a) => a.status === 'envoyee')
                 ? `Prochaine relance le ${formatDate(apps.map(followUpDate).filter((d): d is string => Boolean(d)).sort()[0] ?? today)}.`
-                : 'Rien à relancer. Une candidature envoyée apparaît ici 7 jours plus tard si personne n’a répondu.'}
+                : 'Rien à relancer.'}
             </p>
           ) : (
             <ul className="due-list" role="list">
@@ -165,7 +165,7 @@ export function TrackerView() {
 
         {apps.length === 0 ? (
           <p className="empty">
-            Aucune candidature pour l’instant. Ajoute-en une ci-dessus, ou depuis une <Link href="/offres">offre décodée</Link>.
+            Rien pour l’instant. Ajoute-en une, ou depuis une <Link href="/offres">offre</Link>.
           </p>
         ) : (
           <ul className="app-rows" role="list">
@@ -218,7 +218,6 @@ export function TrackerView() {
             ))}
           </ul>
         )}
-        <p className="panel__note">Ton suivi reste dans ce navigateur : rien n’est envoyé à Décode.</p>
       </section>
     </div>
   );

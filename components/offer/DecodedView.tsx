@@ -82,7 +82,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const alreadyTracked = Boolean(offer && apps.some((a) => a.url === offer.sourceUrl && a.company === company)) || added;
   const realSource = offer && /^https?:\/\//.test(offer.sourceUrl);
 
-  const meta = [company || 'Entreprise non nommée', decoded.lieu.ville ?? offer?.city, decoded.contrat.type !== 'inconnu' ? (decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : 'Contrat pro') : null, offer?.sourceLabel]
+  const meta = [company || 'Entreprise non nommée', offer?.sourceLabel]
     .filter(Boolean)
     .join(' · ');
 
@@ -122,7 +122,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         </div>
       </div>
 
-      {offer?.isExample && <p className="notice">Exemple fictif : l’entreprise, l’annonce et le salaire sont inventés pour montrer le fonctionnement de Décode.</p>}
+      {offer?.isExample && <p className="notice">Exemple fictif.</p>}
 
       <OfferFacts
         payCents={offerCents}
@@ -156,11 +156,11 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             {decoded.entreprise.ceQuElleFait && <p className="lead-sub">{decoded.entreprise.ceQuElleFait}</p>}
           </section>
 
-          <section className="panel" aria-labelledby="missions-title">
-            <div className="panel__head">
+          <details className="panel fold" aria-labelledby="missions-title">
+            <summary className="panel__head fold__head">
               <h2 id="missions-title">Les missions, traduites</h2>
               <span className="panel__meta">{decoded.missions.length} missions</span>
-            </div>
+            </summary>
             <ul className="missions" role="list">
               {decoded.missions.map((m, i) => (
                 <li key={i}>
@@ -170,13 +170,13 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 </li>
               ))}
             </ul>
-          </section>
+          </details>
 
-          <section className="panel" aria-labelledby="semaine-title">
-            <div className="panel__head">
+          <details className="panel fold" aria-labelledby="semaine-title">
+            <summary className="panel__head fold__head">
               <h2 id="semaine-title">Ta semaine probable</h2>
               <Chip c="deduit" />
-            </div>
+            </summary>
             <dl className="week">
               {decoded.semaineType.map((s, i) => (
                 <div key={i}>
@@ -185,7 +185,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 </div>
               ))}
             </dl>
-          </section>
+          </details>
 
           <section className="panel" aria-labelledby="learn-title">
             <div className="split">
@@ -221,11 +221,11 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             </div>
           </section>
 
-          <section className="panel" aria-labelledby="questions-title">
-            <div className="panel__head">
+          <details className="panel fold" aria-labelledby="questions-title">
+            <summary className="panel__head fold__head">
               <h2 id="questions-title">Questions à poser</h2>
               <CopyButton text={decoded.questionsAPoser.map((q) => `- ${q}`).join('\n')} label="Copier les questions" />
-            </div>
+            </summary>
             <ul className="questions" role="list">
               {decoded.questionsAPoser.map((q, i) => (
                 <li key={i}>{q}</li>
@@ -236,13 +236,13 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 <strong>L’annonce ne dit pas :</strong> {decoded.nonPrecise.join(' · ')}
               </p>
             )}
-          </section>
+          </details>
 
           {decoded.jargon.length > 0 && (
-            <section className="panel" aria-labelledby="jargon-title">
-              <div className="panel__head">
+            <details className="panel fold" aria-labelledby="jargon-title">
+              <summary className="panel__head fold__head">
                 <h2 id="jargon-title">Le jargon traduit</h2>
-              </div>
+              </summary>
               <dl className="glossary">
                 {decoded.jargon.map((j, i) => (
                   <div key={i}>
@@ -251,7 +251,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                   </div>
                 ))}
               </dl>
-            </section>
+            </details>
           )}
         </div>
 
@@ -321,14 +321,14 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             </section>
           )}
 
-          <section className="panel" aria-labelledby="pay-title">
-            <div className="panel__head">
+          <details className="panel fold" aria-labelledby="pay-title">
+            <summary className="panel__head fold__head">
               <h2 id="pay-title">Salaire</h2>
               <Link href="/profil" className="panel__link">
                 {profile.age} ans, {profile.year}
                 {profile.year === 1 ? 're' : 'e'} année
               </Link>
-            </div>
+            </summary>
             <div className="pay">
               <div>
                 <p className="ui-label">Annoncé</p>
@@ -356,12 +356,12 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               {profile.contract === 'apprentissage' && `Sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
             </p>
             {decoded.salaire.avantages.length > 0 && <p className="panel__note">En plus : {decoded.salaire.avantages.join(' · ')}</p>}
-          </section>
+          </details>
 
-          <section className="panel" aria-labelledby="contract-title">
-            <div className="panel__head">
+          <details className="panel fold" aria-labelledby="contract-title">
+            <summary className="panel__head fold__head">
               <h2 id="contract-title">Contrat et rythme</h2>
-            </div>
+            </summary>
             <dl className="kv">
               <div>
                 <dt>Diplôme</dt>
@@ -391,12 +391,12 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               )}
             </dl>
             <p className={`ui-status ui-status--${rhythm.tone}`}>{rhythm.text}</p>
-          </section>
+          </details>
 
         </aside>
       </div>
       <p className="screen__foot">
-        {offer?.isExample ? 'Traduction d’exemple rédigée à la main.' : 'Traduction faite par une IA à partir de l’annonce : vérifie les points importants auprès de l’entreprise.'}{' '}
+        {offer?.isExample ? 'Exemple rédigé à la main.' : 'Traduit par une IA : vérifie l’essentiel avec l’entreprise.'}{' '}
         Décode ne garantit ni contrat, ni entretien, ni réponse.
       </p>
     </div>

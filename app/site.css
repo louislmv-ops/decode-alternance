@@ -397,14 +397,15 @@
 /* ---------- Gratuit ---------- */
 
 .free__box {
-  padding: clamp(32px, 6vw, 72px);
+  padding: clamp(28px, 5vw, 56px);
   border-radius: var(--r-card);
   background: var(--ink);
   color: #fff;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px 48px;
-  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px 48px;
 }
 
 .free__box .section-title {
@@ -500,7 +501,7 @@
 }
 
 .site-footer__mark {
-  font-size: clamp(4rem, 2rem + 12vw, 13rem);
+  font-size: clamp(2.75rem, 1rem + 13vw, 13rem);
   line-height: 1;
 }
 

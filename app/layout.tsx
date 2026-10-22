@@ -14,10 +14,15 @@ export const metadata: Metadata = {
     'Les offres d’alternance traduites : ce que tu feras vraiment, ton salaire minimum garanti, les fausses offres d’écoles écartées et qui contacter dans l’équipe.',
   metadataBase: new URL(SITE_URL),
   openGraph: { type: 'website', locale: 'fr_FR', siteName: 'Décode' },
+  appleWebApp: { capable: true, title: 'Décode', statusBarStyle: 'default' },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0b6b4b',
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1926,6 +1926,10 @@
   .facts {
     grid-template-columns: 1fr 1fr;
   }
+  .facts__item--pay,
+  .facts__item:last-child {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ---------- Compatibilité avec ton profil ---------- */
@@ -2147,4 +2151,118 @@
   justify-content: space-between;
   gap: 12px;
   padding-top: 8px;
+}
+
+/* ---------- Panneaux repliables : l'essentiel visible, le détail à la demande ---------- */
+
+.fold > summary {
+  list-style: none;
+  cursor: pointer;
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+}
+
+.fold > summary h2 {
+  flex: 1;
+  min-width: 0;
+}
+
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold > summary::after {
+  content: '+';
+  margin-left: 12px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--brand);
+}
+
+.fold[open] > summary {
+  margin-bottom: 14px;
+}
+
+.fold[open] > summary::after {
+  content: '−';
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brand);
+  cursor: pointer;
+}
+
+/* ---------- Téléphones et app installée ---------- */
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+summary,
+label {
+  touch-action: manipulation;
+}
+
+@media (max-width: 760px) {
+  /* 16 px au moins : en dessous, l'iPhone zoome sur le champ. */
+  .ui-input,
+  .ui-select,
+  .ui-textarea,
+  .filters .ui-select,
+  .search__field input,
+  .search__field select {
+    font-size: 16px;
+  }
+  .canvas {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+@media (max-width: 480px) {
+  .panel__head {
+    flex-wrap: wrap;
+  }
+  .panel__meta {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 360px) {
+  .title-row h1 {
+    font-size: 23px;
+  }
+  .facts__item {
+    padding: 12px 14px;
+  }
+  .tabbar__item {
+    font-size: 10px;
+  }
+  .offer-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .offer-card__avatar {
+    display: none;
+  }
+  .offer-card__side {
+    grid-column: 1;
+  }
+}
+
+/* Ouvert depuis l'écran d'accueil : la barre du haut tient compte de l'encoche. */
+@media (display-mode: standalone) {
+  .topbar {
+    padding-top: env(safe-area-inset-top);
+  }
 }
