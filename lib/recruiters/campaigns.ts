@@ -115,6 +115,15 @@ export async function openCampaigns(): Promise<Campaign[]> {
   return rows.map(toCampaign);
 }
 
+/** Les campagnes ouvertes d'une entreprise, retrouvée par les 9 premiers chiffres du SIRET de ses recruteurs. */
+export async function campaignsForSiren(siren: string): Promise<Campaign[]> {
+  await ensureSchema();
+  const s = db();
+  const rows = await s<Row[]>`${SELECT(s)} where r.verified and not c.hidden and left(r.siret, 9) = ${siren}
+    and c.deadline >= (now() at time zone 'Europe/Paris')::date order by c.deadline asc limit 10`;
+  return rows.map(toCampaign);
+}
+
 export async function campaignById(id: string): Promise<Campaign | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   await ensureSchema();

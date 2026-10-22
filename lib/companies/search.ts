@@ -29,6 +29,8 @@ export function tidyName(raw: string): string {
     .toLowerCase()
     .replace(/(^|[\s(\-'’])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase())
     .replace(/\b(Sas|Sa|Sarl|Sasu|Eurl|Snc|Sci)\b/g, (m) => m.toUpperCase())
+    // Villeneuve-d’Ascq, Boulogne-sur-Mer : les petits mots restent en minuscules, sauf en tête.
+    .replace(/(?<=[-\s])(D’|L’|D'|L'|Sur|Sous|En|Les|La|Le|De|Du|Des|Et)(?=[-\s\p{L}])/gu, (m) => m.toLowerCase())
     .trim();
 }
 

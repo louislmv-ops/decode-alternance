@@ -5,14 +5,16 @@ import { usePathname } from 'next/navigation';
 import { Wordmark } from '@/components/Wordmark';
 import { useProfile } from '@/components/useProfile';
 import { daysLeftWithoutEmployer } from '@/lib/profile';
-import { IconChat, IconDecode, IconEuro, IconList, IconPeople, IconTrack, IconUser } from '@/components/app/Icons';
+import { IconChat, IconDecode, IconStar, IconEuro, IconList, IconPeople, IconTrack, IconUser } from '@/components/app/Icons';
 
 export const NAV = [
   { href: '/offres', label: 'Offres', short: 'Offres', icon: IconList, tab: true },
   { href: '/decoder', label: 'Décoder une offre', short: 'Décoder', icon: IconDecode, tab: true },
+  { href: '/entreprises', label: 'Avis et salaires', short: 'Avis', icon: IconStar, tab: true },
   { href: '/communaute', label: 'La commu', short: 'Commu', icon: IconChat, tab: true },
   { href: '/suivi', label: 'Mon suivi', short: 'Suivi', icon: IconTrack, tab: true },
-  { href: '/salaire', label: 'Mon salaire', short: 'Salaire', icon: IconEuro, tab: true },
+  // Le calculateur reste dans le menu ; sur téléphone, il passe par les pages entreprise et les offres.
+  { href: '/salaire', label: 'Mon salaire', short: 'Salaire', icon: IconEuro, tab: false },
   // Trouver l'équipe se fait surtout depuis une offre : sur téléphone, il passe par la fiche.
   { href: '/equipe', label: 'Trouver l’équipe', short: 'Équipe', icon: IconPeople, tab: false },
 ];

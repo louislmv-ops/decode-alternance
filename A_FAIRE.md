@@ -28,6 +28,7 @@ Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les se
 4. `AUTH_SECRET` : une longue phrase aléatoire (sert à protéger les codes et les sessions).
 5. `ADMIN_EMAILS` : ton adresse e-mail (séparées par des virgules s'il y en a plusieurs) pour accéder à la modération de la commu (`/communaute/moderation`).
    La même page liste les entreprises inscrites sur `/recruteur` : vérifie le SIRET (lien vers l'annuaire officiel) et le site avant de cliquer « Vérifier ». Sans cette étape, une entreprise ne voit aucun alternant.
+   Elle liste aussi les avis d'entreprise à relire (« Publier » ou « Refuser ») : refuse ceux qui nomment une personne ou accusent sans fait précis.
    `LEGAL_CONTACT` sert aussi d'adresse de signalement dans les e-mails que les entreprises envoient aux alternants.
 6. Redeploy. Pour les alertes du matin : mêmes valeurs dans GitHub, Settings, Secrets and variables, Actions.
 

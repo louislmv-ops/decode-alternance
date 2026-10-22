@@ -7,37 +7,40 @@ import { ensureCommunitySchema } from '@/lib/community/store';
 import { db } from '@/lib/offers/store';
 import { minimumSalary } from '@/lib/rules/salary';
 import type { CompanyRef } from './search';
+import { HIRED, MIN_TO_SHOW, type PublicReview, type ReviewStats, type SalaryStats } from './shared';
 
-/** En dessous, une moyenne permettrait de deviner le salaire ou la note d'une personne. */
-export const MIN_TO_SHOW = 3;
+export { CRITERIA, HIRED, HIRED_LABELS, MIN_TO_SHOW } from './shared';
+export type { PublicReview, ReviewStats, SalaryStats } from './shared';
 
 const thisYear = () => new Date().getFullYear();
 
-export const SalaryInput = z
-  .object({
-    jobTitle: z.string().trim().min(2, 'Intitulé du poste trop court').max(80),
-    contract: z.enum(['apprentissage', 'professionnalisation']),
-    age: z.number().int().min(15).max(60),
-    contractYear: z.number().int().min(1).max(3),
-    hasBacPro: z.boolean().default(false),
-    grossEuros: z.number().int().min(200, 'Montant brut mensuel, en euros').max(6000, 'Montant brut mensuel, en euros'),
-    startYear: z.number().int().refine((y) => y >= thisYear() - 3 && y <= thisYear() + 1, 'Contrat des 3 dernières années'),
-    department: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .regex(/^(\d{2,3}|2[AB])$/, 'Département (ex. 69)'),
-  })
-  .refine((v) => v.contract === 'professionnalisation' || v.contractYear <= 3);
+export const SalaryInput = z.object({
+  jobTitle: z.string().trim().min(2, 'Intitulé du poste trop court').max(80),
+  contract: z.enum(['apprentissage', 'professionnalisation']),
+  age: z.number().int().min(15).max(60),
+  contractYear: z.number().int().min(1).max(3),
+  hasBacPro: z.boolean().default(false),
+  grossEuros: z.number().int().min(200, 'Montant brut mensuel, en euros').max(6000, 'Montant brut mensuel, en euros'),
+  startYear: z
+    .number()
+    .int()
+    .refine((y) => y >= thisYear() - 3 && y <= thisYear() + 1, 'Contrat des 3 dernières années'),
+  department: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^(\d{2,3}|2[AB])$/, 'Département (ex. 69)'),
+});
 export type SalaryInput = z.infer<typeof SalaryInput>;
 
 const rating = z.number().int().min(1).max(5);
-export const HIRED = ['oui', 'non', 'pas_encore'] as const;
-export const HIRED_LABELS: Record<(typeof HIRED)[number], string> = { oui: 'Embauche proposée', non: 'Pas d’embauche', pas_encore: 'Contrat en cours' };
 
 export const ReviewInput = z.object({
   jobTitle: z.string().trim().min(2).max(80),
-  startYear: z.number().int().refine((y) => y >= thisYear() - 5 && y <= thisYear(), 'Année de début : les 5 dernières années'),
+  startYear: z
+    .number()
+    .int()
+    .refine((y) => y >= thisYear() - 5 && y <= thisYear(), 'Année de début : les 5 dernières années'),
   overall: rating,
   tutoring: rating,
   missions: rating,
@@ -49,42 +52,6 @@ export const ReviewInput = z.object({
   cons: z.string().trim().min(30, 'Points faibles : 30 caractères au moins').max(1200),
 });
 export type ReviewInput = z.infer<typeof ReviewInput>;
-
-export const CRITERIA = [
-  ['tutoring', 'Tuteur et encadrement'],
-  ['missions', 'Missions confiées'],
-  ['atmosphere', 'Ambiance'],
-  ['schoolRhythm', 'Respect du rythme école'],
-] as const;
-
-export interface SalaryStats {
-  count: number;
-  /** null tant qu'il y a moins de MIN_TO_SHOW déclarations. */
-  medianCents: number | null;
-  /** Écart médian au minimum légal, en pourcentage (+12 = 12 % au-dessus). */
-  aboveMinimumPercent: number | null;
-  belowMinimum: number;
-  jobs: { jobTitle: string; count: number; medianCents: number | null }[];
-}
-
-export interface ReviewStats {
-  count: number;
-  overall: number | null;
-  criteria: Record<(typeof CRITERIA)[number][0], number | null>;
-  hiredPercent: number | null;
-}
-
-export interface PublicReview {
-  id: string;
-  jobTitle: string;
-  startYear: number;
-  overall: number;
-  hired: (typeof HIRED)[number];
-  title: string;
-  pros: string;
-  cons: string;
-  verified: boolean;
-}
 
 export interface CompanyPage {
   company: CompanyRef;
@@ -165,9 +132,25 @@ export async function saveCompany(c: CompanyRef): Promise<void> {
 
 export async function storedCompany(siren: string): Promise<CompanyRef | null> {
   await ensureSchema();
-  const [row] = await db()<{ siren: string; name: string; city: string; postal_code: string; size_code: string | null }[]>`
+  const [row] = await db()<
+    {
+      siren: string;
+      name: string;
+      city: string;
+      postal_code: string;
+      size_code: string | null;
+    }[]
+  >`
     select * from companies where siren = ${siren}`;
-  return row ? { siren: row.siren, name: row.name, city: row.city, postalCode: row.postal_code, sizeCode: row.size_code } : null;
+  return row
+    ? {
+        siren: row.siren,
+        name: row.name,
+        city: row.city,
+        postalCode: row.postal_code,
+        sizeCode: row.size_code,
+      }
+    : null;
 }
 
 export function median(values: number[]): number | null {
@@ -193,7 +176,11 @@ export function salaryStats(rows: { job_title: string; gross_cents: number; mini
     jobs: enough
       ? [...byJob.entries()]
           .filter(([, v]) => v.length >= MIN_TO_SHOW)
-          .map(([job, v]) => ({ jobTitle: job.charAt(0).toUpperCase() + job.slice(1), count: v.length, medianCents: median(v) }))
+          .map(([job, v]) => ({
+            jobTitle: job.charAt(0).toUpperCase() + job.slice(1),
+            count: v.length,
+            medianCents: median(v),
+          }))
           .sort((a, b) => b.count - a.count)
       : [],
   };
@@ -224,7 +211,12 @@ export function reviewStats(rows: Pick<ReviewRow, 'overall' | 'tutoring' | 'miss
   return {
     count: rows.length,
     overall: pick('overall'),
-    criteria: { tutoring: pick('tutoring'), missions: pick('missions'), atmosphere: pick('atmosphere'), schoolRhythm: pick('school_rhythm') },
+    criteria: {
+      tutoring: pick('tutoring'),
+      missions: pick('missions'),
+      atmosphere: pick('atmosphere'),
+      schoolRhythm: pick('school_rhythm'),
+    },
     hiredPercent: finished.length >= MIN_TO_SHOW ? Math.round((finished.filter((r) => r.hired === 'oui').length / finished.length) * 100) : null,
   };
 }
@@ -265,7 +257,18 @@ export interface CompanySummary extends CompanyRef {
 /** Les entreprises les plus renseignées. */
 export async function topCompanies(limit = 30): Promise<CompanySummary[]> {
   await ensureSchema();
-  const rows = await db()<{ siren: string; name: string; city: string; postal_code: string; size_code: string | null; reviews: number; salaries: number; overall: number | null }[]>`
+  const rows = await db()<
+    {
+      siren: string;
+      name: string;
+      city: string;
+      postal_code: string;
+      size_code: string | null;
+      reviews: number;
+      salaries: number;
+      overall: number | null;
+    }[]
+  >`
     select c.*, coalesce(r.n, 0)::int as reviews, coalesce(p.n, 0)::int as salaries,
       case when coalesce(r.n, 0) >= ${MIN_TO_SHOW} then round(r.overall::numeric, 1)::float else null end as overall
     from companies c
@@ -273,14 +276,28 @@ export async function topCompanies(limit = 30): Promise<CompanySummary[]> {
     left join (select siren, count(*) as n from salary_reports where not hidden group by siren) p on p.siren = c.siren
     where coalesce(r.n, 0) + coalesce(p.n, 0) > 0
     order by coalesce(r.n, 0) + coalesce(p.n, 0) desc, c.name limit ${limit}`;
-  return rows.map((r) => ({ siren: r.siren, name: r.name, city: r.city, postalCode: r.postal_code, sizeCode: r.size_code, reviews: r.reviews, salaries: r.salaries, overall: r.overall }));
+  return rows.map((r) => ({
+    siren: r.siren,
+    name: r.name,
+    city: r.city,
+    postalCode: r.postal_code,
+    sizeCode: r.size_code,
+    reviews: r.reviews,
+    salaries: r.salaries,
+    overall: r.overall,
+  }));
 }
 
 export class Duplicate extends Error {}
 
 export async function addSalary(accountId: string, siren: string, input: SalaryInput): Promise<void> {
   await ensureSchema();
-  const minimum = minimumSalary({ contract: input.contract, age: input.age, year: input.contractYear, hasBacPro: input.hasBacPro });
+  const minimum = minimumSalary({
+    contract: input.contract,
+    age: input.age,
+    year: input.contractYear,
+    hasBacPro: input.hasBacPro,
+  });
   const rows = await db()`insert into salary_reports (account_id, siren, job_title, contract, contract_year, gross_cents, minimum_cents, start_year, department)
     values (${accountId}, ${siren}, ${input.jobTitle}, ${input.contract}, ${input.contractYear}, ${input.grossEuros * 100}, ${minimum.cents},
       ${input.startYear}, ${input.department})
@@ -316,7 +333,14 @@ export interface PendingReview extends PublicReview {
 
 export async function pendingReviews(): Promise<PendingReview[]> {
   await ensureSchema();
-  const rows = await db()<(ReviewRow & { company_name: string; siren: string; reports: number; domain: string | null })[]>`
+  const rows = await db()<
+    (ReviewRow & {
+      company_name: string;
+      siren: string;
+      reports: number;
+      domain: string | null;
+    })[]
+  >`
     select r.*, c.name as company_name, w.domain, w.domain is not null as verified
     from company_reviews r join companies c on c.siren = r.siren
     left join work_verifications w on w.account_id = r.account_id and w.siren = r.siren
@@ -343,17 +367,31 @@ export async function moderateReview(id: string, publish: boolean): Promise<void
   await db()`update company_reviews set status = ${publish ? 'published' : 'rejected'}, reports = 0 where id = ${id}`;
 }
 
-export async function myContributions(accountId: string, siren: string): Promise<{ review: 'pending' | 'published' | 'rejected' | null; salaryYears: number[]; verifiedDomain: string | null }> {
+export async function myContributions(
+  accountId: string,
+  siren: string,
+): Promise<{
+  review: 'pending' | 'published' | 'rejected' | null;
+  salaryYears: number[];
+  verifiedDomain: string | null;
+}> {
   await ensureSchema();
   const s = db();
-  const [review] = await s<{ status: 'pending' | 'published' | 'rejected' }[]>`select status from company_reviews where account_id = ${accountId} and siren = ${siren}`;
+  const [review] = await s<
+    { status: 'pending' | 'published' | 'rejected' }[]
+  >`select status from company_reviews where account_id = ${accountId} and siren = ${siren}`;
   const years = await s<{ contract_year: number }[]>`select contract_year from salary_reports where account_id = ${accountId} and siren = ${siren}`;
   const [work] = await s<{ domain: string }[]>`select domain from work_verifications where account_id = ${accountId} and siren = ${siren}`;
-  return { review: review?.status ?? null, salaryYears: years.map((y) => y.contract_year), verifiedDomain: work?.domain ?? null };
+  return {
+    review: review?.status ?? null,
+    salaryYears: years.map((y) => y.contract_year),
+    verifiedDomain: work?.domain ?? null,
+  };
 }
 
 /** Les messageries grand public ne prouvent rien sur l'employeur. */
-const FREE_MAIL = /(^|\.)(gmail|googlemail|yahoo|hotmail|outlook|live|msn|icloud|me|mac|aol|proton|protonmail|gmx|laposte|orange|wanadoo|free|sfr|neuf|bbox|yopmail)\.[a-z.]+$/i;
+const FREE_MAIL =
+  /(^|\.)(gmail|googlemail|yahoo|hotmail|outlook|live|msn|icloud|me|mac|aol|proton|protonmail|gmx|laposte|orange|wanadoo|free|sfr|neuf|bbox|yopmail)\.[a-z.]+$/i;
 
 export function workDomain(email: string): string | null {
   const m = /^[^\s@]+@([a-z0-9.-]+\.[a-z]{2,})$/i.exec(email.trim());
