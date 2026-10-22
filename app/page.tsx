@@ -179,11 +179,11 @@ export default async function Home() {
         <section className="free band" aria-labelledby="free-title">
           <div className="free__box" data-reveal>
             <h2 id="free-title" className="section-title">
-              Gratuit pendant la bêta.
+              Gratuit. Sans compte.
             </h2>
             <p className="free__text">
-              Ensuite, l’essentiel reste gratuit. Un Pass Saison à 9,99 € pour 3 mois, sans renouvellement, ajoutera les alertes et la
-              comparaison d’offres.
+              Les offres et leur décodage sont gratuits, les alertes le seront aussi. Plus tard, un Pass optionnel pourra ajouter des extras,
+              comme un simulateur d’entretien. Ton profil reste sur ton téléphone.
             </p>
             <Link href="/offres" className="btn btn--light">
               Voir les offres
@@ -191,7 +191,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <Faq />
+        <Faq mode={page?.mode ?? 'exemples'} />
       </main>
       <SiteFooter />
     </>

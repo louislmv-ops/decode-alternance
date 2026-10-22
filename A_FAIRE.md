@@ -24,7 +24,9 @@ Supprimer les projets en double `decode-alternance-m3u6` et `decode-alternance-m
 
 ## 4. Avant de faire connaître le site
 
-Remplir les mentions légales (`app/mentions-legales/page.tsx`) : nom ou raison sociale, adresse, SIREN, hébergeur, e-mail de contact.
+- Mentions légales (obligatoires) : dans Vercel, ajouter `LEGAL_EDITOR` (nom ou micro-entreprise), `LEGAL_ADDRESS`, `LEGAL_SIREN`, `LEGAL_CONTACT` (e-mail dédié), puis Redeploy. L'hébergeur est déjà rempli.
+- Un domaine (.fr) : l'acheter, le brancher dans Vercel (Settings, Domains), puis mettre `NEXT_PUBLIC_SITE_URL` à la nouvelle adresse.
+- La bonne alternance : envoyer la demande d'accès à leur API (le mail est prêt dans la conversation).
 
 ## Sécurité
 

@@ -12,6 +12,8 @@ const Body = z.union([
 ]);
 
 const PER_HOUR = Number(process.env.DECODE_PER_HOUR || 10);
+/** Plafond par jour et par adresse, pour garder la facture de l'IA sous contrôle. */
+const PER_DAY = Number(process.env.DECODE_PER_DAY || 30);
 
 export async function POST(request: Request) {
   const parsed = Body.safeParse(await request.json().catch(() => null));
@@ -30,7 +32,11 @@ export async function POST(request: Request) {
   if (!isDecodeConfigured()) {
     return Response.json({ error: 'La traduction par l’IA n’est pas encore activée sur ce site.' }, { status: 503 });
   }
-  if (!allow(clientKey(request), PER_HOUR, 3_600_000)) {
+  const key = clientKey(request);
+  if (!allow(`jour:${key}`, PER_DAY, 86_400_000)) {
+    return Response.json({ error: `Tu as décodé ${PER_DAY} offres aujourd’hui, c’est le maximum. Reviens demain.` }, { status: 429 });
+  }
+  if (!allow(key, PER_HOUR, 3_600_000)) {
     return Response.json({ error: `Tu as déjà décodé ${PER_HOUR} offres cette heure-ci. Reviens un peu plus tard.` }, { status: 429 });
   }
 

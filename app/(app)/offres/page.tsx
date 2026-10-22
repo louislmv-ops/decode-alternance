@@ -11,7 +11,10 @@ import { highlights } from '@/lib/offers/highlights';
 import { listOffers } from '@/lib/offers/repository';
 import type { OfferFilters } from '@/lib/offers/types';
 
-export const metadata: Metadata = { title: 'Offres d’alternance' };
+export const metadata: Metadata = {
+  title: 'Offres d’alternance',
+  description: 'Les offres d’alternance avec leur paie notée en €, ton salaire minimum comparé et les offres d’écoles écartées.',
+};
 
 function pageHref(filters: OfferFilters, page: number): string {
   const params = new URLSearchParams();

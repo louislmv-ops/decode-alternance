@@ -4,6 +4,7 @@ import { formatEuros, relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
 import { payTier } from '@/lib/offers/pay-tier';
 import { SOURCE_LABELS, type Offer } from '@/lib/offers/types';
+import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 
 const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 'Contrat pro', alternance: 'Alternance' };
@@ -45,6 +46,7 @@ export function OfferCard({ offer, h, reveal }: { offer: Offer; h: Highlights; r
           {[offer.company ?? 'Entreprise non nommée', place].filter(Boolean).join(' · ')}
         </p>
         <div className="offer-card__tags">
+          <MatchBadge offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
           <span className="tag">{CONTRACT_LABELS[offer.contract]}</span>
           {offer.direct ? <span className="tag">Direct entreprise</span> : <span className="tag tag--quiet">{SOURCE_LABELS[offer.source]}</span>}
           {h.bigCompany && !h.schoolBait && <span className="pepite">Grande entreprise</span>}

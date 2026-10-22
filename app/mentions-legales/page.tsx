@@ -3,7 +3,16 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { SMIC } from '@/lib/rules/reference';
 
-export const metadata: Metadata = { title: 'Mentions légales' };
+export const metadata: Metadata = { title: 'Mentions légales', description: 'Éditeur, hébergeur, données personnelles et sources des offres et des règles de Décode.' };
+
+// Les informations de l'éditeur se règlent dans les variables d'environnement, sans toucher au code.
+const LEGAL = {
+  editor: process.env.LEGAL_EDITOR || '[NOM OU RAISON SOCIALE]',
+  address: process.env.LEGAL_ADDRESS || '[ADRESSE]',
+  siren: process.env.LEGAL_SIREN || '[NUMÉRO SIREN]',
+  director: process.env.LEGAL_DIRECTOR || process.env.LEGAL_EDITOR || '[NOM]',
+  contact: process.env.LEGAL_CONTACT || process.env.NEXT_PUBLIC_CONTACT_EMAIL || '[ADRESSE E-MAIL]',
+};
 
 export default function LegalPage() {
   return (
@@ -12,9 +21,10 @@ export default function LegalPage() {
       <main className="prose-page">
         <h1>Mentions légales</h1>
         <p>
-          Éditeur du site : [NOM OU RAISON SOCIALE], [ADRESSE], [NUMÉRO SIREN]. Directeur de la publication : [NOM]. Hébergeur :
-          [HÉBERGEUR ET ADRESSE]. Contact : [ADRESSE E-MAIL].
+          Éditeur du site : {LEGAL.editor}, {LEGAL.address}, SIREN {LEGAL.siren}. Directeur de la publication : {LEGAL.director}.
+          Contact : {LEGAL.contact}.
         </p>
+        <p>Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).</p>
 
         <h2>Ce que Décode fait, et ne fait pas</h2>
         <p>
