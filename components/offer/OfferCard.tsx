@@ -8,7 +8,6 @@ import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 
 const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 'Contrat pro', alternance: 'Alternance' };
-const AVATAR_FIELDS = ['var(--mint)', 'var(--sky)', 'var(--peach)', 'var(--butter)'];
 
 function payLabel(pay: Highlights['pay']): string {
   if (!pay) return '';
@@ -17,14 +16,11 @@ function payLabel(pay: Highlights['pay']): string {
   return `+${pay.diffPercent} % vs ton minimum`;
 }
 
-/** L'initiale de l'entreprise sur un aplat pastel, toujours le même pour une même entreprise. */
+/** L'initiale de l'entreprise, en monogramme. */
 function Avatar({ name }: { name: string | null }) {
-  const label = (name ?? '?').trim();
-  let hash = 0;
-  for (const ch of label) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
   return (
-    <span className="offer-card__avatar" style={{ background: AVATAR_FIELDS[hash % AVATAR_FIELDS.length] }} aria-hidden="true">
-      {label.charAt(0).toUpperCase()}
+    <span className="offer-card__avatar" aria-hidden="true">
+      {(name ?? '?').trim().charAt(0).toUpperCase()}
     </span>
   );
 }

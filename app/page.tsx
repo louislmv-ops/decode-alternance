@@ -19,9 +19,6 @@ const PROMISES = [
   'Salaire minimum calculé pour toi',
   'Offres d’écoles virées',
   'Qui contacter sur LinkedIn',
-  '€ / €€ / €€€ en un coup d’œil',
-  'Ton CV lu en 10 secondes',
-  'Questions à poser en entretien',
 ];
 
 const TOOLS = [
@@ -123,10 +120,8 @@ export default async function Home() {
 
         <div className="ticker" aria-label="Ce que fait Décode">
           <ul className="ticker__track" role="list">
-            {[...PROMISES, ...PROMISES].map((p, i) => (
-              <li key={i} aria-hidden={i >= PROMISES.length ? true : undefined}>
-                {p}
-              </li>
+            {PROMISES.map((p) => (
+              <li key={p}>{p}</li>
             ))}
           </ul>
         </div>

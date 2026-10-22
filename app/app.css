@@ -15,7 +15,7 @@
 .ui-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--r-card);
   padding: 20px;
   color: var(--ink);
 }
@@ -59,7 +59,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 0.8em;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--accent);
   color: var(--accent-ink);
   font-size: 13px;
@@ -72,7 +72,7 @@
   display: inline-flex;
   align-items: center;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
@@ -88,7 +88,7 @@
   display: inline-flex;
   align-items: center;
   padding: 1px 7px;
-  border-radius: 4px;
+  border-radius: var(--r-control);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
@@ -126,7 +126,7 @@
 .ui-segmented {
   display: inline-flex;
   padding: 3px;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--surface);
   flex: none;
 }
@@ -136,7 +136,7 @@
   background: none;
   padding: 0 12px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
@@ -154,7 +154,7 @@
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--control);
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: #fff;
 }
 
@@ -193,7 +193,7 @@
   min-height: 38px;
   padding: 7px 12px;
   border: 1px solid var(--control);
-  border-radius: var(--r-control);
+  border-radius: var(--r-card);
   background: #fff;
   font-size: 15px;
 }
@@ -241,7 +241,7 @@
   min-height: 38px;
   padding: 0 16px;
   border: 1px solid var(--control);
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: #fff;
   color: var(--ink);
   font-size: 14px;
@@ -440,7 +440,7 @@
 
 .ui-weekstrip > div {
   padding: 10px 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--r-control);
 }
 
 .ui-weekstrip .is-company {
@@ -468,7 +468,7 @@
   margin-top: 10px;
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: var(--r-control);
   background: var(--alert-bg);
   color: var(--alert-ink);
   font-weight: 600;
@@ -490,7 +490,7 @@
   margin-top: 14px;
   display: inline-block;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: var(--r-control);
   background: var(--surface);
   font-size: 14px;
 }
@@ -564,7 +564,7 @@
 
 .notice {
   padding: 12px 16px;
-  border-radius: 14px;
+  border-radius: var(--r-card);
   background: var(--notice-bg);
   color: var(--notice-ink);
   font-size: 14px;
@@ -580,7 +580,7 @@
 .panel {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--r-card);
   padding: 20px;
   min-width: 0;
 }
@@ -637,7 +637,7 @@
 .empty {
   padding: 14px 16px;
   border: 1px dashed var(--control);
-  border-radius: 14px;
+  border-radius: var(--r-card);
   color: var(--muted);
   font-size: 14px;
 }
@@ -737,14 +737,16 @@
 .offer-card__avatar {
   width: 52px;
   height: 52px;
-  border-radius: 14px;
+  border-radius: var(--r-card);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
+  font-stretch: var(--display-stretch);
   font-size: 22px;
-  font-weight: 700;
-  color: var(--ink);
+  font-weight: 800;
+  background: var(--ink);
+  color: var(--accent);
 }
 
 .offer-card__title {
@@ -760,7 +762,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  border-radius: var(--r-card);
 }
 
 .offer-card__meta {
@@ -780,7 +782,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--surface);
   font-size: 13px;
   font-weight: 600;
@@ -974,7 +976,7 @@
   top: 10px;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  border-radius: var(--r-control);
   background: var(--active);
   font-size: 12px;
   font-weight: 600;
@@ -1037,7 +1039,7 @@
   top: 0.45em;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--r-control);
   background: var(--alert);
 }
 
@@ -1067,7 +1069,7 @@
   position: relative;
   margin-top: 14px;
   height: 10px;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--surface);
 }
 
@@ -1076,7 +1078,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--accent);
 }
 
@@ -1136,7 +1138,7 @@
   gap: 8px;
   padding: 8px 12px;
   border: 1px solid var(--control);
-  border-radius: 6px;
+  border-radius: var(--r-control);
   font-size: 14px;
   font-weight: 500;
   color: var(--ink);
@@ -1153,7 +1155,7 @@
 .message {
   margin-top: 14px;
   padding: 14px;
-  border-radius: 8px;
+  border-radius: var(--r-control);
   background: var(--ground);
 }
 
@@ -1588,7 +1590,7 @@
 .settings__panel {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--r-control);
   padding: 20px;
 }
 
@@ -1900,7 +1902,7 @@
 .brief li {
   position: relative;
   padding: 10px 14px 10px 40px;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   background: var(--surface);
   font-size: 15px;
   font-weight: 500;
@@ -1932,7 +1934,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--sky);
   font-size: 13px;
   font-weight: 700;
