@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { OfferCard } from '@/components/offer/OfferCard';
+import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
-import { Fragment } from '@/components/site/Fragments';
 import { MatchButton } from '@/components/Matcher';
-import { HeroDecode } from '@/components/site/HeroDecode';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
@@ -14,38 +12,11 @@ import { listOffers } from '@/lib/offers/repository';
 import type { OfferPage } from '@/lib/offers/types';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 
-const PROMISES = [
-  'Missions en clair',
-  'Salaire minimum calculé pour toi',
-  'Offres d’écoles virées',
-  'Qui contacter sur LinkedIn',
-];
-
-const TOOLS = [
-  {
-    id: 'missions' as const,
-    title: 'Ce que tu feras, vraiment',
-    text: 'Le jargon devient une semaine type.',
-    href: '/decoder',
-    action: 'Décoder une offre',
-    field: 'var(--mint)',
-  },
-  {
-    id: 'salaire' as const,
-    title: 'Combien tu touches, au centime',
-    text: 'Selon ton âge et ton année. Les offres en dessous sont signalées.',
-    href: '/salaire',
-    action: 'Calculer mon salaire',
-    field: 'var(--sky)',
-  },
-  {
-    id: 'equipe' as const,
-    title: 'Qui contacter pour passer devant',
-    text: 'Le bon service, les bonnes recherches LinkedIn, un message court.',
-    href: '/equipe',
-    action: 'Trouver l’équipe',
-    field: 'var(--peach)',
-  },
+/** Trois étapes, pas une de plus : c'est tout le site. */
+const STEPS = [
+  { title: 'Cherche', text: 'Les offres de partout, sans les fausses offres d’écoles.', href: '/offres', action: 'Voir les offres' },
+  { title: 'Comprends', text: 'Chaque offre traduite : ce que tu feras, combien tu toucheras.', href: '/decoder', action: 'Décoder une offre' },
+  { title: 'Démarque-toi', text: 'Qui contacter dans l’équipe, et le suivi de tes candidatures.', href: '/equipe', action: 'Trouver l’équipe' },
 ];
 
 async function latestOffers(): Promise<OfferPage | null> {
@@ -61,85 +32,82 @@ async function latestOffers(): Promise<OfferPage | null> {
 export default async function Home() {
   const [page, jar] = await Promise.all([latestOffers(), cookies()]);
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
-  const latest = (page?.offers ?? []).slice(0, 4).map((offer) => ({ offer, h: highlights(offer, profile) }));
+  const latest = (page?.offers ?? []).slice(0, 5).map((offer) => ({ offer, h: highlights(offer, profile) }));
 
   return (
     <>
       <SiteNav />
       <main className="home">
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero__inner">
-            <div className="hero__copy">
-              <h1 id="hero-title" className="hero__title">
-                L’alternance, sans le blabla.
-              </h1>
-              <p className="hero__lead">Chaque offre traduite. Missions, salaire, qui contacter.</p>
+        <section className="hero2" aria-labelledby="hero-title">
+          <h1 id="hero-title" className="hero2__title">
+            Trouve ton alternance. En clair.
+          </h1>
+          <p className="hero2__lead">Les offres traduites, ton salaire calculé, les pièges écartés. Gratuit.</p>
 
-              <div className="hero__cta">
-                <MatchButton className="btn btn--accent btn--big">Mes offres</MatchButton>
-                <p className="hero__cta-sub">Ton CV ou 4 questions. Gratuit.</p>
-              </div>
-
-              <form className="search" action="/offres" method="get" role="search">
-                <label className="search__field search__field--q">
-                  <span className="sr-only">Métier, entreprise ou ville</span>
-                  <input type="search" name="q" placeholder="Ou cherche : métier, entreprise" autoComplete="off" />
-                </label>
-                <label className="search__field search__field--dep">
-                  <span className="sr-only">Département</span>
-                  <select name="dep" defaultValue="">
-                    <option value="">Toute la France</option>
-                    {DEPARTMENT_OPTIONS.map((d) => (
-                      <option key={d.code} value={d.code}>
-                        {d.code} · {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button type="submit" className="btn search__go">
-                  Chercher
-                </button>
-              </form>
-
-              <ul className="domains" role="list" aria-label="Recherches par domaine">
-                {DOMAINS.slice(0, 8).map((d) => (
-                  <li key={d.label}>
-                    <Link href={`/offres?q=${encodeURIComponent(d.query)}`} className="domain">
-                      {d.label}
-                    </Link>
-                  </li>
+          <form className="hero2__search" action="/offres" method="get" role="search">
+            <label className="hero2__field">
+              <span className="hero2__label">Métier</span>
+              <input type="search" name="q" placeholder="Marketing, boulanger, développeur…" autoComplete="off" />
+            </label>
+            <label className="hero2__field">
+              <span className="hero2__label">Où</span>
+              <select name="dep" defaultValue="">
+                <option value="">Toute la France</option>
+                {DEPARTMENT_OPTIONS.map((d) => (
+                  <option key={d.code} value={d.code}>
+                    {d.code} · {d.name}
+                  </option>
                 ))}
-              </ul>
-            </div>
+              </select>
+            </label>
+            <button type="submit" className="hero2__go">
+              C’est parti
+            </button>
+          </form>
 
-            <div className="hero__stage hero__stage--in">
-              <HeroDecode />
-            </div>
-          </div>
-        </section>
+          <p className="hero2__alt">
+            Pas d’idée ? <MatchButton className="hero2__match">Ton CV ou 4 questions</MatchButton>
+          </p>
 
-        <div className="ticker" aria-label="Ce que fait Décode">
-          <ul className="ticker__track" role="list">
-            {PROMISES.map((p) => (
-              <li key={p}>{p}</li>
+          <ul className="hero2__domains" role="list" aria-label="Recherches par domaine">
+            {DOMAINS.slice(0, 6).map((d) => (
+              <li key={d.label}>
+                <Link href={`/offres?q=${encodeURIComponent(d.query)}`}>{d.label}</Link>
+              </li>
             ))}
           </ul>
-        </div>
+        </section>
 
-        <section className="latest band" aria-labelledby="latest-title">
-          <div className="band__head" data-reveal>
-            <h2 id="latest-title" className="section-title">
-              Les dernières offres
-            </h2>
-            <Link href="/offres" className="link link--always band__more">
+        <section className="steps" aria-labelledby="steps-title">
+          <h2 id="steps-title" className="sr-only">
+            Comment ça marche
+          </h2>
+          <ol className="steps__list">
+            {STEPS.map((step, i) => (
+              <li key={step.title} className="step" data-reveal>
+                <span className="step__num num">{i + 1}</span>
+                <h3 className="step__title">{step.title}</h3>
+                <p className="step__text">{step.text}</p>
+                <Link href={step.href} className="link step__link">
+                  {step.action}
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="home-latest" aria-labelledby="latest-title">
+          <div className="offers__bar">
+            <h2 id="latest-title">Les dernières offres</h2>
+            {page?.mode === 'exemples' && <span className="num">exemples fictifs</span>}
+            <Link href="/offres" className="link">
               Toutes les offres
             </Link>
           </div>
-          {page?.mode === 'exemples' && <p className="latest__note">Exemples fictifs pour l’instant.</p>}
           {latest.length > 0 ? (
-            <ul className="offer-cards offer-cards--grid" role="list">
-              {latest.map(({ offer, h }, i) => (
-                <OfferCard key={offer.id} offer={offer} h={h} reveal={i % 2} />
+            <ul className="orows" role="list">
+              {latest.map(({ offer, h }) => (
+                <OfferRow key={offer.id} offer={offer} h={h} />
               ))}
             </ul>
           ) : (
@@ -147,39 +115,6 @@ export default async function Home() {
               Les offres ne répondent pas pour l’instant. <Link href="/offres">Réessaie sur la page Offres</Link>.
             </p>
           )}
-        </section>
-
-        <section className="tools band" aria-labelledby="tools-title">
-          <h2 id="tools-title" className="section-title" data-reveal>
-            Ce que les autres ne font pas
-          </h2>
-          <div className="tools__list">
-            {TOOLS.map((t, i) => (
-              <article key={t.id} className={`tool${i % 2 ? ' tool--flip' : ''}`} style={{ background: t.field }} data-reveal>
-                <div className="tool__copy">
-                  <h3 className="tool__title">{t.title}</h3>
-                  <p className="tool__text">{t.text}</p>
-                  <Link href={t.href} className="btn btn--small">
-                    {t.action}
-                  </Link>
-                </div>
-                <div className="tool__frag">
-                  <Fragment id={t.id} />
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="free band" aria-labelledby="free-title">
-          <div className="free__box" data-reveal>
-            <h2 id="free-title" className="section-title">
-              Gratuit. Vraiment.
-            </h2>
-            <Link href="/offres" className="btn btn--light">
-              Voir les offres
-            </Link>
-          </div>
         </section>
 
         <Faq mode={page?.mode ?? 'exemples'} />
