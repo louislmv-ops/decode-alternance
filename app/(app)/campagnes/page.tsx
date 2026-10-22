@@ -29,7 +29,7 @@ export default async function CampaignsPage() {
           </div>
         )}
         <p className="c-note">
-          Tu recrutes ? <Link href="/entreprises">Lance ta campagne</Link>.
+          Tu recrutes ? <Link href="/recruter">Lance ta campagne</Link>.
         </p>
       </div>
     </div>

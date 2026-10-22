@@ -27,6 +27,7 @@ export function ModerationView() {
   const [items, setItems] = useState<Reported[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<Pending[]>([]);
+  const [reviews, setReviews] = useState<{ id: string; companyName: string; siren: string; title: string; pros: string; cons: string; jobTitle: string; overall: number; reports: number; verifiedDomain: string | null }[]>([]);
   const [campaigns, setCampaigns] = useState<{ id: string; title: string; company: string }[]>([]);
   const loadPending = () => call<{ pending: Pending[] }>('/api/recruteur/verification').then((d) => setPending(d.pending)).catch(() => {});
 
@@ -40,6 +41,7 @@ export function ModerationView() {
       .then((d) => setItems(d.reported))
       .catch((err: Error) => setError(err.message));
     call<{ pending: Pending[] }>('/api/recruteur/verification').then((d) => setPending(d.pending)).catch(() => {});
+    call<{ pending: typeof reviews }>('/api/entreprises/moderation').then((d) => setReviews(d.pending)).catch(() => {});
     call<{ campaigns: { id: string; title: string; company: string }[] }>('/api/campagnes').then((d) => setCampaigns(d.campaigns)).catch(() => {});
   }, []);
 
@@ -83,6 +85,34 @@ export function ModerationView() {
             </div>
           </article>
         ))}
+        {reviews.length > 0 && <h2>Avis à relire</h2>}
+        {reviews.map((r) => (
+          <article key={r.id} className="c-mod">
+            <p className="c-post__meta">
+              <a className="link" href={`/entreprises/${r.siren}`}>{r.companyName}</a> · {r.jobTitle} · {r.overall}/5
+              {r.reports > 0 ? ` · ${r.reports} signalement${r.reports > 1 ? 's' : ''}` : ''}
+              {r.verifiedDomain ? ` · @${r.verifiedDomain}` : ''}
+            </p>
+            <p className="c-post__text"><strong>{r.title}</strong></p>
+            <p className="c-post__text">+ {r.pros}</p>
+            <p className="c-post__text">− {r.cons}</p>
+            <div className="c-mod__actions">
+              {([['Publier', true], ['Refuser', false]] as const).map(([label, publish]) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="ui-btn ui-btn--small"
+                  onClick={async () => {
+                    await call('/api/entreprises/moderation', 'POST', { id: r.id, publish });
+                    setReviews((all) => all.filter((x) => x.id !== r.id));
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </article>
+        ))}
         {campaigns.length > 0 && <h2>Campagnes en ligne</h2>}
         {campaigns.map((c) => (
           <article key={c.id} className="c-mod">
@@ -104,7 +134,7 @@ export function ModerationView() {
             </div>
           </article>
         ))}
-        {(pending.length > 0 || campaigns.length > 0) && <h2>Signalements</h2>}
+        {(pending.length > 0 || campaigns.length > 0 || reviews.length > 0) && <h2>Signalements</h2>}
         {items?.length === 0 && <p className="c-empty">Aucun signalement.</p>}
         {items?.map((it) => (
           <article key={it.id} className="c-mod">

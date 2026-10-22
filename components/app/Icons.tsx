@@ -75,3 +75,9 @@ export const IconChat = () => (
     <path d="M5 6.5h6M5 8.5h4" />
   </svg>
 );
+
+export const IconStar = () => (
+  <svg {...base}>
+    <path d="M8 1.8l1.8 3.7 4 .6-2.9 2.8.7 4L8 11l-3.6 1.9.7-4-2.9-2.8 4-.6z" />
+  </svg>
+);

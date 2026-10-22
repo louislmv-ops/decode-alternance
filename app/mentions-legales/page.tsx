@@ -50,6 +50,15 @@ export default function LegalPage() {
           enfreint la loi ou la charte. Tu peux supprimer tes messages et ton compte à tout moment.
         </p>
 
+        <h2 id="avis">Avis et salaires</h2>
+        <p>
+          Les avis et salaires sont déposés par des personnes connectées, une fois par entreprise, et publiés sans nom ni date précise.
+          Chaque avis est relu avant publication : il est refusé s’il vise une personne, contient des données personnelles ou des propos
+          illicites. Il repasse en relecture après trois signalements. Les moyennes ne s’affichent qu’à partir de trois réponses. Les
+          avis ne sont ni payés ni triés par les entreprises. La mention « e-mail pro vérifié » signifie qu’un code a été reçu sur une
+          adresse au nom de domaine indiqué, pas que l’emploi a été contrôlé.
+        </p>
+
         <h2 id="sources">Sources des offres et des règles</h2>
         <ul className="bullets">
           <li>Offres France Travail : API Offres d’emploi, réutilisées selon la licence de France Travail, sans les coordonnées de contact.</li>

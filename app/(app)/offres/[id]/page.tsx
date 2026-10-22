@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DecodedView, type OfferMeta } from '@/components/offer/DecodedView';
 import { BackLink } from '@/components/BackLink';
@@ -44,6 +45,11 @@ export default async function OfferPage({ params }: Props) {
     <>
       <div className="back-row">
         <BackLink fallback="/offres" label="Offres" />
+        {offer.company && offer.source !== 'exemple' && (
+          <Link href={`/entreprises?q=${encodeURIComponent(offer.company)}`} className="link back-row__aside">
+            Avis et salaires
+          </Link>
+        )}
       </div>
       {decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />}
     </>

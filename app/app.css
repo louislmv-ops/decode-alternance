@@ -530,6 +530,9 @@
 }
 
 .back-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   max-width: 1240px;
   margin: 0 auto 16px;
 }
@@ -3023,4 +3026,252 @@ label {
 .r-levels legend {
   width: 100%;
   margin-bottom: 6px;
+}
+
+/* Avis et salaires */
+.back-row__aside {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.e-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.e-search__input {
+  min-height: 48px;
+  font-size: 16px;
+}
+
+.e-results {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  background: var(--card);
+}
+
+.e-results li + li {
+  border-top: 1px solid var(--rule);
+}
+
+.e-results a {
+  display: flex;
+  align-items: center;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.e-results a:hover {
+  background: var(--active);
+}
+
+.e-results strong {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+
+.e-results span {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.e-top h2,
+.e-block h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.e-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.e-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.e-head__score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.e-big {
+  font-family: var(--font-display);
+  font-stretch: var(--display-stretch);
+  font-size: clamp(32px, 9vw, 48px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.e-big span {
+  font-family: var(--font);
+  font-stretch: normal;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.e-vs {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: var(--r-control);
+  background: var(--accent);
+  font-weight: 700;
+}
+
+.e-vs.is-low {
+  background: var(--alert-bg);
+  color: var(--alert-ink);
+}
+
+.e-jobs,
+.e-criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.e-jobs li,
+.e-criteria li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.e-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.e-score__bar {
+  position: relative;
+  width: 72px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.e-score__bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--brand);
+}
+
+.e-empty {
+  text-align: left;
+  padding: 0;
+}
+
+.e-review {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.e-review__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.e-review__part {
+  font-size: 15px;
+  white-space: pre-line;
+}
+
+.e-review__part span {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.e-review__report {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.e-rate {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.e-rate legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.e-rate label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--control);
+  border-radius: var(--r-control);
+  background: var(--card);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.e-rate label.is-on {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.e-rate input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+
+.e-rate label:has(input:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.e-give .c-tabs {
+  grid-template-columns: repeat(3, 1fr);
 }
