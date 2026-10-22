@@ -68,3 +68,10 @@ export const IconOut = () => (
     <path d="M9 3h4v4M13 3L7.5 8.5M11 9.5V13H3V5h3.5" />
   </svg>
 );
+
+export const IconChat = () => (
+  <svg {...base}>
+    <path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" />
+    <path d="M5 6.5h6M5 8.5h4" />
+  </svg>
+);

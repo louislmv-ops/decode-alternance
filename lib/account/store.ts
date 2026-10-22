@@ -20,7 +20,7 @@ export function isAccountsConfigured(): boolean {
 let schemaReady: Promise<void> | null = null;
 
 /** Les tables des comptes sont créées au premier usage : rien à lancer à la main. */
-function ensureSchema(): Promise<void> {
+export function ensureSchema(): Promise<void> {
   schemaReady ??= (async () => {
     const s = db();
     await s`create table if not exists accounts (
