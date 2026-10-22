@@ -5,15 +5,7 @@ import { formatEuros } from '@/lib/format';
 import { SMIC } from '@/lib/rules/reference';
 import { minimumSalary } from '@/lib/rules/salary';
 
-const ITEMS = [
-  { id: 'missions', name: 'Ce que tu feras', fact: 'Chaque info dit d’où elle vient : écrite, déduite ou inconnue.', field: 'var(--tint-6)' },
-  { id: 'salaire', name: 'Ton salaire minimum', fact: 'Au centime, pour ton âge et ton année.', field: 'var(--tint-5)' },
-  { id: 'rythme', name: 'Ton rythme', fact: 'Comparé à celui de ton école.', field: 'var(--surface)' },
-  { id: 'pieges', name: 'Les pièges', fact: 'Les fausses offres d’écoles sont signalées.', field: 'var(--ink)' },
-  { id: 'equipe', name: 'À qui écrire', fact: 'Le service à viser et un message prêt.', field: 'var(--tint-6)' },
-] as const;
-
-type ItemId = (typeof ITEMS)[number]['id'];
+export type ItemId = 'missions' | 'salaire' | 'rythme' | 'pieges' | 'equipe';
 
 function SalaryLive() {
   const [age, setAge] = useState(21);
@@ -72,7 +64,7 @@ const WEEK = [
   { day: 'Ven', where: 'École' },
 ];
 
-function Fragment({ id }: { id: ItemId }) {
+export function Fragment({ id }: { id: ItemId }) {
   if (id === 'salaire') return <SalaryLive />;
   if (id === 'missions')
     return (
@@ -139,36 +131,5 @@ function Fragment({ id }: { id: ItemId }) {
         réussit sa première année ?
       </p>
     </div>
-  );
-}
-
-export function Showcase() {
-  const [selected, setSelected] = useState<ItemId>('salaire');
-  const item = ITEMS.find((i) => i.id === selected) ?? ITEMS[0];
-
-  return (
-    <section className="showcase" aria-labelledby="showcase-title">
-      <div className="showcase__stage">
-        <div className="showcase__shape stroke" style={{ background: item.field }} aria-hidden="true" />
-        <div className="showcase__object" key={item.id}>
-          <Fragment id={item.id} />
-        </div>
-      </div>
-      <div className="showcase__list">
-        <h2 id="showcase-title" className="showcase__heading">
-          Ce qu’on lit pour toi
-        </h2>
-        <ul role="list">
-          {ITEMS.map((i) => (
-            <li key={i.id}>
-              <button type="button" aria-pressed={i.id === selected} onClick={() => setSelected(i.id)}>
-                {i.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <p className="showcase__fact">{item.fact}</p>
-    </section>
   );
 }

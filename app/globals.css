@@ -2,59 +2,69 @@
 
 /* ==========================================================================
    Décode : tokens
-   Direction « One motif » : le trait de surligneur, un parallélogramme à bout biseauté,
-   porte la couleur menthe. Tout le reste est fond, encre et deux gris.
+   Direction « plateforme claire » : un fond blanc, un vert sapin pour agir, un vert citron
+   pour surligner ce qui compte, et quatre aplats pastel pour ranger les domaines et les outils.
    ========================================================================== */
 
 :root {
-  --bg: #f7f7f5;
-  --surface: #ebebe8;
-  --ink: #141414;
-  --muted: #5e5e5b;
-  --accent: #f6e016;
-  --accent-ink: #141414;
-  --field-2: #141414;
+  --bg: #ffffff;
+  --surface: #f2f5f3;
+  --ink: #0f1f1a;
+  --muted: #4f5f58;
+  --brand: #0b6b4b;
+  --brand-dark: #07513a;
+  --brand-ink: #ffffff;
+  --accent: #d4f35a;
+  --accent-ink: #0f1f1a;
+  --field-2: #0b6b4b;
   --field-2-ink: #ffffff;
+
+  /* Aplats pastel : un par domaine ou par outil, jamais pour le texte courant. */
+  --mint: #dff2e7;
+  --sky: #e1ecfd;
+  --peach: #fde2e8;
+  --butter: #fff2bf;
 
   /* Les fonctions de l'appli : alerte et prudence, jamais décoratives. */
   --alert: #b3261e;
   --alert-bg: #ffedea;
   --alert-ink: #831c1e;
-  --notice-bg: #fffbeb;
-  --notice-ink: #92400e;
+  --notice-bg: #fff8e1;
+  --notice-ink: #7a4b00;
   --positive: #1f7a4d;
 
-  /* Teintes du parcours, du plus sombre au plus clair, dans la teinte de la menthe. */
-  --tint-1: #141414;
-  --tint-2: #2c2c2a;
-  --tint-3: #4a4a46;
-  --tint-4: #d9c50f;
-  --tint-5: #f6e016;
-  --tint-6: #faef7c;
+  --tint-1: #07513a;
+  --tint-2: #0b6b4b;
+  --tint-3: #3f8f6c;
+  --tint-4: #b7e04a;
+  --tint-5: #d4f35a;
+  --tint-6: #ebfab0;
 
-  /* L'appli (style « Achromatic ledger ») : un fond de papier, des cartes blanches. */
-  --ground: #f2f2ef;
+  /* L'appli : un fond à peine teinté, des cartes blanches. */
+  --ground: #f4f7f5;
   --card: #ffffff;
-  --border: #e6e6e3;
-  --rule: #efefec;
-  --control: #cfd2d6;
-  --active: #e9e9e6;
+  --border: #e1e8e4;
+  --rule: #edf1ee;
+  --control: #c9d4ce;
+  --active: #e6efe9;
 
-  --font: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --r-card: 20px;
+  --r-control: 12px;
 
   /* Cinq tailles sur les pages. */
   --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
-  --step-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
-  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
-  --step-head: clamp(2rem, 1.1rem + 2.4vw, 3.25rem);
-  --step-display: clamp(3.25rem, 1.6rem + 5.6vw, 6.5rem);
+  --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-lead: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --step-head: clamp(1.875rem, 1.2rem + 2.2vw, 3rem);
+  --step-display: clamp(2.75rem, 1.4rem + 5vw, 5.75rem);
 
-  --margin: clamp(20px, 2.4vw, 32px);
+  --margin: clamp(16px, 3vw, 40px);
+  --max: 1240px;
   --gutter: 16px;
-  --section-gap: clamp(112px, 12vw, 200px);
-
-  /* Le biseau du surligneur, en proportion de la hauteur. */
-  --slant: 0.32em;
+  --section-gap: clamp(88px, 10vw, 160px);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
@@ -83,6 +93,7 @@ body {
   font-size: var(--step-body);
   line-height: 1.5;
   font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -90,9 +101,10 @@ h2,
 h3,
 h4 {
   margin: 0;
-  font-weight: 600;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
   text-wrap: balance;
 }
 
@@ -119,7 +131,7 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 3px solid var(--brand);
   outline-offset: 3px;
 }
 
@@ -140,12 +152,12 @@ textarea {
 }
 
 /* ==========================================================================
-   Le motif
+   Le motif : le surligneur citron, posé en pastille arrondie
    ========================================================================== */
 
-/* Un trait de surligneur : un parallélogramme dont les deux bouts sont coupés en biais. */
+/* Gardée pour les anciens appels : la pastille n'a plus de biais. */
 .stroke {
-  clip-path: polygon(var(--slant) 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
+  border-radius: 999px;
 }
 
 /* Le trait en puce, à la taille du texte. */
@@ -169,10 +181,10 @@ textarea {
   position: absolute;
   left: 0;
   top: 0.38em;
-  width: 0.85em;
+  width: 0.62em;
   height: 0.62em;
-  background: var(--accent);
-  clip-path: polygon(0.2em 0, 100% 0, calc(100% - 0.2em) 100%, 0 100%);
+  border-radius: 50%;
+  background: var(--brand);
 }
 
 .bullets--ink li::before {
@@ -184,8 +196,9 @@ mark,
 .hl {
   background: var(--accent);
   color: var(--accent-ink);
-  padding: 0.04em 0.18em;
+  padding: 0.04em 0.22em;
   margin: 0 -0.06em;
+  border-radius: 0.3em;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
@@ -195,23 +208,21 @@ mark,
    ========================================================================== */
 
 .btn {
-  --slant: 0.7rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5em;
   min-height: 3.25rem;
-  padding: 0 1.9rem;
+  padding: 0 1.75rem;
   border: 0;
-  background: var(--ink);
-  color: var(--bg);
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--brand-ink);
   font-size: var(--step-small);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  clip-path: polygon(var(--slant) 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
   transition:
     transform var(--t-press) var(--ease-out),
     background-color var(--t-hover) ease,
@@ -222,22 +233,19 @@ mark,
   transform: scale(0.97);
 }
 
-.btn:focus-visible {
-  outline: none;
-  background: var(--accent);
-  color: var(--accent-ink);
-  box-shadow: inset 0 0 0 3px var(--ink);
-}
-
 .btn--accent {
   background: var(--accent);
   color: var(--accent-ink);
 }
 
+.btn--light {
+  background: var(--bg);
+  color: var(--ink);
+}
+
 .btn--small {
-  --slant: 0.5rem;
   min-height: 2.5rem;
-  padding: 0 1.3rem;
+  padding: 0 1.2rem;
 }
 
 .btn[disabled] {
@@ -248,12 +256,13 @@ mark,
 
 @media (hover: hover) and (pointer: fine) {
   .btn:not([disabled]):hover {
-    background: var(--accent);
-    color: var(--accent-ink);
+    background: var(--brand-dark);
   }
   .btn--accent:not([disabled]):hover {
-    background: var(--ink);
-    color: var(--bg);
+    background: var(--tint-4);
+  }
+  .btn--light:not([disabled]):hover {
+    background: var(--accent);
   }
 }
 

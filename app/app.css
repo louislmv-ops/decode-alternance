@@ -15,7 +15,7 @@
 .ui-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 20px;
   color: var(--ink);
 }
@@ -56,10 +56,10 @@
 }
 
 .pepite {
-  --slant: 0.45em;
   display: inline-flex;
   align-items: center;
-  padding: 3px 0.95em;
+  padding: 3px 0.8em;
+  border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
   font-size: 13px;
@@ -71,8 +71,8 @@
 .pill {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
@@ -96,7 +96,7 @@
 }
 
 .ui-chip--dit {
-  background: var(--ink);
+  background: var(--brand);
   color: #fff;
 }
 
@@ -126,7 +126,7 @@
 .ui-segmented {
   display: inline-flex;
   padding: 3px;
-  border-radius: 7px;
+  border-radius: 999px;
   background: var(--surface);
   flex: none;
 }
@@ -136,7 +136,7 @@
   background: none;
   padding: 0 12px;
   height: 30px;
-  border-radius: 5px;
+  border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
@@ -154,7 +154,7 @@
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--control);
-  border-radius: 6px;
+  border-radius: 999px;
   background: #fff;
 }
 
@@ -193,7 +193,7 @@
   min-height: 38px;
   padding: 7px 12px;
   border: 1px solid var(--control);
-  border-radius: 6px;
+  border-radius: var(--r-control);
   background: #fff;
   font-size: 15px;
 }
@@ -230,7 +230,7 @@
 .ui-check input {
   width: 16px;
   height: 16px;
-  accent-color: var(--ink);
+  accent-color: var(--brand);
 }
 
 .ui-btn {
@@ -238,10 +238,10 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: 38px;
+  padding: 0 16px;
   border: 1px solid var(--control);
-  border-radius: 6px;
+  border-radius: 999px;
   background: #fff;
   color: var(--ink);
   font-size: 14px;
@@ -260,9 +260,10 @@
 }
 
 .ui-btn--primary {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 600;
 }
 
 .ui-btn--small {
@@ -285,10 +286,11 @@
 
 @media (hover: hover) and (pointer: fine) {
   .ui-btn:not([disabled]):hover {
-    border-color: var(--ink);
+    border-color: var(--brand);
   }
   .ui-btn--primary:not([disabled]):hover {
-    background: #000;
+    background: var(--brand-dark);
+    border-color: var(--brand-dark);
   }
   .ui-segmented button:not([aria-pressed='true']):hover {
     color: var(--ink);
@@ -506,107 +508,11 @@
 .app {
   min-height: 100svh;
   background: var(--ground);
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-}
-
-.shell {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  display: flex;
-  flex-direction: column;
-  padding: 20px 12px 16px;
-  border-right: 1px solid var(--border);
-}
-
-.shell__brand {
-  display: inline-flex;
-  padding: 4px 10px 20px;
-  text-decoration: none;
-}
-
-.shell-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.shell-nav__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 8px;
-  color: #4a4a4a;
-  font-size: 14px;
-  text-decoration: none;
-  transition: background-color var(--t-hover) ease, color var(--t-hover) ease;
-}
-
-.shell-nav__item[aria-current='page'] {
-  background: var(--active);
-  color: var(--ink);
-  font-weight: 500;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .shell-nav__item:not([aria-current='page']):hover {
-    color: var(--ink);
-    background: rgba(0, 0, 0, 0.03);
-  }
-}
-
-.shell-foot {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Le chrono des 3 mois : l'élément propre à Décode, en bas de la navigation. */
-.chrono {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  text-decoration: none;
-}
-
-.chrono__label {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.chrono__value {
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.chrono--urgent .chrono__value {
-  color: var(--alert);
-}
-
-.chrono__hint {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
-.phone-bar,
-.phone-sheet {
-  display: none;
 }
 
 .canvas {
   min-width: 0;
-  padding: 32px 40px 64px;
+  padding: 32px var(--margin) 72px;
 }
 
 .screen {
@@ -637,10 +543,10 @@
 }
 
 .title-row h1 {
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  font-size: clamp(26px, 2.4vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .title-row__sub {
@@ -657,12 +563,12 @@
 }
 
 .notice {
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border-radius: 14px;
   background: var(--notice-bg);
   color: var(--notice-ink);
   font-size: 14px;
-  border: 1px solid #fde68a;
+  border: 1px solid #f6dd8c;
 }
 
 .notice--error {
@@ -674,7 +580,7 @@
 .panel {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 20px;
   min-width: 0;
 }
@@ -729,9 +635,9 @@
 }
 
 .empty {
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 1px dashed var(--control);
-  border-radius: 8px;
+  border-radius: 14px;
   color: var(--muted);
   font-size: 14px;
 }
@@ -762,22 +668,32 @@
   margin-top: 14px;
 }
 
-/* ---------- Offres ---------- */
+/* ---------- Offres : une bande de recherche, puis des cartes ---------- */
 
 .filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  border: 1px solid var(--border);
 }
 
 .filters__search {
-  flex: 1 1 200px;
+  flex: 1 1 240px;
+}
+
+.filters .ui-input,
+.filters .ui-select,
+.filters .ui-btn {
+  min-height: 46px;
 }
 
 .filters .ui-select {
   width: auto;
-  max-width: 200px;
+  max-width: 220px;
   font-size: 14px;
 }
 
@@ -785,83 +701,141 @@
   padding: 0 6px;
 }
 
-.offer-rows {
+.results .panel__head {
+  margin: 8px 0 12px;
+}
+
+.offer-cards {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.offer-row {
+.offer-card {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 190px 96px;
-  gap: 20px;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 18px 20px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition:
+    border-color var(--t-hover) ease,
+    transform var(--t-press) var(--ease-out);
+}
+
+.offer-card.is-pepite {
+  border-color: var(--tint-4);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.offer-card__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: inline-flex;
   align-items: center;
-  padding: 14px 4px;
-  border-top: 1px solid var(--rule);
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
-.offer-row:first-child {
-  border-top: 0;
-}
-
-.offer-row__title {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+.offer-card__title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
   color: var(--ink);
   text-decoration: none;
 }
 
-.offer-row__title:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+/* Toute la carte est cliquable, le lien reste le titre. */
+.offer-card__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
 }
 
-.offer-row__meta {
-  margin-top: 3px;
-  font-size: 13px;
+.offer-card__meta {
+  margin-top: 4px;
+  font-size: 14px;
   color: var(--muted);
 }
 
-.offer-row__tags {
-  margin-top: 8px;
+.offer-card__tags {
+  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.offer-row__tags:empty {
-  display: none;
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.offer-row__pay {
+.tag--quiet {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.offer-card__side {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
+  gap: 2px;
+  min-width: 140px;
 }
 
-.offer-row__amount {
-  font-size: 16px;
-  font-weight: 600;
+.offer-card__amount {
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.offer-row__amount--none {
-  font-weight: 400;
+.offer-card__amount--none {
+  font-weight: 500;
   color: var(--muted);
   font-size: 14px;
 }
 
-.offer-row__sub {
-  font-size: 12px;
+.offer-card__sub {
+  font-size: 13px;
   color: var(--muted);
 }
 
-.offer-row__date {
+.offer-card__date {
+  margin-top: 10px;
   font-size: 13px;
   color: var(--muted);
-  text-align: right;
-  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .offer-card:hover {
+    border-color: var(--brand);
+  }
+  .offer-card:hover .offer-card__title {
+    color: var(--brand);
+  }
+}
+
+.offer-card:active {
+  transform: scale(0.995);
 }
 
 .pager {
@@ -1646,74 +1620,6 @@
 }
 
 @media (max-width: 1100px) {
-  .app {
-    display: block;
-  }
-  .shell {
-    display: none;
-  }
-  .phone-bar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    height: 52px;
-    padding: 0 16px;
-    background: var(--ground);
-    border-bottom: 1px solid var(--border);
-  }
-  .phone-bar__brand {
-    text-decoration: none;
-  }
-  .phone-bar__brand .wordmark {
-    font-size: 1.25rem;
-  }
-  .phone-bar__title {
-    flex: 1;
-    font-size: 15px;
-    font-weight: 500;
-    text-align: right;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .phone-bar__menu {
-    width: 44px;
-    height: 44px;
-    margin-right: -10px;
-    border: 0;
-    background: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .phone-sheet {
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    display: flex;
-    flex-direction: column;
-    padding: 4px 16px 24px;
-    background: var(--ground);
-    overflow-y: auto;
-  }
-  .phone-sheet__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 48px;
-    margin-bottom: 16px;
-  }
-  .phone-sheet .shell-nav__item {
-    height: 48px;
-    font-size: 16px;
-  }
-  .phone-sheet .shell-foot {
-    margin-top: 32px;
-  }
   .canvas {
     padding: 24px 24px 56px;
   }
@@ -1744,7 +1650,7 @@
     gap: 14px;
   }
   .title-row h1 {
-    font-size: 22px;
+    font-size: 26px;
   }
   .title-row__actions {
     width: 100%;
@@ -1776,21 +1682,27 @@
   .filters .ui-select {
     min-height: 44px;
   }
-  .offer-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 6px 12px;
+  .offer-card {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px;
   }
-  .offer-row__main {
-    grid-column: 1 / -1;
+  .offer-card__avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 19px;
   }
-  .offer-row__pay {
-    grid-column: 1;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .offer-row__date {
+  .offer-card__side {
     grid-column: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    text-align: left;
+    gap: 4px 8px;
+    min-width: 0;
+  }
+  .offer-card__date {
+    margin: 0 0 0 auto;
   }
   .lead-text {
     font-size: 18px;
@@ -1820,4 +1732,14 @@
   .hero-fragment__head {
     flex-direction: column;
   }
+}
+
+/* ==========================================================================
+   La barre du haut, la barre d'onglets du téléphone et le chrono
+   ========================================================================== */
+
+.app h2,
+.app h3 {
+  font-family: var(--font);
+  letter-spacing: -0.01em;
 }
