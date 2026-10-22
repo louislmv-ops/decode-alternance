@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { DecodedView, type OfferMeta } from '@/components/offer/DecodedView';
 import { BackLink } from '@/components/BackLink';
 import { InterviewPrep } from '@/components/pro/InterviewPrep';
+import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
 import { findDecode, findOffer } from '@/lib/offers/repository';
 import { SOURCE_LABELS } from '@/lib/offers/types';
@@ -47,13 +48,13 @@ export default async function OfferPage({ params }: Props) {
       <div className="back-row">
         <BackLink fallback="/offres" label="Offres" />
         {offer.company && offer.source !== 'exemple' && (
-          <Link href={`/entreprises?q=${encodeURIComponent(offer.company)}`} className="link back-row__aside">
+          <Link href={`/entreprises?q=${encodeURIComponent(offer.company)}`} className="link back-row__aside" data-needs="comptes">
             Avis et salaires
           </Link>
         )}
       </div>
       {decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />}
-      {offer.source !== 'exemple' && <InterviewPrep offerId={offer.id} />}
+      {offer.source !== 'exemple' && isAccountsConfigured() && <InterviewPrep offerId={offer.id} />}
     </>
   );
 }

@@ -29,19 +29,19 @@ export function SiteFooter() {
           <Link className="link" href="/aides">
             Tes aides
           </Link>
-          <Link className="link" href="/campagnes">
+          <Link className="link" href="/campagnes" data-needs="comptes">
             Campagnes d’alternance
           </Link>
-          <Link className="link" href="/recruter">
+          <Link className="link" href="/recruter" data-needs="comptes">
             Recruter un alternant
           </Link>
         </nav>
         <nav aria-label="Infos" className="site-footer__col">
           <p className="site-footer__label">Infos</p>
-          <Link className="link" href="/pro">
+          <Link className="link" href="/pro" data-needs="comptes">
             Décode Pro
           </Link>
-          <Link className="link" href="/cgv">
+          <Link className="link" href="/cgv" data-needs="comptes">
             Conditions de vente
           </Link>
           <Link className="link" href="/mentions-legales">
