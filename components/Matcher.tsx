@@ -126,7 +126,7 @@ export function Matcher() {
         {step === 'start' ? (
           <div className="matcher__step">
             <h2 id="matcher-title" className="matcher__title">
-              Tes offres en 30 secondes.
+              Tes offres, sur mesure.
             </h2>
             <p className="matcher__lead">Balance ton CV ou réponds à 4 questions. On trie, tu postules.</p>
             <div className="matcher__choices">
