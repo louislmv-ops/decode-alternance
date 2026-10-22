@@ -25,7 +25,7 @@ const TOOLS = [
   {
     id: 'missions' as const,
     title: 'Ce que tu feras, vraiment',
-    text: 'Colle une offre : le jargon devient une semaine type, et chaque info dit si elle est écrite, déduite ou inconnue.',
+    text: 'Le jargon devient une semaine type.',
     href: '/decoder',
     action: 'Décoder une offre',
     field: 'var(--mint)',
@@ -33,7 +33,7 @@ const TOOLS = [
   {
     id: 'salaire' as const,
     title: 'Combien tu touches, au centime',
-    text: 'Calculé selon ton âge, ton année et ton contrat. Une offre en dessous est signalée.',
+    text: 'Selon ton âge et ton année. Les offres en dessous sont signalées.',
     href: '/salaire',
     action: 'Calculer mon salaire',
     field: 'var(--sky)',
@@ -41,7 +41,7 @@ const TOOLS = [
   {
     id: 'equipe' as const,
     title: 'Qui contacter pour passer devant',
-    text: 'Le service à viser, les bonnes recherches LinkedIn et un message court. Tu écris à l’équipe, pas à une boîte mail RH.',
+    text: 'Le bon service, les bonnes recherches LinkedIn, un message court.',
     href: '/equipe',
     action: 'Trouver l’équipe',
     field: 'var(--peach)',
@@ -73,11 +73,11 @@ export default async function Home() {
               <h1 id="hero-title" className="hero__title">
                 L’alternance, sans le blabla.
               </h1>
-              <p className="hero__lead">Chaque offre traduite : ce que tu feras, combien tu touches, à qui écrire pour passer devant.</p>
+              <p className="hero__lead">Chaque offre traduite. Missions, salaire, qui contacter.</p>
 
               <div className="hero__cta">
                 <MatchButton className="btn btn--accent btn--big">Mes offres</MatchButton>
-                <p className="hero__cta-sub">Ton CV ou 4 questions. Gratuit, sans compte.</p>
+                <p className="hero__cta-sub">Ton CV ou 4 questions. Gratuit.</p>
               </div>
 
               <form className="search" action="/offres" method="get" role="search">
@@ -135,7 +135,7 @@ export default async function Home() {
               Toutes les offres
             </Link>
           </div>
-          {page?.mode === 'exemples' && <p className="latest__note">Exemples fictifs, en attendant que les vraies offres soient branchées.</p>}
+          {page?.mode === 'exemples' && <p className="latest__note">Exemples fictifs pour l’instant.</p>}
           {latest.length > 0 ? (
             <ul className="offer-cards offer-cards--grid" role="list">
               {latest.map(({ offer, h }, i) => (
@@ -177,8 +177,7 @@ export default async function Home() {
               Gratuit. Sans compte.
             </h2>
             <p className="free__text">
-              Les offres et leur décodage sont gratuits, les alertes le seront aussi. Plus tard, un Pass optionnel pourra ajouter des extras,
-              comme un simulateur d’entretien. Ton profil reste sur ton téléphone.
+              Offres, décodage et alertes compris. Ton profil reste à toi.
             </p>
             <Link href="/offres" className="btn btn--light">
               Voir les offres

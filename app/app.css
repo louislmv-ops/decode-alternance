@@ -1955,3 +1955,196 @@
   background: var(--sky);
   font-size: 15px;
 }
+
+/* ---------- Mon compte ---------- */
+
+.acct {
+  max-width: 520px;
+}
+
+.acct-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  border: 1px solid var(--border);
+  min-height: 120px;
+}
+
+.acct-title {
+  font-size: 30px;
+  line-height: 1.05;
+}
+
+.acct-sub {
+  color: var(--muted);
+  font-size: 15px;
+  margin-top: -6px;
+}
+
+.acct-input {
+  width: 100%;
+  height: 54px;
+  padding: 0 16px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-control);
+  background: var(--bg);
+  font-size: 17px;
+}
+
+.acct-input--code {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
+.acct-go {
+  width: 100%;
+}
+
+.acct-error {
+  color: var(--alert-ink);
+  font-size: 14px;
+}
+
+.acct-link {
+  align-self: flex-start;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--brand);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.acct-link[disabled] {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.acct-link--danger {
+  color: var(--alert);
+}
+
+.acct-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 18px;
+  margin-top: 4px;
+  border-top: 1px solid var(--rule);
+}
+
+.acct-group h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.acct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.acct-note {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.acct-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: var(--r-control);
+  background: var(--surface);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acct-toggle.is-off {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* Un interrupteur dessiné sur la case à cocher elle-même. */
+.acct-toggle input {
+  appearance: none;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  border-radius: var(--r-control);
+  background: var(--control);
+  cursor: inherit;
+  transition: background-color var(--t-hover) ease;
+}
+
+.acct-toggle input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 2px;
+  background: #fff;
+  transition: transform var(--t-ui) var(--ease-out);
+}
+
+.acct-toggle input:checked {
+  background: var(--brand);
+}
+
+.acct-toggle input:checked::after {
+  transform: translateX(20px);
+}
+
+.acct-phone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.acct-phone .btn {
+  align-self: flex-start;
+}
+
+.acct-freq {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.acct-freq button {
+  height: 44px;
+  border: 0;
+  border-radius: var(--r-control);
+  background: var(--surface);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acct-freq button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--accent);
+}
+
+.acct-end {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+}

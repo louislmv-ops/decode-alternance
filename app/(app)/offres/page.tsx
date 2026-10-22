@@ -46,15 +46,12 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           <h1>Offres d’alternance</h1>
           <p className="title-row__sub">
             {result.total.toLocaleString('fr-FR')} offre{result.total > 1 ? 's' : ''}
-            {pepites > 0 ? (
+            {pepites > 0 && (
               <>
                 {' '}
-                · <span className="hl">{pepites} pépite{pepites > 1 ? 's' : ''}</span> sur cette page pour ton profil
+                · <span className="hl">{pepites} pépite{pepites > 1 ? 's' : ''}</span>
               </>
-            ) : null}
-            {' '}
-            · salaires comparés à ton minimum ({profile.age} ans, {profile.year}
-            {profile.year === 1 ? 're' : 'e'} année{profile.filled ? '' : ', profil par défaut'})
+            )}
           </p>
         </div>
         <Link href="/decoder" className="ui-btn ui-btn--primary">
@@ -63,7 +60,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       </div>
 
       {result.mode === 'exemples' && (
-        <p className="notice">Exemples fictifs : les vraies offres ne sont pas encore branchées. Tu peux déjà coller n’importe quelle offre.</p>
+        <p className="notice">Exemples fictifs pour l’instant.</p>
       )}
 
       <ForYou />

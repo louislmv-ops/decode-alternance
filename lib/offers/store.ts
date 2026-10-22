@@ -12,7 +12,7 @@ export function isDatabaseConfigured(): boolean {
   return Boolean(process.env.DATABASE_URL);
 }
 
-function db(): postgres.Sql {
+export function db(): postgres.Sql {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL manquant');
   sql ??= postgres(process.env.DATABASE_URL, { max: 5, idle_timeout: 20, prepare: false });
   return sql;
@@ -154,6 +154,12 @@ export async function saveDecode(offerId: string, decoded: DecodedOffer, model: 
   await s`
     insert into offer_decodes (offer_id, decoded, model) values (${offerId}, ${s.json(decoded as postgres.JSONValue)}, ${model})
     on conflict (offer_id) do update set decoded = excluded.decoded, model = excluded.model, created_at = now()`;
+}
+
+/** Combien d'offres la collecte a mises en base ; échoue si la table n'existe pas encore. */
+export async function countStoredOffers(): Promise<number> {
+  const [row] = await db()<{ n: number }[]>`select count(*)::int as n from offers`;
+  return row?.n ?? 0;
 }
 
 export async function closeDb(): Promise<void> {

@@ -3,6 +3,7 @@ import '@fontsource-variable/archivo/wdth.css';
 import './globals.css';
 import './site.css';
 import './app.css';
+import { AccountSync } from '@/components/account/AccountSync';
 import { Matcher } from '@/components/Matcher';
 import { Reveal } from '@/components/Reveal';
 import { SITE_URL } from '@/lib/site';
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
         <Matcher />
+        <AccountSync />
         <Reveal />
       </body>
     </html>

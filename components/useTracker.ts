@@ -48,6 +48,11 @@ function write(apps: Application[]) {
   listeners.forEach((l) => l());
 }
 
+/** Remplace tout le suivi, par exemple par celui retrouvé sur le compte. */
+export function replaceApplications(apps: Application[]) {
+  write(sanitizeApplications(apps));
+}
+
 export function useTracker() {
   const apps = useSyncExternalStore(subscribe, read, () => EMPTY);
   const add = useCallback((app: Omit<Application, 'id'>) => write([{ ...app, id: crypto.randomUUID() }, ...read()]), []);
