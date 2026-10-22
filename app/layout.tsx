@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import '@fontsource-variable/bricolage-grotesque/opsz.css';
-import '@fontsource-variable/figtree/wght.css';
+import '@fontsource-variable/archivo/wdth.css';
 import './globals.css';
 import './site.css';
 import './app.css';

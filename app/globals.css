@@ -48,18 +48,21 @@
   --control: #c9d4ce;
   --active: #e6efe9;
 
-  --font: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  /* Une seule famille, Archivo : normale pour lire, élargie et noire pour les titres. */
+  --font: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --display-stretch: 125%;
 
-  --r-card: 20px;
-  --r-control: 12px;
+  /* Des angles nets : rien n'est en pilule. */
+  --r-card: 4px;
+  --r-control: 3px;
 
   /* Cinq tailles sur les pages. */
   --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
   --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
   --step-lead: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
-  --step-head: clamp(1.875rem, 1.2rem + 2.2vw, 3rem);
-  --step-display: clamp(2.75rem, 1.4rem + 5vw, 5.75rem);
+  --step-head: clamp(1.625rem, 1.1rem + 1.9vw, 2.625rem);
+  --step-display: clamp(2.25rem, 1.1rem + 4.2vw, 4.75rem);
 
   --margin: clamp(16px, 3vw, 40px);
   --max: 1240px;
@@ -102,8 +105,9 @@ h3,
 h4 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-stretch: var(--display-stretch);
+  font-weight: 800;
+  letter-spacing: -0.02em;
   line-height: 1;
   text-wrap: balance;
 }
@@ -157,7 +161,7 @@ textarea {
 
 /* Gardée pour les anciens appels : la pastille n'a plus de biais. */
 .stroke {
-  border-radius: 999px;
+  border-radius: var(--r-card);
 }
 
 /* Le trait en puce, à la taille du texte. */
@@ -183,7 +187,7 @@ textarea {
   top: 0.38em;
   width: 0.62em;
   height: 0.62em;
-  border-radius: 50%;
+  border-radius: var(--r-control);
   background: var(--brand);
 }
 
@@ -215,7 +219,7 @@ mark,
   min-height: 3.25rem;
   padding: 0 1.75rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-card);
   background: var(--brand);
   color: var(--brand-ink);
   font-size: var(--step-small);
