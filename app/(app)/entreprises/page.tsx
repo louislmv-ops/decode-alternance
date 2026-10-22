@@ -10,6 +10,7 @@ const STEPS = [
   ['Inscris ton entreprise', 'Un compte, ton SIRET. On vérifie à la main.'],
   ['Cherche', 'Par domaine, ville, niveau et date de début. Seuls les alternants qui l’ont accepté apparaissent.'],
   ['Écris', 'Ton message part par e-mail. La réponse arrive directement chez toi.'],
+  ['Ou lance une campagne', 'Plusieurs postes, une date limite. Elle s’affiche sur la page Campagnes et sur les offres.'],
 ] as const;
 
 export default function CompaniesPage() {

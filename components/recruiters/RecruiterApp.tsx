@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { CampaignsPanel } from '@/components/campaigns/CampaignsPanel';
 import { AlternantCard } from '@/components/community/AlternantCard';
 import { Avatar, call, type PublicMember } from '@/components/community/ui';
 import { LEVEL_SHORT } from '@/lib/community/shared';
@@ -55,7 +56,13 @@ export function RecruiterApp({ open }: { open: boolean }) {
         </button>
       </div>
       {r.verified ? (
-        <Search />
+        <>
+          <CampaignsPanel />
+          <section className="r-section">
+            <h2>Trouver un alternant</h2>
+            <Search />
+          </section>
+        </>
       ) : (
         <p className="c-note">On vérifie l’entreprise à la main, sous 48 h ouvrées. Tu pourras ensuite chercher et contacter des alternants.</p>
       )}

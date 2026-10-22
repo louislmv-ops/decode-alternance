@@ -27,6 +27,7 @@ export function ModerationView() {
   const [items, setItems] = useState<Reported[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<Pending[]>([]);
+  const [campaigns, setCampaigns] = useState<{ id: string; title: string; company: string }[]>([]);
   const loadPending = () => call<{ pending: Pending[] }>('/api/recruteur/verification').then((d) => setPending(d.pending)).catch(() => {});
 
   const load = () =>
@@ -39,6 +40,7 @@ export function ModerationView() {
       .then((d) => setItems(d.reported))
       .catch((err: Error) => setError(err.message));
     call<{ pending: Pending[] }>('/api/recruteur/verification').then((d) => setPending(d.pending)).catch(() => {});
+    call<{ campaigns: { id: string; title: string; company: string }[] }>('/api/campagnes').then((d) => setCampaigns(d.campaigns)).catch(() => {});
   }, []);
 
   async function act(body: unknown) {
@@ -81,7 +83,28 @@ export function ModerationView() {
             </div>
           </article>
         ))}
-        {pending.length > 0 && <h2>Signalements</h2>}
+        {campaigns.length > 0 && <h2>Campagnes en ligne</h2>}
+        {campaigns.map((c) => (
+          <article key={c.id} className="c-mod">
+            <p className="c-post__text">
+              <strong>{c.company}</strong> · <a className="link" href={`/campagnes/${c.id}`}>{c.title}</a>
+            </p>
+            <div className="c-mod__actions">
+              <button
+                type="button"
+                className="ui-btn ui-btn--small"
+                onClick={async () => {
+                  if (!window.confirm('Masquer cette campagne ?')) return;
+                  await call(`/api/campagnes/${c.id}`, 'DELETE');
+                  setCampaigns((all) => all.filter((x) => x.id !== c.id));
+                }}
+              >
+                Masquer
+              </button>
+            </div>
+          </article>
+        ))}
+        {(pending.length > 0 || campaigns.length > 0) && <h2>Signalements</h2>}
         {items?.length === 0 && <p className="c-empty">Aucun signalement.</p>}
         {items?.map((it) => (
           <article key={it.id} className="c-mod">

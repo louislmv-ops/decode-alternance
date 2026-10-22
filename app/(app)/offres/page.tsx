@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
 import { ForYou } from '@/components/offer/ForYou';
 import { OfferCard } from '@/components/offer/OfferCard';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
@@ -64,6 +65,8 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       )}
 
       <ForYou />
+
+      {(filters.page ?? 1) <= 1 && <CampaignStrip />}
 
       <form className="filters" action="/offres" method="get" role="search">
         <label className="filters__search">
