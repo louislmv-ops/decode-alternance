@@ -32,6 +32,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Pr
                     <span>
                       {c.reviews} avis · {c.salaries} salaire{c.salaries > 1 ? 's' : ''}
                     </span>
+                    {c.top && <span className="e-top-badge">Top alternants</span>}
                     <Score value={c.overall} />
                   </Link>
                 </li>

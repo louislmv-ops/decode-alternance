@@ -7,7 +7,7 @@ import { ensureCommunitySchema } from '@/lib/community/store';
 import { db } from '@/lib/offers/store';
 import { minimumSalary } from '@/lib/rules/salary';
 import type { CompanyRef } from './search';
-import { HIRED, MIN_TO_SHOW, type PublicReview, type ReviewStats, type SalaryStats } from './shared';
+import { HIRED, isTopForApprentices, MIN_TO_SHOW, type PublicReview, type ReviewStats, type SalaryStats } from './shared';
 
 export { CRITERIA, HIRED, HIRED_LABELS, MIN_TO_SHOW } from './shared';
 export type { PublicReview, ReviewStats, SalaryStats } from './shared';
@@ -252,6 +252,7 @@ export interface CompanySummary extends CompanyRef {
   reviews: number;
   salaries: number;
   overall: number | null;
+  top: boolean;
 }
 
 /** Les entreprises les plus renseignées. */
@@ -267,12 +268,14 @@ export async function topCompanies(limit = 30): Promise<CompanySummary[]> {
       reviews: number;
       salaries: number;
       overall: number | null;
+      tutoring: number | null;
     }[]
   >`
     select c.*, coalesce(r.n, 0)::int as reviews, coalesce(p.n, 0)::int as salaries,
-      case when coalesce(r.n, 0) >= ${MIN_TO_SHOW} then round(r.overall::numeric, 1)::float else null end as overall
+      case when coalesce(r.n, 0) >= ${MIN_TO_SHOW} then round(r.overall::numeric, 1)::float else null end as overall,
+      case when coalesce(r.n, 0) >= ${MIN_TO_SHOW} then round(r.tutoring::numeric, 1)::float else null end as tutoring
     from companies c
-    left join (select siren, count(*) as n, avg(overall) as overall from company_reviews where status = 'published' group by siren) r on r.siren = c.siren
+    left join (select siren, count(*) as n, avg(overall) as overall, avg(tutoring) as tutoring from company_reviews where status = 'published' group by siren) r on r.siren = c.siren
     left join (select siren, count(*) as n from salary_reports where not hidden group by siren) p on p.siren = c.siren
     where coalesce(r.n, 0) + coalesce(p.n, 0) > 0
     order by coalesce(r.n, 0) + coalesce(p.n, 0) desc, c.name limit ${limit}`;
@@ -285,6 +288,7 @@ export async function topCompanies(limit = 30): Promise<CompanySummary[]> {
     reviews: r.reviews,
     salaries: r.salaries,
     overall: r.overall,
+    top: isTopForApprentices(r.reviews, r.overall, r.tutoring),
   }));
 }
 

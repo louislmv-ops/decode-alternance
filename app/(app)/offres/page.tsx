@@ -128,6 +128,9 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           <span className="num">
             {from}–{to} sur {result.total.toLocaleString('fr-FR')}
           </span>
+          <Link href={`/offres/swipe${pageHref(filters, 1).replace('/offres', '')}`} className="offers__swipe">
+            Mode swipe
+          </Link>
           <Link href="/decoder" className="link">
             Coller une offre
           </Link>

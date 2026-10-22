@@ -41,3 +41,11 @@ export interface PublicReview {
   cons: string;
   verified: boolean;
 }
+
+/** Le label « Top pour les alternants » : assez d'avis, une bonne note et un vrai tuteur. Il ne s'achète pas. */
+export const TOP_MIN_REVIEWS = 5;
+export const TOP_MIN_SCORE = 4;
+
+export function isTopForApprentices(count: number, overall: number | null, tutoring: number | null): boolean {
+  return count >= TOP_MIN_REVIEWS && overall !== null && tutoring !== null && overall >= TOP_MIN_SCORE && tutoring >= TOP_MIN_SCORE;
+}

@@ -53,3 +53,13 @@ describe('adresse pro', () => {
     expect(workDomain('Ines.Martin@Decathlon.com')).toBe('decathlon.com');
   });
 });
+
+describe('label Top pour les alternants', async () => {
+  const { isTopForApprentices } = await import('./shared');
+  it('demande 5 avis, une note et un tuteur à 4 ou plus', () => {
+    expect(isTopForApprentices(5, 4.2, 4.0)).toBe(true);
+    expect(isTopForApprentices(4, 4.8, 4.8)).toBe(false);
+    expect(isTopForApprentices(12, 4.5, 3.6)).toBe(false);
+    expect(isTopForApprentices(12, null, null)).toBe(false);
+  });
+});
