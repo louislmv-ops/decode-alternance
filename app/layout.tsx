@@ -6,6 +6,7 @@ import './app.css';
 import { AccountSync } from '@/components/account/AccountSync';
 import { Matcher } from '@/components/Matcher';
 import { Reveal } from '@/components/Reveal';
+import { isAccountsConfigured } from '@/lib/account/store';
 import { SITE_URL } from '@/lib/site';
 
 // Archivo servie par Next : préchargée, avec une police de secours aux mêmes proportions,
@@ -38,7 +39,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={archivo.variable}>
+    <html lang="fr" className={archivo.variable} data-comptes={isAccountsConfigured() ? '' : undefined}>
       <head>
         {/* Les états cachés des apparitions ne s'appliquent que si le script tourne. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
