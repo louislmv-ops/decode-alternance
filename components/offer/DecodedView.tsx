@@ -11,6 +11,7 @@ import { RHYTHMS } from '@/lib/profile';
 import { apprenticeNetThresholdCents, comparePay, minimumSalary } from '@/lib/rules/salary';
 import { IconOut } from '@/components/app/Icons';
 import { CopyButton } from './CopyButton';
+import { OfferFacts } from './OfferFacts';
 
 export interface OfferMeta {
   id: string;
@@ -22,6 +23,7 @@ export interface OfferMeta {
   salaryCents: number | null;
   schoolFlags: string[];
   isExample: boolean;
+  contract: string | null;
 }
 
 const CERTITUDE: Record<Certitude, string> = { dit: 'Dit', deduit: 'Déduit', inconnu: 'Inconnu' };
@@ -118,13 +120,27 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
 
       {offer?.isExample && <p className="notice">Exemple fictif : l’entreprise, l’annonce et le salaire sont inventés pour montrer le fonctionnement de Décode.</p>}
 
+      <OfferFacts
+        payCents={offerCents}
+        minimumCents={minimum.cents}
+        company={company || null}
+        place={[decoded.lieu.ville ?? offer?.city, decoded.lieu.precision].filter(Boolean).join(', ') || null}
+        rhythm={decoded.contrat.rythme}
+        contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
+      />
+
       <div className="detail">
         <div className="detail__main">
           <section className="panel panel--lead" aria-labelledby="clair-title">
-            <h2 id="clair-title" className="sr-only">
-              En clair
+            <h2 id="clair-title" className="brief-title">
+              En bref
             </h2>
             <p className="lead-text">{decoded.enClair}</p>
+            <ul className="brief" role="list">
+              {decoded.missions.slice(0, 3).map((m, i) => (
+                <li key={i}>{m.enClair}</li>
+              ))}
+            </ul>
             {(big || pay?.verdict === 'bien-paye' || schoolBait) && (
               <div className="tags">
                 {big && !schoolBait && <span className="pepite stroke">Grande entreprise</span>}
@@ -137,7 +153,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
 
           <section className="panel" aria-labelledby="missions-title">
             <div className="panel__head">
-              <h2 id="missions-title">Ce que tu feras</h2>
+              <h2 id="missions-title">Les missions, traduites</h2>
               <span className="panel__meta">{decoded.missions.length} missions</span>
             </div>
             <ul className="missions" role="list">
@@ -180,7 +196,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               </div>
               <div>
                 <div className="panel__head">
-                  <h2>Pour et contre</h2>
+                  <h2>Points forts, points faibles</h2>
                 </div>
                 {decoded.pointsForts.length > 0 && (
                   <ul className="bullets">
@@ -245,6 +261,58 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                   </li>
                 ))}
               </ul>
+            </section>
+          )}
+
+          {decoded.aMettreEnAvant.length > 0 && (
+            <section className="panel" aria-labelledby="cv-title">
+              <div className="panel__head">
+                <h2 id="cv-title">Fais la différence</h2>
+              </div>
+              <ul className="bullets">
+                {decoded.aMettreEnAvant.map((x, i) => (
+                  <li key={i}>{x}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {company && decoded.equipe.aContacter.length > 0 && (
+            <section className="panel" aria-labelledby="team-title">
+              <div className="panel__head">
+                <h2 id="team-title">Trouve qui contacter</h2>
+              </div>
+              <p className="panel__note panel__note--first">
+                Service à viser : <strong>{decoded.equipe.service}</strong>
+              </p>
+              <ul className="bullets team-roles">
+                {decoded.equipe.aContacter.map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
+              <ul className="search-links" role="list">
+                {searches.slice(0, 3).map((s) => (
+                  <li key={s.url}>
+                    <a href={s.url} target="_blank" rel="noopener noreferrer" className="search-link">
+                      <span>{s.label}</span>
+                      <IconOut />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <div className="message">
+                <p className="ui-label">Message à adapter</p>
+                <p className="message__text">{message || fallbackMessage}</p>
+                <div className="message__foot">
+                  <span className="num">{(message || fallbackMessage).length} / 300</span>
+                  <CopyButton text={message || fallbackMessage} label="Copier le message" />
+                </div>
+              </div>
+              <Link
+                className="panel__link"
+                href={`/equipe?entreprise=${encodeURIComponent(company)}&service=${encodeURIComponent(decoded.equipe.motsCles[0] ?? decoded.equipe.service)}&ville=${encodeURIComponent(decoded.lieu.ville ?? '')}`}
+              >
+                Toute la méthode pour cette entreprise
+              </Link>
             </section>
           )}
 
@@ -320,58 +388,6 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             <p className={`ui-status ui-status--${rhythm.tone}`}>{rhythm.text}</p>
           </section>
 
-          {company && decoded.equipe.aContacter.length > 0 && (
-            <section className="panel" aria-labelledby="team-title">
-              <div className="panel__head">
-                <h2 id="team-title">Trouve l’équipe</h2>
-              </div>
-              <p className="panel__note panel__note--first">
-                Service à viser : <strong>{decoded.equipe.service}</strong>
-              </p>
-              <ul className="bullets team-roles">
-                {decoded.equipe.aContacter.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-              <ul className="search-links" role="list">
-                {searches.slice(0, 3).map((s) => (
-                  <li key={s.url}>
-                    <a href={s.url} target="_blank" rel="noopener noreferrer" className="search-link">
-                      <span>{s.label}</span>
-                      <IconOut />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              <div className="message">
-                <p className="ui-label">Message à adapter</p>
-                <p className="message__text">{message || fallbackMessage}</p>
-                <div className="message__foot">
-                  <span className="num">{(message || fallbackMessage).length} / 300</span>
-                  <CopyButton text={message || fallbackMessage} label="Copier le message" />
-                </div>
-              </div>
-              <Link
-                className="panel__link"
-                href={`/equipe?entreprise=${encodeURIComponent(company)}&service=${encodeURIComponent(decoded.equipe.motsCles[0] ?? decoded.equipe.service)}&ville=${encodeURIComponent(decoded.lieu.ville ?? '')}`}
-              >
-                Toute la méthode pour cette entreprise
-              </Link>
-            </section>
-          )}
-
-          {decoded.aMettreEnAvant.length > 0 && (
-            <section className="panel" aria-labelledby="cv-title">
-              <div className="panel__head">
-                <h2 id="cv-title">À mettre en avant</h2>
-              </div>
-              <ul className="bullets">
-                {decoded.aMettreEnAvant.map((x, i) => (
-                  <li key={i}>{x}</li>
-                ))}
-              </ul>
-            </section>
-          )}
         </aside>
       </div>
       <p className="screen__foot">

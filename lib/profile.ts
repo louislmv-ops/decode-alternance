@@ -30,6 +30,10 @@ export interface Profile {
   rhythm: Rhythm | null;
   /** Date de début de la formation au CFA, pour le chrono des 3 mois. */
   cfaStart: string | null;
+  /** Le métier ou le domaine cherché, tel que tapé ou lu dans le CV. */
+  job: string;
+  /** Le département où chercher, ou null pour toute la France. */
+  department: string | null;
   /** Le profil a-t-il été rempli par la personne, ou est-ce la valeur par défaut ? */
   filled: boolean;
 }
@@ -45,6 +49,8 @@ export const DEFAULT_PROFILE: Profile = {
   schoolCity: '',
   rhythm: null,
   cfaStart: null,
+  job: '',
+  department: null,
   filled: false,
 };
 
@@ -96,6 +102,8 @@ export function sanitizeProfile(raw: unknown): Profile {
     schoolCity: typeof r.schoolCity === 'string' ? r.schoolCity.slice(0, 60) : '',
     rhythm: RHYTHMS.some((x) => x.value === r.rhythm) ? (r.rhythm as Rhythm) : null,
     cfaStart: typeof r.cfaStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.cfaStart) ? r.cfaStart : null,
+    job: typeof r.job === 'string' ? r.job.slice(0, 80) : '',
+    department: typeof r.department === 'string' && /^(\d{2,3}|2[AB])$/.test(r.department) ? r.department : null,
     filled: Boolean(r.filled),
   };
 }

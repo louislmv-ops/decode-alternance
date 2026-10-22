@@ -113,7 +113,8 @@ export async function removeStale(source: OfferSource, cutoff: Date): Promise<nu
 
 export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
   const s = db();
-  const conditions = [s`true`];
+  // Les offres d'écoles déguisées ne sont jamais listées.
+  const conditions = [s`cardinality(school_flags) = 0`];
   if (filters.department) conditions.push(s`department = ${filters.department}`);
   if (filters.contract) conditions.push(s`contract = ${filters.contract}`);
   if (filters.level) conditions.push(s`(diploma_level is null or diploma_level <= ${filters.level})`);

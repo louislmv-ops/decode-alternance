@@ -3,16 +3,26 @@ import { cookies } from 'next/headers';
 import { OfferCard } from '@/components/offer/OfferCard';
 import { Faq } from '@/components/site/Faq';
 import { Fragment } from '@/components/site/Fragments';
-import { HeroFragment } from '@/components/site/HeroFragment';
+import { MatchButton } from '@/components/Matcher';
+import { HeroDecode } from '@/components/site/HeroDecode';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
+import { DOMAINS } from '@/lib/domains';
 import { highlights } from '@/lib/offers/highlights';
 import { listOffers } from '@/lib/offers/repository';
 import type { OfferPage } from '@/lib/offers/types';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 
-const DOMAINS = ['Marketing', 'Commerce', 'Développeur', 'Ressources humaines', 'Comptabilité', 'Communication', 'Logistique', 'Banque'];
+const PROMISES = [
+  'Missions en clair',
+  'Salaire minimum calculé pour toi',
+  'Offres d’écoles virées',
+  'Qui contacter sur LinkedIn',
+  '€ / €€ / €€€ en un coup d’œil',
+  'Ton CV lu en 10 secondes',
+  'Questions à poser en entretien',
+];
 
 const TOOLS = [
   {
@@ -25,7 +35,7 @@ const TOOLS = [
   },
   {
     id: 'salaire' as const,
-    title: 'Ton salaire minimum, au centime',
+    title: 'Combien tu touches, au centime',
     text: 'Calculé selon ton âge, ton année et ton contrat. Une offre en dessous est signalée.',
     href: '/salaire',
     action: 'Calculer mon salaire',
@@ -33,8 +43,8 @@ const TOOLS = [
   },
   {
     id: 'equipe' as const,
-    title: 'À qui écrire dans l’équipe',
-    text: 'Le service à viser, les postes à chercher sur LinkedIn et un premier message court.',
+    title: 'Qui contacter pour passer devant',
+    text: 'Le service à viser, les bonnes recherches LinkedIn et un message court. Tu écris à l’équipe, pas à une boîte mail RH.',
     href: '/equipe',
     action: 'Trouver l’équipe',
     field: 'var(--peach)',
@@ -64,14 +74,19 @@ export default async function Home() {
           <div className="hero__inner">
             <div className="hero__copy">
               <h1 id="hero-title" className="hero__title">
-                L’alternance, en clair.
+                L’alternance, sans le blabla.
               </h1>
-              <p className="hero__lead">Les offres traduites : ce que tu feras, ton salaire minimum et à qui écrire.</p>
+              <p className="hero__lead">Chaque offre traduite : ce que tu feras, combien tu touches, à qui écrire pour passer devant.</p>
+
+              <div className="hero__cta">
+                <MatchButton className="btn btn--accent btn--big">Mes offres en 30 s</MatchButton>
+                <p className="hero__cta-sub">Ton CV ou 4 questions. Gratuit, sans compte.</p>
+              </div>
 
               <form className="search" action="/offres" method="get" role="search">
                 <label className="search__field search__field--q">
                   <span className="sr-only">Métier, entreprise ou ville</span>
-                  <input type="search" name="q" placeholder="Métier, entreprise, ville" autoComplete="off" />
+                  <input type="search" name="q" placeholder="Ou cherche : métier, entreprise" autoComplete="off" />
                 </label>
                 <label className="search__field search__field--dep">
                   <span className="sr-only">Département</span>
@@ -85,15 +100,15 @@ export default async function Home() {
                   </select>
                 </label>
                 <button type="submit" className="btn search__go">
-                  Rechercher
+                  Chercher
                 </button>
               </form>
 
               <ul className="domains" role="list" aria-label="Recherches par domaine">
-                {DOMAINS.map((d) => (
-                  <li key={d}>
-                    <Link href={`/offres?q=${encodeURIComponent(d)}`} className="domain">
-                      {d}
+                {DOMAINS.slice(0, 8).map((d) => (
+                  <li key={d.label}>
+                    <Link href={`/offres?q=${encodeURIComponent(d.query)}`} className="domain">
+                      {d.label}
                     </Link>
                   </li>
                 ))}
@@ -101,10 +116,20 @@ export default async function Home() {
             </div>
 
             <div className="hero__stage hero__stage--in">
-              <HeroFragment />
+              <HeroDecode />
             </div>
           </div>
         </section>
+
+        <div className="ticker" aria-label="Ce que fait Décode">
+          <ul className="ticker__track" role="list">
+            {[...PROMISES, ...PROMISES].map((p, i) => (
+              <li key={i} aria-hidden={i >= PROMISES.length ? true : undefined}>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <section className="latest band" aria-labelledby="latest-title">
           <div className="band__head" data-reveal>
@@ -131,7 +156,7 @@ export default async function Home() {
 
         <section className="tools band" aria-labelledby="tools-title">
           <h2 id="tools-title" className="section-title" data-reveal>
-            Trois outils, zéro blabla
+            Ce que les autres ne font pas
           </h2>
           <div className="tools__list">
             {TOOLS.map((t, i) => (
