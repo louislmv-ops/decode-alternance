@@ -18,7 +18,7 @@ export function ForYou() {
         <p className="for-you__text">
           <strong>Pas envie de filtrer ?</strong> Ton CV ou 4 questions, et on te sort les offres qui collent.
         </p>
-        <MatchButton className="btn btn--small">Mes offres en 30 s</MatchButton>
+        <MatchButton className="btn btn--small">Mes offres</MatchButton>
       </div>
     );
   }

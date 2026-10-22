@@ -79,7 +79,7 @@ export default async function Home() {
               <p className="hero__lead">Chaque offre traduite : ce que tu feras, combien tu touches, à qui écrire pour passer devant.</p>
 
               <div className="hero__cta">
-                <MatchButton className="btn btn--accent btn--big">Mes offres en 30 s</MatchButton>
+                <MatchButton className="btn btn--accent btn--big">Mes offres</MatchButton>
                 <p className="hero__cta-sub">Ton CV ou 4 questions. Gratuit, sans compte.</p>
               </div>
 
