@@ -18,11 +18,21 @@ Ce que seul le propriétaire des comptes peut faire. Le code est prêt : dès qu
 1. console.anthropic.com, Settings, API Keys, Create Key ; ajouter quelques euros de crédit dans Billing.
 2. Vercel : Key `ANTHROPIC_API_KEY`, Value : la clé. Puis Redeploy.
 
-## 3. Ménage Vercel
+## 3. Les comptes et les alertes (e-mail, SMS)
+
+Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les secrets GitHub pour les alertes du matin).
+
+1. Base de données gratuite : créer un projet sur neon.tech, copier la « connection string » → `DATABASE_URL`. Les tables se créent toutes seules.
+2. E-mails : compte sur resend.com, vérifier le domaine (ou tester avec l'adresse de test), créer une clé → `RESEND_API_KEY`, et `EMAIL_FROM` (ex. `Décode <bonjour@ton-domaine.fr>`).
+3. SMS (optionnel, payant à l'envoi) : compte sur brevo.com, acheter des crédits SMS, créer une clé API → `BREVO_API_KEY`.
+4. `AUTH_SECRET` : une longue phrase aléatoire (sert à protéger les codes et les sessions).
+5. Redeploy. Pour les alertes du matin : mêmes valeurs dans GitHub, Settings, Secrets and variables, Actions.
+
+## 4. Ménage Vercel
 
 Supprimer les projets en double `decode-alternance-m3u6` et `decode-alternance-m3u699` (Settings, tout en bas, Delete Project).
 
-## 4. Avant de faire connaître le site
+## 5. Avant de faire connaître le site
 
 - Mentions légales (obligatoires) : dans Vercel, ajouter `LEGAL_EDITOR` (nom ou micro-entreprise), `LEGAL_ADDRESS`, `LEGAL_SIREN`, `LEGAL_CONTACT` (e-mail dédié), puis Redeploy. L'hébergeur est déjà rempli.
 - Un domaine (.fr) : l'acheter, le brancher dans Vercel (Settings, Domains), puis mettre `NEXT_PUBLIC_SITE_URL` à la nouvelle adresse.

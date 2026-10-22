@@ -53,9 +53,13 @@ export function TopBar() {
         </nav>
         <div className="topbar__end">
           <Chrono />
-          <Link href="/profil" className="topbar__profile" aria-current={pathname.startsWith('/profil') ? 'page' : undefined}>
+          <Link
+            href="/compte"
+            className="topbar__profile"
+            aria-current={pathname.startsWith('/compte') || pathname.startsWith('/profil') ? 'page' : undefined}
+          >
             <IconUser />
-            <span className="topbar__profile-label">Mon profil</span>
+            <span className="topbar__profile-label">Mon compte</span>
           </Link>
           {pathname === '/' && (
             <Link href="/decoder" className="btn btn--small topbar__action">

@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "ingest": "tsx --env-file-if-exists=.env.local scripts/ingest.ts"
+    "ingest": "tsx --env-file-if-exists=.env.local scripts/ingest.ts",
+    "alerts": "tsx --env-file-if-exists=.env.local scripts/alerts.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.0.0",

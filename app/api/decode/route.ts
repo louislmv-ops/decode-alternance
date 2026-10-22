@@ -45,8 +45,11 @@ export async function POST(request: Request) {
       const offer = await findOffer(parsed.data.offerId);
       if (!offer) return Response.json({ error: 'Cette offre n’existe plus.' }, { status: 404 });
       const { decoded, model } = await decodeOffer(`${offer.title}\n${offer.company ?? ''}\n${offer.city ?? ''}\n\n${offer.description}`);
-      if (isDatabaseConfigured() && !offer.id.startsWith('exemple:')) await saveDecode(offer.id, decoded, model);
-      else rememberDecode(offer.id, decoded);
+      rememberDecode(offer.id, decoded);
+      if (isDatabaseConfigured() && !offer.id.startsWith('exemple:')) {
+        // Sans table des offres (base utilisée seulement pour les comptes), la mémoire suffit.
+        await saveDecode(offer.id, decoded, model).catch(() => {});
+      }
       return Response.json({ decoded, cached: false });
     }
     // Le texte collé n'est ni gardé ni enregistré : il sert à la traduction et c'est tout.
