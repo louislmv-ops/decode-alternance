@@ -5,9 +5,11 @@ import { connection } from 'next/server';
 import { BackLink } from '@/components/BackLink';
 import { CampaignCard } from '@/components/campaigns/CampaignCard';
 import { Contribute } from '@/components/companies/Contribute';
+import { SpontaneousCta } from '@/components/companies/SpontaneousCta';
 import { ReviewCard } from '@/components/companies/ReviewCard';
 import { Score } from '@/components/companies/Stars';
 import { companyBySiren, type CompanyRef } from '@/lib/companies/search';
+import { isTopForApprentices } from '@/lib/companies/shared';
 import { type CompanyPage, companyPage, CRITERIA, MIN_TO_SHOW } from '@/lib/companies/store';
 import { isCommunityOpen } from '@/lib/community/http';
 import { formatEuros } from '@/lib/format';
@@ -64,6 +66,11 @@ export default async function CompanyPageView({ params }: Props) {
         <header className="e-head">
           <h1 className="c-charte__title">{company.name}</h1>
           <p className="c-post__meta">{[company.city, `SIREN ${company.siren}`].filter(Boolean).join(' · ')}</p>
+          {r && isTopForApprentices(r.count, r.overall, r.criteria.tutoring) && (
+            <p className="e-top-badge e-top-badge--big" title="Au moins 5 avis, note globale et tuteur à 4 sur 5 ou plus">
+              Top pour les alternants
+            </p>
+          )}
           {r?.overall != null && (
             <p className="e-head__score">
               <Score value={r.overall} label="Note globale" /> <span className="c-post__meta">{r.count} avis</span>
@@ -137,6 +144,8 @@ export default async function CompanyPageView({ params }: Props) {
             <ReviewCard key={review.id} review={review} />
           ))}
         </section>
+
+        <SpontaneousCta name={company.name} />
 
         {isCommunityOpen() && <Contribute siren={company.siren} name={company.name} />}
 
