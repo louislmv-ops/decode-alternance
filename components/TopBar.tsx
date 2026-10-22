@@ -5,14 +5,16 @@ import { usePathname } from 'next/navigation';
 import { Wordmark } from '@/components/Wordmark';
 import { useProfile } from '@/components/useProfile';
 import { daysLeftWithoutEmployer } from '@/lib/profile';
-import { IconDecode, IconEuro, IconList, IconPeople, IconTrack, IconUser } from '@/components/app/Icons';
+import { IconChat, IconDecode, IconEuro, IconList, IconPeople, IconTrack, IconUser } from '@/components/app/Icons';
 
 export const NAV = [
-  { href: '/offres', label: 'Offres', short: 'Offres', icon: IconList },
-  { href: '/decoder', label: 'Décoder une offre', short: 'Décoder', icon: IconDecode },
-  { href: '/suivi', label: 'Mon suivi', short: 'Suivi', icon: IconTrack },
-  { href: '/salaire', label: 'Mon salaire', short: 'Salaire', icon: IconEuro },
-  { href: '/equipe', label: 'Trouver l’équipe', short: 'Équipe', icon: IconPeople },
+  { href: '/offres', label: 'Offres', short: 'Offres', icon: IconList, tab: true },
+  { href: '/decoder', label: 'Décoder une offre', short: 'Décoder', icon: IconDecode, tab: true },
+  { href: '/communaute', label: 'La commu', short: 'Commu', icon: IconChat, tab: true },
+  { href: '/suivi', label: 'Mon suivi', short: 'Suivi', icon: IconTrack, tab: true },
+  { href: '/salaire', label: 'Mon salaire', short: 'Salaire', icon: IconEuro, tab: true },
+  // Trouver l'équipe se fait surtout depuis une offre : sur téléphone, il passe par la fiche.
+  { href: '/equipe', label: 'Trouver l’équipe', short: 'Équipe', icon: IconPeople, tab: false },
 ];
 
 export function isActive(pathname: string, href: string) {
@@ -77,7 +79,7 @@ export function TabBar() {
   const pathname = usePathname();
   return (
     <nav aria-label="Outils" className="tabbar">
-      {NAV.map(({ href, short, icon: Icon }) => (
+      {NAV.filter((n) => n.tab).map(({ href, short, icon: Icon }) => (
         <Link key={href} href={href} className="tabbar__item" aria-current={isActive(pathname, href) ? 'page' : undefined}>
           <Icon />
           <span>{short}</span>

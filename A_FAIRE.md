@@ -18,7 +18,7 @@ Ce que seul le propriétaire des comptes peut faire. Le code est prêt : dès qu
 1. console.anthropic.com, Settings, API Keys, Create Key ; ajouter quelques euros de crédit dans Billing.
 2. Vercel : Key `ANTHROPIC_API_KEY`, Value : la clé. Puis Redeploy.
 
-## 3. Les comptes et les alertes (e-mail, SMS)
+## 3. Les comptes, les alertes et la commu
 
 Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les secrets GitHub pour les alertes du matin).
 
@@ -26,7 +26,8 @@ Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les se
 2. E-mails : compte sur resend.com, vérifier le domaine (ou tester avec l'adresse de test), créer une clé → `RESEND_API_KEY`, et `EMAIL_FROM` (ex. `Décode <bonjour@ton-domaine.fr>`).
 3. SMS (optionnel, payant à l'envoi) : compte sur brevo.com, acheter des crédits SMS, créer une clé API → `BREVO_API_KEY`.
 4. `AUTH_SECRET` : une longue phrase aléatoire (sert à protéger les codes et les sessions).
-5. Redeploy. Pour les alertes du matin : mêmes valeurs dans GitHub, Settings, Secrets and variables, Actions.
+5. `ADMIN_EMAILS` : ton adresse e-mail (séparées par des virgules s'il y en a plusieurs) pour accéder à la modération de la commu (`/communaute/moderation`).
+6. Redeploy. Pour les alertes du matin : mêmes valeurs dans GitHub, Settings, Secrets and variables, Actions.
 
 ## 4. Ménage Vercel
 

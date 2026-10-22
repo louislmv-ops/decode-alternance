@@ -43,6 +43,13 @@ export default function LegalPage() {
         </p>
         <p>Décode ne lit aucune donnée sur LinkedIn et ne contacte personne à ta place.</p>
 
+        <h2 id="communaute">La commu</h2>
+        <p>
+          Les messages sont publiés par leurs auteurs, sous leur responsabilité, dans le respect de la charte. Pour signaler un contenu
+          illicite : bouton « Signaler » sous le message, ou écris à {LEGAL.contact}. Le contenu signalé est examiné et retiré s’il
+          enfreint la loi ou la charte. Tu peux supprimer tes messages et ton compte à tout moment.
+        </p>
+
         <h2 id="sources">Sources des offres et des règles</h2>
         <ul className="bullets">
           <li>Offres France Travail : API Offres d’emploi, réutilisées selon la licence de France Travail, sans les coordonnées de contact.</li>
