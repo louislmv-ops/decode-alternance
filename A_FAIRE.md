@@ -13,6 +13,16 @@ Ce que seul le propriétaire des comptes peut faire. Le code est prêt : dès qu
    - Key `FRANCE_TRAVAIL_CLIENT_SECRET`, Value : la clé secrète
 5. Save, puis Deployments, « ⋯ » sur le dernier, Redeploy.
 
+## 1 bis. Plus d'offres, tout de suite : Adzuna et Jooble (gratuit)
+
+Deux agrégateurs qui regroupent les annonces de centaines de sites. Leurs offres s'ajoutent à celles de France Travail ou de la base, sans doublons ni offres d'écoles. Il n'y a pas d'API qui donne 100 % des offres : personne ne les a toutes.
+
+1. Adzuna : compte sur **developer.adzuna.com** (clé immédiate) → `ADZUNA_APP_ID` et `ADZUNA_APP_KEY` dans Vercel.
+2. Jooble : demande de clé sur **jooble.org/api/about** (réponse par e-mail) → `JOOBLE_API_KEY`.
+3. Redeploy. Une seule des deux suffit pour que la page Offres affiche de vraies annonces.
+
+Leurs conditions demandent de les citer (c'est fait sous la liste des offres) et de passer par leurs liens pour postuler (c'est le cas).
+
 ## 2. Le bouton « Décoder » (Anthropic)
 
 1. console.anthropic.com, Settings, API Keys, Create Key ; ajouter quelques euros de crédit dans Billing.

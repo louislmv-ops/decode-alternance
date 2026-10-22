@@ -4,6 +4,7 @@ import type { DecodedOffer } from '@/lib/decode/schema';
 import { DEMO_DECODES, DEMO_OFFERS } from './demo';
 import { dedupe, filterOffers } from './filter';
 import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
+import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer } from './aggregators';
 import { isLiveConfigured, liveOffer, liveSearch } from './live';
 import type { Offer, OfferFilters, OfferPage } from './types';
 
@@ -26,10 +27,43 @@ async function hasStoredOffers(): Promise<boolean> {
   return value;
 }
 
-export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
+/** Les filtres que les agrégateurs ne savent pas appliquer eux-mêmes. */
+function keepAggregated(o: Offer, filters: OfferFilters): boolean {
+  if (o.schoolFlags.length > 0) return false;
+  if (filters.contract && o.contract !== filters.contract && o.contract !== 'alternance') return false;
+  if (filters.level && o.diplomaLevel !== null && o.diplomaLevel > filters.level) return false;
+  // Taille d'entreprise inconnue et jamais en direct : ces deux filtres les écartent.
+  return !filters.bigCompany && !filters.direct;
+}
+
+async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
   if (isLiveConfigured()) return liveSearch(filters);
-  return filterOffers(DEMO_OFFERS, filters, 'exemples');
+  return null;
+}
+
+export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
+  const aggregators = isAggregatorsConfigured();
+  const primary = await primarySearch(filters).catch((error) => {
+    // Sans agrégateur, une panne de la source principale doit se voir ; avec, ils prennent le relais.
+    if (!aggregators) throw error;
+    console.error(error);
+    return null;
+  });
+  if (!aggregators) return primary ?? filterOffers(DEMO_OFFERS, filters, 'exemples');
+
+  const pageSize = primary?.pageSize ?? 20;
+  const extra = await aggregatorSearch(filters, primary ? Math.ceil(pageSize / 2) : pageSize);
+  const kept = extra.offers.filter((o) => keepAggregated(o, filters));
+  const offers = dedupe([...(primary?.offers ?? []), ...kept]).sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  return {
+    offers,
+    total: (primary?.total ?? 0) + extra.total,
+    page: Math.max(1, filters.page ?? 1),
+    pageSize: Math.max(pageSize, offers.length),
+    mode: primary?.mode === 'base' ? 'base' : 'direct',
+    maxPage: primary?.maxPage,
+  };
 }
 
 export async function findOffer(id: string): Promise<Offer | null> {
@@ -39,6 +73,7 @@ export async function findOffer(id: string): Promise<Offer | null> {
     if (offer) return offer;
   }
   if (isLiveConfigured() && id.startsWith('france-travail:')) return liveOffer(id.slice('france-travail:'.length));
+  if (id.startsWith('adzuna:') || id.startsWith('jooble:')) return recallAggregatorOffer(id);
   return null;
 }
 

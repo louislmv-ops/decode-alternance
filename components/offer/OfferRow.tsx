@@ -4,7 +4,7 @@ import { formatEuros, relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
 import { payTier } from '@/lib/offers/pay-tier';
 import { cleanTitle } from '@/lib/offers/title';
-import type { Offer } from '@/lib/offers/types';
+import { type Offer, offerHref } from '@/lib/offers/types';
 import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 
@@ -23,7 +23,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
           {h.pepite && <span className="orow__flag">Pépite</span>}
           <MatchBadge offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
         </p>
-        <Link href={`/offres/${encodeURIComponent(offer.id)}`} className="orow__title">
+        <Link href={offerHref(offer)} className="orow__title">
           {cleanTitle(offer.title)}
         </Link>
         <p className="orow__meta">

@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { DecodedView, type OfferMeta } from '@/components/offer/DecodedView';
 import { BackLink } from '@/components/BackLink';
 import { InterviewPrep } from '@/components/pro/InterviewPrep';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
 import { findDecode, findOffer } from '@/lib/offers/repository';
-import { SOURCE_LABELS } from '@/lib/offers/types';
+import { isAggregatorUrl, SOURCE_LABELS } from '@/lib/offers/types';
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ u?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const offer = await findOffer(decodeURIComponent((await params).id));
@@ -22,10 +22,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function OfferPage({ params }: Props) {
+export default async function OfferPage({ params, searchParams }: Props) {
   const id = decodeURIComponent((await params).id);
   const offer = await findOffer(id);
-  if (!offer) notFound();
+  if (!offer) {
+    // Une offre d'agrégateur que ce serveur n'a plus en mémoire : on renvoie vers l'annonce d'origine.
+    const { u } = await searchParams;
+    if (u && isAggregatorUrl(u)) redirect(u);
+    notFound();
+  }
   const decoded = await findDecode(id);
 
   const meta: OfferMeta = {

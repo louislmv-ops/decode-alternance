@@ -1,14 +1,17 @@
 import type { DiplomaLevel } from '@/lib/rules/employer';
 
 /** D'où vient une offre. L'ordre de `SOURCE_PRIORITY` décide laquelle garder quand une offre est publiée deux fois. */
-export type OfferSource = 'site-carriere' | 'france-travail' | 'la-bonne-alternance' | 'exemple';
+export type OfferSource = 'site-carriere' | 'france-travail' | 'la-bonne-alternance' | 'adzuna' | 'jooble' | 'exemple';
 
-export const SOURCE_PRIORITY: OfferSource[] = ['site-carriere', 'france-travail', 'la-bonne-alternance', 'exemple'];
+// Les agrégateurs passent en dernier : ils reprennent des offres publiées ailleurs.
+export const SOURCE_PRIORITY: OfferSource[] = ['site-carriere', 'france-travail', 'la-bonne-alternance', 'adzuna', 'jooble', 'exemple'];
 
 export const SOURCE_LABELS: Record<OfferSource, string> = {
   'site-carriere': 'Site carrière de l’entreprise',
   'france-travail': 'France Travail',
   'la-bonne-alternance': 'La bonne alternance',
+  adzuna: 'Adzuna',
+  jooble: 'Jooble',
   exemple: 'Exemple fictif',
 };
 
@@ -76,4 +79,22 @@ export interface OfferPage {
   mode: 'base' | 'direct' | 'exemples';
   /** Dernière page qu'on peut demander, quand la source limite la pagination. */
   maxPage?: number;
+}
+
+/** Hôtes vers lesquels une fiche d'agrégateur oubliée peut renvoyer : jamais une adresse quelconque. */
+const AGGREGATOR_HOSTS = /(^|\.)(adzuna\.(fr|com)|jooble\.org)$/;
+
+export function isAggregatorUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === 'https:' && AGGREGATOR_HOSTS.test(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** Adresse de la fiche Décode d'une offre ; pour un agrégateur, elle garde le lien d'origine en secours. */
+export function offerHref(offer: Pick<Offer, 'id' | 'source' | 'sourceUrl'>): string {
+  const base = `/offres/${encodeURIComponent(offer.id)}`;
+  return offer.source === 'adzuna' || offer.source === 'jooble' ? `${base}?u=${encodeURIComponent(offer.sourceUrl)}` : base;
 }

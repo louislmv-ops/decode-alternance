@@ -3,7 +3,7 @@ import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { formatEuros, relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
 import { payTier } from '@/lib/offers/pay-tier';
-import type { Offer } from '@/lib/offers/types';
+import { type Offer, offerHref } from '@/lib/offers/types';
 import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 
@@ -35,7 +35,7 @@ export function OfferCard({ offer, h, reveal }: { offer: Offer; h: Highlights; r
     >
       <Avatar name={offer.company} />
       <div className="offer-card__main">
-        <Link href={`/offres/${encodeURIComponent(offer.id)}`} className="offer-card__title">
+        <Link href={offerHref(offer)} className="offer-card__title">
           {offer.title}
         </Link>
         <p className="offer-card__meta">
