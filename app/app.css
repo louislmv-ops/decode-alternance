@@ -2879,6 +2879,148 @@ label {
 
 @media (min-width: 720px) {
   .r-search {
-    grid-template-columns: 1.6fr 1.2fr 9.5em 10em auto;
+    grid-template-columns: 2fr 1.3fr 8.5em 9em auto;
   }
+}
+
+/* Campagnes d'alternance */
+.k-list,
+.k-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.k-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  background: var(--card);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.k-card:hover {
+  border-color: var(--brand);
+}
+
+.k-card__company {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.k-card__title {
+  font-family: var(--font-display);
+  font-stretch: var(--display-stretch);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.k-card__facts {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.k-deadline {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: var(--r-control);
+  background: var(--mint);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.k-deadline.is-soon {
+  background: var(--peach);
+}
+
+.k-detail__body {
+  font-size: 16px;
+  white-space: pre-line;
+}
+
+.k-detail > .btn {
+  align-self: flex-start;
+}
+
+.k-strip {
+  margin: 16px 0;
+}
+
+.k-strip__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.k-strip__head h2 {
+  font-size: 18px;
+}
+
+.k-strip__row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(240px, 300px);
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 4px;
+}
+
+.k-strip__row > * {
+  scroll-snap-align: start;
+}
+
+.r-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.r-section h2 {
+  flex: 1;
+  font-size: 20px;
+}
+
+.r-campaigns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.r-campaigns li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.r-campaigns li .link {
+  flex: 1;
+  min-width: 0;
+}
+
+.r-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.r-levels legend {
+  width: 100%;
+  margin-bottom: 6px;
 }

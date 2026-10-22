@@ -26,6 +26,9 @@ export function SiteFooter() {
           <Link className="link" href="/suivi">
             Suivi des candidatures
           </Link>
+          <Link className="link" href="/campagnes">
+            Campagnes d’alternance
+          </Link>
           <Link className="link" href="/entreprises">
             Recruter un alternant
           </Link>

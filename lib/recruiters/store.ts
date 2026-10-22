@@ -160,3 +160,5 @@ export async function setRecruiterVerified(accountId: string, verified: boolean)
   await ensureSchema();
   await db()`update recruiters set verified = ${verified} where account_id = ${accountId}`;
 }
+
+export { ensureSchema as ensureRecruiterSchema };
