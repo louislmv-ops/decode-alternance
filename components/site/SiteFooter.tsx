@@ -29,7 +29,7 @@ export function SiteFooter() {
           <Link className="link" href="/campagnes">
             Campagnes d’alternance
           </Link>
-          <Link className="link" href="/entreprises">
+          <Link className="link" href="/recruter">
             Recruter un alternant
           </Link>
         </nav>

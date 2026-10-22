@@ -9,7 +9,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ['/salaire', 0.8],
     ['/equipe', 0.7],
     ['/campagnes', 0.7],
-    ['/entreprises', 0.6],
+    ['/entreprises', 0.8],
+    ['/recruter', 0.5],
     ['/mentions-legales', 0.2],
   ];
   return pages.map(([path, priority]) => ({ url: `${SITE_URL}${path}`, changeFrequency: 'daily', priority }));

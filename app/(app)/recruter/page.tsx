@@ -13,7 +13,7 @@ const STEPS = [
   ['Ou lance une campagne', 'Plusieurs postes, une date limite. Elle s’affiche sur la page Campagnes et sur les offres.'],
 ] as const;
 
-export default function CompaniesPage() {
+export default function RecruitPage() {
   return (
     <div className="screen c-screen">
       <div className="c-main">
