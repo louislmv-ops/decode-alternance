@@ -35,6 +35,12 @@ export function SiteFooter() {
         </nav>
         <nav aria-label="Infos" className="site-footer__col">
           <p className="site-footer__label">Infos</p>
+          <Link className="link" href="/pro">
+            Décode Pro
+          </Link>
+          <Link className="link" href="/cgv">
+            Conditions de vente
+          </Link>
           <Link className="link" href="/mentions-legales">
             Mentions légales
           </Link>

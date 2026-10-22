@@ -32,11 +32,25 @@ Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les se
    `LEGAL_CONTACT` sert aussi d'adresse de signalement dans les e-mails que les entreprises envoient aux alternants.
 6. Redeploy. Pour les alertes du matin : mêmes valeurs dans GitHub, Settings, Secrets and variables, Actions.
 
-## 4. Ménage Vercel
+## 4. Décode Pro (Stripe)
+
+Sans ces réglages, la page `/pro` affiche « Bientôt » et rien n'est vendu.
+
+1. Crée un compte sur stripe.com (statut micro-entreprise ou société nécessaire pour recevoir l'argent).
+2. **Catalogue de produits → Ajouter un produit** : « Décode Pro », prix **récurrent mensuel**. Suggestion : 2,99 €. Copie l'identifiant du prix (`price_...`) dans Vercel : `STRIPE_PRICE_ID`. Le site affiche toujours le prix de Stripe, jamais un prix écrit en dur.
+3. **Développeurs → Clés API** : la clé secrète (`sk_live_...`) dans Vercel : `STRIPE_SECRET_KEY`. Ne la colle jamais dans un chat.
+4. **Développeurs → Webhooks → Ajouter un endpoint** : `https://TON-SITE/api/pro/webhook`, événements `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Copie le secret de signature (`whsec_...`) dans Vercel : `STRIPE_WEBHOOK_SECRET`.
+5. **Paramètres → Facturation → Portail client** : active « Mettre à jour le moyen de paiement » et « Historique des factures ».
+6. Choisis un **médiateur de la consommation** (obligatoire pour vendre à des particuliers, une centaine d'euros par an) et mets son nom et son site dans `LEGAL_MEDIATOR`.
+7. Micro-entrepreneur sans TVA : ajoute la mention « TVA non applicable, art. 293 B du CGI » dans Stripe (Paramètres → Factures → Pied de page).
+8. Fais relire `/cgv` par quelqu'un de compétent avant d'encaisser le premier euro.
+9. Les alertes horaires de Pro tournent avec GitHub Actions (16 fois par jour). Sur un dépôt privé, ça consomme environ la moitié des 2 000 minutes gratuites par mois.
+
+## 5. Ménage Vercel
 
 Supprimer les projets en double `decode-alternance-m3u6` et `decode-alternance-m3u699` (Settings, tout en bas, Delete Project).
 
-## 5. Avant de faire connaître le site
+## 6. Avant de faire connaître le site
 
 - Mentions légales (obligatoires) : dans Vercel, ajouter `LEGAL_EDITOR` (nom ou micro-entreprise), `LEGAL_ADDRESS`, `LEGAL_SIREN`, `LEGAL_CONTACT` (e-mail dédié), puis Redeploy. L'hébergeur est déjà rempli.
 - Un domaine (.fr) : l'acheter, le brancher dans Vercel (Settings, Domains), puis mettre `NEXT_PUBLIC_SITE_URL` à la nouvelle adresse.

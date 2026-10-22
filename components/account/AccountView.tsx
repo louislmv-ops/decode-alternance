@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import type { ProState } from '@/lib/pro/plan';
 import { useEffect, useState } from 'react';
 import { useProfile } from '@/components/useProfile';
 import type { PublicAccount } from '@/lib/account/http';
@@ -170,6 +171,14 @@ function Phone({ account, sms, onChange }: { account: PublicAccount; sms: boolea
 function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boolean; onChange: (a: PublicAccount | null) => void }) {
   const [profile] = useProfile();
   const [error, setError] = useState<string | null>(null);
+  const [pro, setPro] = useState<ProState | null>(null);
+
+  useEffect(() => {
+    fetch('/api/pro')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { state?: ProState } | null) => setPro(d?.state ?? null))
+      .catch(() => {});
+  }, []);
 
   async function patch(body: Record<string, unknown>) {
     setError(null);
@@ -203,8 +212,17 @@ function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boo
           </p>
         )}
         <Toggle label="Par e-mail" checked={account.alertEmail} onChange={(v) => patch({ alertEmail: v })} />
-        <Toggle label="Par SMS" checked={account.alertSms} disabled={!account.phoneVerified} onChange={(v) => patch({ alertSms: v })} />
-        <Phone account={account} sms={sms} onChange={onChange} />
+        {pro?.pro ? (
+          <>
+            <Toggle label="Par SMS" checked={account.alertSms} disabled={!account.phoneVerified} onChange={(v) => patch({ alertSms: v })} />
+            <Phone account={account} sms={sms} onChange={onChange} />
+            <p className="acct-note">Pro : tu reçois aussi les nouvelles offres toutes les heures en journée.</p>
+          </>
+        ) : (
+          <p className="acct-note">
+            Par SMS et toutes les heures : <Link href="/pro">avec Pro</Link>.
+          </p>
+        )}
         <div className="acct-freq" role="group" aria-label="Fréquence">
           {(['quotidien', 'hebdo'] as const).map((f) => (
             <button key={f} type="button" aria-pressed={account.alertFrequency === f} onClick={() => patch({ alertFrequency: f })}>
@@ -212,6 +230,16 @@ function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boo
             </button>
           ))}
         </div>
+      </section>
+
+      <section className="acct-group" aria-labelledby="pro-title">
+        <h2 id="pro-title">Décode Pro</h2>
+        <p className="acct-row">
+          <span>{pro?.pro ? (pro.status ? 'Abonné' : `Essai jusqu’au ${new Date(pro.trialUntil!).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' })}`) : 'Version gratuite'}</span>
+          <Link href="/pro" className="acct-link">
+            {pro?.pro ? 'Gérer' : pro?.trialUsed ? 'Voir Pro' : '1 mois offert'}
+          </Link>
+        </p>
       </section>
 
       <section className="acct-group" aria-labelledby="sync-title">

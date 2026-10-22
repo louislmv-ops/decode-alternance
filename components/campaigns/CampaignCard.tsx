@@ -4,7 +4,7 @@ import type { Campaign } from '@/lib/recruiters/campaigns';
 
 /** « 2027-03-15 » devient « 15 mars ». */
 export function formatDeadline(day: string): string {
-  return new Date(`${day}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' });
+  return new Date(`${day}T12:00:00Z`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }).replace(/^1 /, '1er ');
 }
 
 /** Jours restants avant la date limite incluse, à l'heure de Paris. */

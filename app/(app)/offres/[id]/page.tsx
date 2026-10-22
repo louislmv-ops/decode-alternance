@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DecodedView, type OfferMeta } from '@/components/offer/DecodedView';
 import { BackLink } from '@/components/BackLink';
+import { InterviewPrep } from '@/components/pro/InterviewPrep';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
 import { findDecode, findOffer } from '@/lib/offers/repository';
 import { SOURCE_LABELS } from '@/lib/offers/types';
@@ -52,6 +53,7 @@ export default async function OfferPage({ params }: Props) {
         )}
       </div>
       {decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />}
+      {offer.source !== 'exemple' && <InterviewPrep offerId={offer.id} />}
     </>
   );
 }
