@@ -49,8 +49,8 @@
   --active: #e6efe9;
 
   /* Une seule famille, Archivo : normale pour lire, élargie et noire pour les titres. */
-  --font: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --display-stretch: 125%;
 
   /* Des angles nets : rien n'est en pilule. */

@@ -3444,3 +3444,345 @@ label {
 .prep h3 {
   font-size: 16px;
 }
+
+/* ---------- Offres : une grande recherche, des pastilles, une liste aérée ---------- */
+.offers {
+  max-width: 1080px;
+}
+
+.offers__head h1 {
+  font-family: var(--font-display);
+  font-stretch: var(--display-stretch);
+  font-size: clamp(34px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.offers__head h1 span {
+  color: var(--brand);
+}
+
+.offers__count {
+  margin-top: 12px;
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.offers__count strong {
+  color: var(--ink);
+}
+
+.offers__demo {
+  font-size: 14px;
+}
+
+.osearch {
+  margin: 28px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.osearch__bar {
+  display: flex;
+  align-items: stretch;
+  min-height: 60px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-card);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.osearch__bar:focus-within {
+  box-shadow: 0 0 0 4px var(--accent);
+}
+
+.osearch__field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  color: var(--muted);
+}
+
+.osearch__field input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.osearch__go {
+  padding: 0 26px;
+  border: 0;
+  background: var(--ink);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.osearch__chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.osearch__chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  border: 1px solid var(--control);
+  border-radius: 999px;
+  background: var(--card);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chip select {
+  height: 100%;
+  padding: 0 34px 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%230f1f1a' stroke-width='1.6'%3E%3Cpath d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E") no-repeat right 14px center;
+  appearance: none;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  /* La pastille épouse le choix affiché, pas l'option la plus longue de la liste. */
+  field-sizing: content;
+  max-width: 220px;
+  text-overflow: ellipsis;
+}
+
+.chip.is-on,
+.chip--check:has(input:checked) {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.chip.is-on select {
+  color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%23d4f35a' stroke-width='1.6'%3E%3Cpath d='M3 4.5l3 3 3-3'/%3E%3C/svg%3E");
+}
+
+.chip--check {
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.chip--check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip--check:has(input:checked) span {
+  color: #fff;
+}
+
+.chip--check:has(input:checked) span::before {
+  content: '✓ ';
+  color: var(--accent);
+}
+
+.chip:has(:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.offers__bar {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 28px 0 4px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.offers__bar h2 {
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.offers__bar .num {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.offers__bar .link {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.orows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.orow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 24px;
+  align-items: center;
+  gap: 24px;
+  padding: 26px 8px;
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--t-hover) ease;
+}
+
+.orow__company {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.orow__flag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+}
+
+.orow__title {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: clamp(19px, 2.2vw, 24px);
+  font-weight: 750;
+  line-height: 1.2;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* Toute la ligne est cliquable, le lien reste le titre. */
+.orow__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.orow__meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.orow__alerts {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.orow__pay {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+  min-width: 130px;
+}
+
+.orow__pay strong {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.orow__none {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.orow__sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.orow.is-pepite .orow__sub {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.orow__arrow {
+  color: var(--muted);
+  transition: transform var(--t-hover) ease, color var(--t-hover) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .orow:hover {
+    background: var(--active);
+  }
+  .orow:hover .orow__arrow {
+    color: var(--ink);
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 640px) {
+  .osearch {
+    margin-top: 20px;
+  }
+  .osearch__bar {
+    min-height: 54px;
+  }
+  .osearch__go {
+    padding: 0 16px;
+    font-size: 15px;
+  }
+  .osearch__chips {
+    margin: 0 -16px;
+    padding: 0 16px 2px;
+  }
+  .offers__bar .link {
+    display: none;
+  }
+  .orow {
+    grid-template-columns: minmax(0, 1fr) 20px;
+    gap: 6px 12px;
+    padding: 20px 0;
+  }
+  .orow__pay {
+    grid-column: 1;
+    grid-row: 2;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    text-align: left;
+  }
+  .orow__pay strong {
+    font-size: 20px;
+  }
+  .orow__arrow {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}

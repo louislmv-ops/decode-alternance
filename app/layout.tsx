@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import '@fontsource-variable/archivo/wdth.css';
+import localFont from 'next/font/local';
 import './globals.css';
 import './site.css';
 import './app.css';
@@ -7,6 +7,17 @@ import { AccountSync } from '@/components/account/AccountSync';
 import { Matcher } from '@/components/Matcher';
 import { Reveal } from '@/components/Reveal';
 import { SITE_URL } from '@/lib/site';
+
+// Archivo servie par Next : préchargée, avec une police de secours aux mêmes proportions,
+// pour que les titres ne bougent pas quand elle arrive.
+const archivo = localFont({
+  // Le sous-ensemble latin couvre le français (é, ç, œ, ’…).
+  src: './fonts/archivo-latin-wdth-normal.woff2',
+  weight: '100 900',
+  display: 'swap',
+  variable: '--font-archivo',
+  declarations: [{ prop: 'font-stretch', value: '62% 125%' }],
+});
 
 export const metadata: Metadata = {
   title: { default: 'Décode : l’alternance, en clair', template: '%s · Décode' },
@@ -27,7 +38,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={archivo.variable}>
       <head>
         {/* Les états cachés des apparitions ne s'appliquent que si le script tourne. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
