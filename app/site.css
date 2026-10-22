@@ -652,13 +652,9 @@
   .search__go {
     width: 100%;
   }
-  .domains {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin-left: -16px;
-    margin-right: -16px;
-    padding: 0 16px 4px;
-    scrollbar-width: none;
+  /* Sur téléphone, six domaines qui tiennent sur deux lignes, sans défilement caché. */
+  .domains li:nth-child(n + 7) {
+    display: none;
   }
   .domain {
     white-space: nowrap;
@@ -727,4 +723,440 @@
 
 .latest .offer-card__avatar {
   background: var(--bg) !important;
+}
+
+/* ---------- Le questionnaire de 30 secondes ---------- */
+
+.matcher {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100svh - 24px);
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: var(--bg);
+  color: var(--ink);
+  /* Une fenêtre flotte vraiment : c'est le seul endroit où une ombre a un sens. */
+  box-shadow: 0 30px 80px rgba(15, 31, 26, 0.35);
+}
+
+.matcher::backdrop {
+  background: rgba(7, 81, 58, 0.72);
+}
+
+.matcher[open] {
+  animation: matcher-in 360ms var(--ease-out);
+}
+
+@keyframes matcher-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+}
+
+.matcher__box {
+  position: relative;
+  padding: 36px 28px 28px;
+}
+
+.matcher__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.matcher__title {
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
+  font-weight: 800;
+  padding-right: 40px;
+}
+
+.matcher__lead {
+  margin-top: 12px;
+  font-size: var(--step-lead);
+}
+
+.matcher__choices {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.matcher__choice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 132px;
+  justify-content: flex-end;
+  padding: 18px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease;
+}
+
+.matcher__choice--cv {
+  background: var(--accent);
+}
+
+.matcher__choice:active {
+  transform: scale(0.97);
+}
+
+.matcher__choice.is-busy {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.matcher__choice:focus-within {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.matcher__choice-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.matcher__choice-sub {
+  font-size: 14px;
+}
+
+.matcher__error {
+  margin-top: 14px;
+  color: var(--alert-ink);
+  font-size: 14px;
+}
+
+.matcher__progress {
+  height: 6px;
+  margin: 0 48px 22px 0;
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.matcher__progress span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  transition: width var(--t-ui) var(--ease-out);
+}
+
+.matcher__note {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.matcher__input {
+  width: 100%;
+  margin-top: 18px;
+  height: 56px;
+  padding: 0 18px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--bg);
+  font-size: 17px;
+}
+
+.matcher__chips {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.matcher__chip {
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease;
+}
+
+.matcher__chip:active {
+  transform: scale(0.95);
+}
+
+.matcher__chip[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--accent);
+}
+
+.matcher__chips--big .matcher__chip {
+  height: 56px;
+  padding: 0 22px;
+  font-size: 18px;
+}
+
+.matcher__age {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.matcher__age button {
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.matcher__age span {
+  min-width: 120px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 800;
+}
+
+.matcher__nav {
+  margin-top: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.matcher__back {
+  border: 0;
+  background: none;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 12px 0;
+}
+
+@media (max-width: 760px) {
+  .matcher {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 92svh;
+    margin: auto 0 0;
+    border-radius: 28px 28px 0 0;
+  }
+  .matcher__box {
+    padding: 32px 18px calc(24px + env(safe-area-inset-bottom));
+  }
+  .matcher__choices {
+    grid-template-columns: 1fr;
+  }
+  .matcher__choice {
+    min-height: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matcher[open] {
+    animation: none;
+  }
+}
+
+/* ---------- Haut de page : l'appel, et l'offre qui se décode sous tes yeux ---------- */
+
+.hero__cta {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn--big {
+  min-height: 4rem;
+  padding: 0 2.25rem;
+  font-size: 1.125rem;
+}
+
+.hero__cta-sub {
+  font-size: var(--step-small);
+  color: #cfe6da;
+}
+
+.hero .search {
+  margin-top: 28px;
+}
+
+.hdec {
+  padding: 24px;
+  border-radius: 28px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.hdec__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.hdec__title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hdec__meta {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.hdec__stage {
+  margin-top: 22px;
+  min-height: 190px;
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.hdec__jargon {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.hdec__jargon span {
+  position: relative;
+}
+
+/* Le trait rouge qui barre le jargon. */
+.hdec__jargon span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 55%;
+  height: 2px;
+  background: var(--alert);
+  transform-origin: left;
+}
+
+.hdec__plain {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+}
+
+.hdec__tags {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hdec__dots {
+  margin-top: 18px;
+  display: flex;
+  gap: 6px;
+}
+
+.hdec__dots span {
+  width: 22px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background-color var(--t-ui) ease, width var(--t-ui) var(--ease-out);
+}
+
+.hdec__dots .is-on {
+  width: 40px;
+  background: var(--brand);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Le trait rouge barre le jargon, puis la traduction monte. */
+  .hdec__jargon span::after {
+    animation: strike 700ms var(--ease-in-out) 150ms both;
+  }
+  .hdec__plain {
+    animation: rise 600ms var(--ease-out) 650ms both;
+  }
+}
+
+@keyframes strike {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* ---------- Le bandeau qui défile ---------- */
+
+.ticker {
+  margin-top: 20px;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--accent);
+  transform: rotate(-1.2deg);
+  margin-left: -8px;
+  margin-right: -8px;
+}
+
+.ticker__track {
+  list-style: none;
+  margin: 0;
+  padding: 16px 0;
+  display: flex;
+  width: max-content;
+  gap: 48px;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.ticker__track li::after {
+  content: '✦';
+  margin-left: 48px;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ticker__track {
+    animation: ticker 38s linear infinite;
+  }
+}
+
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 760px) {
+  .hero__cta .btn--big {
+    width: 100%;
+  }
+  .hdec {
+    padding: 18px;
+  }
+  .hdec__stage {
+    min-height: 170px;
+    padding: 18px;
+  }
 }

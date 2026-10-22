@@ -55,6 +55,8 @@ export async function liveSearch(filters: OfferFilters): Promise<OfferPage> {
   );
   const offers = results
     .flatMap((r) => r.offers)
+    // Les offres d'écoles déguisées ne sont jamais listées.
+    .filter((o) => o.schoolFlags.length === 0)
     .filter((o) => (!filters.contract || o.contract === filters.contract || o.contract === 'alternance'))
     .filter((o) => (!filters.level || o.diplomaLevel === null || o.diplomaLevel <= filters.level) && (!filters.bigCompany || o.companySize === 'grande'))
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));

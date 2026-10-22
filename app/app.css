@@ -1743,3 +1743,185 @@
   font-family: var(--font);
   letter-spacing: -0.01em;
 }
+
+/* ---------- Les « € » de la paie ---------- */
+
+.euros {
+  display: inline-flex;
+  flex: none;
+  white-space: nowrap;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.euros--small {
+  font-size: 16px;
+}
+
+.euros--large {
+  font-size: 28px;
+}
+
+.euros__on {
+  color: var(--brand);
+}
+
+.euros__off,
+.euros--none {
+  color: var(--control);
+}
+
+/* ---------- Pour toi ---------- */
+
+.for-you {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  padding: 14px 14px 14px 20px;
+  border-radius: var(--r-card);
+  background: var(--ink);
+  color: #fff;
+}
+
+.for-you__text {
+  font-size: 15px;
+}
+
+.for-you__text strong {
+  color: var(--accent);
+}
+
+.for-you__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.for-you .btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.for-you__edit {
+  border: 0;
+  background: none;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* ---------- L'essentiel d'une offre ---------- */
+
+.facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.facts__item {
+  padding: 16px 18px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  border: 1px solid var(--border);
+  min-width: 0;
+}
+
+.facts__item--pay {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.facts__item--pay .euros__off,
+.facts__item--pay .euros--none {
+  color: #43554d;
+}
+
+.facts__item--pay .euros__on {
+  color: var(--accent);
+}
+
+.facts dt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.facts__item--pay dt {
+  color: #b9c7c0;
+}
+
+.facts dd {
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.facts__main {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.facts__sub {
+  font-size: 13px;
+}
+
+.facts__link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.brief-title {
+  font-size: 13px !important;
+  font-weight: 700;
+  color: var(--brand);
+  margin-bottom: 8px;
+}
+
+.brief {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brief li {
+  position: relative;
+  padding: 10px 14px 10px 40px;
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.brief li::before {
+  content: '→';
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.decode-pitch {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .facts {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import type { DecodedOffer } from '@/lib/decode/schema';
+import { useProfile } from '@/components/useProfile';
+import { minimumSalary } from '@/lib/rules/salary';
 import { DecodedView, type OfferMeta } from './DecodedView';
+import { OfferFacts } from './OfferFacts';
 
 /** Une offre pas encore traduite : son texte brut, et le bouton qui demande la traduction. */
 export function UndecodedOffer({ offer, description }: { offer: OfferMeta; description: string }) {
@@ -10,7 +13,9 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
     status: 'idle',
   });
 
+  const [profile] = useProfile();
   if (state.status === 'done') return <DecodedView decoded={state.decoded} offer={offer} />;
+  const minimum = minimumSalary({ contract: profile.contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
 
   async function decode() {
     setState({ status: 'loading' });
@@ -37,10 +42,16 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         </div>
         <div className="title-row__actions">
           <button type="button" className="ui-btn ui-btn--primary" onClick={decode} disabled={state.status === 'loading'}>
-            {state.status === 'loading' ? 'Traduction en cours…' : 'Traduire cette offre'}
+            {state.status === 'loading' ? 'Décodage en cours…' : 'Décoder cette offre'}
           </button>
         </div>
       </div>
+      <OfferFacts payCents={offer.salaryCents} minimumCents={minimum.cents} company={offer.company} place={offer.city} rhythm={null} contract={offer.contract} />
+      {state.status === 'idle' && (
+        <p className="decode-pitch">
+          Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.
+        </p>
+      )}
       {state.status === 'error' && (
         <p className="notice notice--error" role="alert">
           {state.message}
@@ -48,7 +59,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       )}
       {state.status === 'loading' && (
         <p className="notice" role="status">
-          Décode lit l’annonce. Ça prend en général une vingtaine de secondes.
+          Décode lit l’annonce. Compte une vingtaine de secondes.
         </p>
       )}
       <section className="panel" aria-labelledby="raw-title">

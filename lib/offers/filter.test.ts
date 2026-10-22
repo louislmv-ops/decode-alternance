@@ -11,6 +11,12 @@ describe('dedupe', () => {
 });
 
 describe('filterOffers', () => {
+  it('ne liste jamais les offres d’écoles déguisées', () => {
+    const listed = filterOffers(DEMO_OFFERS, {}, 'exemples').offers;
+    expect(DEMO_OFFERS.some((o) => o.schoolFlags.length > 0)).toBe(true);
+    expect(listed.some((o) => o.schoolFlags.length > 0)).toBe(false);
+  });
+
   it('filtre par département et par grande entreprise', () => {
     expect(filterOffers(DEMO_OFFERS, { department: '35' }, 'exemples').offers.map((o) => o.company)).toEqual(['Kerlog Solutions']);
     expect(filterOffers(DEMO_OFFERS, { bigCompany: true }, 'exemples').total).toBe(2);

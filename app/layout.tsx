@@ -4,6 +4,7 @@ import '@fontsource-variable/figtree/wght.css';
 import './globals.css';
 import './site.css';
 import './app.css';
+import { Matcher } from '@/components/Matcher';
 import { Reveal } from '@/components/Reveal';
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {children}
+        <Matcher />
         <Reveal />
       </body>
     </html>

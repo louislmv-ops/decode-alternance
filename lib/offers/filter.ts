@@ -27,6 +27,8 @@ export function filterOffers(offers: Offer[], filters: OfferFilters, mode: Offer
   const words = normalizeText(filters.q ?? '').split(' ').filter(Boolean);
   const matching = dedupe(offers)
     .filter((o) => {
+      // Les offres d'écoles déguisées ne sont jamais listées.
+      if (o.schoolFlags.length > 0) return false;
       if (filters.department && o.department !== filters.department) return false;
       if (filters.contract && o.contract !== filters.contract) return false;
       if (filters.level && o.diplomaLevel !== null && o.diplomaLevel > filters.level) return false;

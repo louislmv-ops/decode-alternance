@@ -28,6 +28,7 @@ export default async function OfferPage({ params }: Props) {
     salaryCents: offer.salaryMonthlyCents,
     schoolFlags: offer.schoolFlags,
     isExample: offer.source === 'exemple',
+    contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };
 
   return decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />;

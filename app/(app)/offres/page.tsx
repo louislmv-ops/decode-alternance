@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { ForYou } from '@/components/offer/ForYou';
 import { OfferCard } from '@/components/offer/OfferCard';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
@@ -61,6 +62,8 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       {result.mode === 'exemples' && (
         <p className="notice">Exemples fictifs : les vraies offres ne sont pas encore branchées. Tu peux déjà coller n’importe quelle offre.</p>
       )}
+
+      <ForYou />
 
       <form className="filters" action="/offres" method="get" role="search">
         <label className="filters__search">

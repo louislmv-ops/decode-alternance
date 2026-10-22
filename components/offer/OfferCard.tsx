@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { formatEuros, relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
+import { payTier } from '@/lib/offers/pay-tier';
 import { SOURCE_LABELS, type Offer } from '@/lib/offers/types';
+import { PayEuros } from './PayTier';
 
 const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 'Contrat pro', alternance: 'Alternance' };
 const AVATAR_FIELDS = ['var(--mint)', 'var(--sky)', 'var(--peach)', 'var(--butter)'];
@@ -52,6 +54,7 @@ export function OfferCard({ offer, h, reveal }: { offer: Offer; h: Highlights; r
         </div>
       </div>
       <div className="offer-card__side">
+        <PayEuros tier={payTier(offer.salaryMonthlyCents, h.minimumCents)} />
         {offer.salaryMonthlyCents !== null ? (
           <>
             <span className="num offer-card__amount">{formatEuros(offer.salaryMonthlyCents, 0)}</span>
@@ -59,8 +62,8 @@ export function OfferCard({ offer, h, reveal }: { offer: Offer; h: Highlights; r
           </>
         ) : (
           <>
-            <span className="offer-card__amount offer-card__amount--none">Salaire non chiffré</span>
-            <span className="offer-card__sub num">minimum {formatEuros(h.minimumCents, 0)}</span>
+            <span className="offer-card__amount offer-card__amount--none">Non chiffré</span>
+            <span className="offer-card__sub num">garanti : {formatEuros(h.minimumCents, 0)} min.</span>
           </>
         )}
         <span className="offer-card__date">{relativeDays(offer.publishedAt)}</span>
