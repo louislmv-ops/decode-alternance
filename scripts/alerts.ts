@@ -1,10 +1,12 @@
 // Envoie les alertes du jour : pour chaque compte qui suit une recherche, les offres publiées
-// depuis la dernière alerte, par e-mail et par SMS si le numéro est vérifié.
-//   pnpm alerts
+// depuis la dernière alerte, par e-mail, et par SMS pour les comptes Pro au numéro vérifié.
+//   pnpm alerts             la tournée du matin, pour tout le monde
+//   pnpm alerts --rapide    la tournée horaire, pour les comptes Pro seulement
 
 import { buildAlert } from '@/lib/account/alerts';
 import { isEmailConfigured, isSmsConfigured, sendEmail, sendSms } from '@/lib/account/senders';
-import { accountsDueForAlert, isAccountsConfigured, markAlerted } from '@/lib/account/store';
+import { accountsDueForAlert, accountsDueHourly, isAccountsConfigured, markAlerted } from '@/lib/account/store';
+import { proAccountIds } from '@/lib/pro/store';
 import { listOffers } from '@/lib/offers/repository';
 import { closeDb } from '@/lib/offers/store';
 import type { DiplomaLevel } from '@/lib/rules/employer';
@@ -15,7 +17,9 @@ async function main() {
     console.log('Comptes non configurés (DATABASE_URL, RESEND_API_KEY) : rien à envoyer.');
     return;
   }
-  const accounts = await accountsDueForAlert();
+  const fast = process.argv.includes('--rapide');
+  const pro = await proAccountIds();
+  const accounts = fast ? (await accountsDueHourly()).filter((a) => pro.has(a.id)) : await accountsDueForAlert();
   let sent = 0;
   for (const account of accounts) {
     const since = account.lastAlertAt ?? new Date(Date.now() - 86_400_000);
@@ -26,7 +30,7 @@ async function main() {
       const alert = buildAlert(fresh, account.savedSearch, SITE_URL);
       try {
         if (account.alertEmail && isEmailConfigured()) await sendEmail(account.email, alert.subject, alert.text);
-        if (account.alertSms && account.phoneVerified && account.phone && isSmsConfigured()) await sendSms(account.phone, alert.sms);
+        if (pro.has(account.id) && account.alertSms && account.phoneVerified && account.phone && isSmsConfigured()) await sendSms(account.phone, alert.sms);
         sent += 1;
       } catch (error) {
         console.error(`Alerte non envoyée pour un compte : ${(error as Error).message}`);

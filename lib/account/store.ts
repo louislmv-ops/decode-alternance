@@ -209,6 +209,16 @@ export async function accountsDueForAlert(): Promise<(Account & { lastAlertAt: D
   return rows.map((r) => ({ ...toAccount(r), lastAlertAt: r.last_alert_at }));
 }
 
+/** Pour les alertes horaires de Pro : tous les comptes qui suivent une recherche et n'ont rien reçu depuis 50 minutes. */
+export async function accountsDueHourly(): Promise<(Account & { lastAlertAt: Date | null })[]> {
+  await ensureSchema();
+  const rows = await db()<AccountRow[]>`select * from accounts
+    where (alert_email or (alert_sms and phone_verified))
+      and saved_search <> '{}'::jsonb
+      and (last_alert_at is null or last_alert_at < now() - interval '50 minutes')`;
+  return rows.map((r) => ({ ...toAccount(r), lastAlertAt: r.last_alert_at }));
+}
+
 export async function markAlerted(id: string): Promise<void> {
   await db()`update accounts set last_alert_at = now() where id = ${id}`;
 }

@@ -11,5 +11,6 @@ describe('date limite des campagnes', () => {
 
   it('affiche la date en clair', () => {
     expect(formatDeadline('2027-03-15')).toBe('15 mars');
+    expect(formatDeadline('2027-04-01')).toBe('1er avril');
   });
 });

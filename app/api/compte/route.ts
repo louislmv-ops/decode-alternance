@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+import { isPro } from '@/lib/pro/store';
 import { clearSessionCookies, currentAccount, notConfigured, publicAccount } from '@/lib/account/http';
 import { deleteAccount, isAccountsConfigured, SavedSearch, updateAccount } from '@/lib/account/store';
 
@@ -35,6 +36,9 @@ export async function PATCH(request: Request) {
   if (!parsed.success) return Response.json({ error: 'Données invalides.' }, { status: 400 });
   if (parsed.data.alertSms && !account.phoneVerified) {
     return Response.json({ error: 'Ajoute d’abord ton numéro.' }, { status: 400 });
+  }
+  if (parsed.data.alertSms && !(await isPro(account.id))) {
+    return Response.json({ error: 'Les alertes SMS font partie de Pro.' }, { status: 402 });
   }
   return Response.json({ account: publicAccount(await updateAccount(account.id, parsed.data)) });
 }
