@@ -20,6 +20,15 @@ export interface Member {
   followers: number;
   following: number;
   posts: number;
+  /** La carte alternant : ce qu'un recruteur veut voir en dix secondes. */
+  formation: string;
+  level: number | null;
+  rhythm: string;
+  startMonth: string | null;
+  seeking: boolean;
+  visibleToCompanies: boolean;
+  skills: string[];
+  linkedin: string;
 }
 
 export interface Post {
@@ -33,4 +42,12 @@ export interface Post {
   replies: number;
   likedByMe: boolean;
   mine: boolean;
+}
+
+export const LEVEL_SHORT: Record<number, string> = { 3: 'CAP', 4: 'Bac', 5: 'Bac+2', 6: 'Bac+3', 7: 'Bac+5' };
+
+/** « 2027-09 » devient « sept. 2027 ». */
+export function formatMonth(month: string | null): string | null {
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) return null;
+  return new Date(`${month}-01T12:00:00`).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
 }

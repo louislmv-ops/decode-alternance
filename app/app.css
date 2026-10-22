@@ -2783,3 +2783,102 @@ label {
     border-radius: 0;
   }
 }
+
+/* Carte alternant et espace entreprise */
+.c-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  background: #fff;
+}
+
+.c-card__flag {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: var(--r-control);
+  background: var(--accent);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.c-card__facts {
+  font-size: 15px;
+}
+
+.c-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.c-card__skills li {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  font-size: 13px;
+}
+
+.c-card__link {
+  align-self: flex-start;
+  font-size: 14px;
+}
+
+.c-edit__wide {
+  grid-column: 1 / -1;
+}
+
+.c-edit__actions,
+.r-company {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.r-company p {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+}
+
+.r-search {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.r-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.r-candidate,
+.r-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.r-candidate {
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.r-candidate > .btn,
+.r-contact > .btn {
+  align-self: flex-start;
+}
+
+@media (min-width: 720px) {
+  .r-search {
+    grid-template-columns: 1.6fr 1.2fr 9.5em 10em auto;
+  }
+}

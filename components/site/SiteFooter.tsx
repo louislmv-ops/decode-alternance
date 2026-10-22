@@ -26,6 +26,9 @@ export function SiteFooter() {
           <Link className="link" href="/suivi">
             Suivi des candidatures
           </Link>
+          <Link className="link" href="/entreprises">
+            Recruter un alternant
+          </Link>
         </nav>
         <nav aria-label="Infos" className="site-footer__col">
           <p className="site-footer__label">Infos</p>
