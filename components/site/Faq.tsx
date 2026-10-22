@@ -2,16 +2,16 @@ import type { OfferPage } from '@/lib/offers/types';
 
 const SOURCES: Record<OfferPage['mode'], string> = {
   exemples:
-    'Pour l’instant, ce sont des exemples fictifs : les vraies offres de France Travail arrivent dès que l’accès est validé. Tu peux déjà coller n’importe quelle offre trouvée ailleurs.',
-  direct: 'De France Travail, interrogé à chaque recherche : tu vois les offres du jour. Tu postules toujours sur la page d’origine de l’offre.',
-  base: 'De France Travail et des sites carrière des entreprises, mis à jour chaque nuit. Tu postules toujours sur la page d’origine de l’offre.',
+    'Pour l’instant, des exemples fictifs. Les vraies offres de France Travail arrivent très vite.',
+  direct: 'De France Travail, à jour. Tu postules sur la page d’origine.',
+  base: 'De France Travail et des sites carrière, à jour chaque nuit.',
 };
 
 const CARDS = [
   {
     tab: 'Garantie',
     q: 'Décode me trouve-t-il un contrat ?',
-    a: 'Non. Décode t’aide à comprendre les offres et à viser les bonnes personnes. Personne ne peut garantir un contrat, nous non plus.',
+    a: 'Non. Personne ne peut le garantir. Décode t’aide à viser juste.',
   },
   {
     tab: 'Offres',
@@ -21,12 +21,12 @@ const CARDS = [
   {
     tab: 'Données',
     q: 'Qu’est-ce que vous gardez sur moi ?',
-    a: 'Ton profil et ton suivi restent sur ton téléphone. Une offre collée part chez notre fournisseur d’IA pour être traduite, puis n’est pas gardée.',
+    a: 'Le strict minimum. Ton profil reste sur ton téléphone, sauf si tu crées un compte.',
   },
   {
     tab: 'Prix',
     q: 'C’est vraiment gratuit ?',
-    a: 'Oui. Les offres et leur décodage sont gratuits, et les alertes le seront aussi quand elles arriveront. Plus tard, un Pass optionnel pourra ajouter des extras comme un simulateur d’entretien.',
+    a: 'Oui. Offres, décodage et alertes. Un Pass optionnel pourra ajouter des extras plus tard.',
   },
 ];
 

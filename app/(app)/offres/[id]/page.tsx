@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { DecodedView, type OfferMeta } from '@/components/offer/DecodedView';
+import { BackLink } from '@/components/BackLink';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
 import { findDecode, findOffer } from '@/lib/offers/repository';
 import { SOURCE_LABELS } from '@/lib/offers/types';
@@ -39,5 +40,12 @@ export default async function OfferPage({ params }: Props) {
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };
 
-  return decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />;
+  return (
+    <>
+      <div className="back-row">
+        <BackLink fallback="/offres" label="Offres" />
+      </div>
+      {decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />}
+    </>
+  );
 }

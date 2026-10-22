@@ -24,7 +24,7 @@ export function ProfileView() {
       <div className="title-row">
         <div>
           <h1>Mon profil</h1>
-          <p className="title-row__sub">Il sert à calculer ton salaire minimum, à comparer les rythmes et à remplir tes messages. Il reste dans ce navigateur.</p>
+          <p className="title-row__sub">Reste sur ton téléphone.</p>
         </div>
       </div>
 
@@ -40,7 +40,6 @@ export function ProfileView() {
         <section className="settings__row">
           <div className="settings__label">
             <h2>Toi</h2>
-            <p>Ton prénom et ta formation remplissent tes messages LinkedIn.</p>
           </div>
           <div className="settings__panel form-grid">
             <label className="ui-field">
@@ -107,7 +106,7 @@ export function ProfileView() {
             <h2>Ton école</h2>
             <p>
               {left === null
-                ? 'Inscrit en CFA sans entreprise ? La loi te laisse 3 mois pour en trouver une. Indique ta date de rentrée pour suivre ce délai.'
+                ? 'En CFA sans entreprise ? Tu as 3 mois pour en trouver une.'
                 : left > 0
                   ? `Il te reste ${left} jours pour signer avec une entreprise.`
                   : 'Le délai de 3 mois est passé : parle à ton CFA de la suite de ta formation.'}

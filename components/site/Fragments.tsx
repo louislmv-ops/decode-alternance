@@ -126,10 +126,6 @@ export function Fragment({ id }: { id: ItemId }) {
         <li>Responsable études</li>
       </ul>
       <p className="ui-query">« Orvane » insights alternant</p>
-      <p className="ui-message">
-        Bonjour, je suis Inès, en master marketing. Vous qui êtes dans l’équipe Insights : qu’est-ce qui fait qu’un alternant y
-        réussit sa première année ?
-      </p>
     </div>
   );
 }
