@@ -9,6 +9,7 @@ import { PayEuros } from './PayTier';
 
 export interface SwipeCard {
   id: string;
+  href: string;
   company: string;
   title: string;
   facts: string;
@@ -36,7 +37,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
     (dir: 'left' | 'right') => {
       if (!card || leaving) return;
       if (dir === 'right') {
-        const url = `/offres/${encodeURIComponent(card.id)}`;
+        const url = card.href;
         if (!apps.some((a) => a.url === url)) {
           add({ company: card.company, title: card.title, url, channel: 'offre', status: 'a-envoyer', sentAt: null, followedUpAt: null, notes: '' });
         }
@@ -144,7 +145,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
             )}
             {card.diffPercent !== null && <span className="orow__sub num">+{card.diffPercent} % vs ton minimum</span>}
           </div>
-          <Link href={`/offres/${encodeURIComponent(card.id)}`} className="link swipe__open" onPointerDown={(e) => e.stopPropagation()}>
+          <Link href={card.href} className="link swipe__open" onPointerDown={(e) => e.stopPropagation()}>
             Voir l’offre décodée
           </Link>
         </article>

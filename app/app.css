@@ -4003,3 +4003,9 @@ label {
   margin-top: 4px;
   font-size: 13px;
 }
+
+.offers__via {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}

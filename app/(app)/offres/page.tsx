@@ -146,6 +146,20 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           </ul>
         )}
 
+        {rows.some(({ offer }) => offer.source === 'adzuna' || offer.source === 'jooble') && (
+          <p className="offers__via">
+            Une partie des offres via{' '}
+            <a href="https://www.adzuna.fr" target="_blank" rel="noopener noreferrer" className="link">
+              Adzuna
+            </a>{' '}
+            et{' '}
+            <a href="https://fr.jooble.org" target="_blank" rel="noopener noreferrer" className="link">
+              Jooble
+            </a>
+            , qui regroupent des annonces publiées sur d’autres sites.
+          </p>
+        )}
+
         {pages > 1 && (
           <nav className="pager" aria-label="Pages">
             {result.page > 1 ? (

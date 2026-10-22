@@ -3,7 +3,7 @@
 
 create table if not exists offers (
   id text primary key,
-  source text not null check (source in ('site-carriere', 'france-travail', 'la-bonne-alternance')),
+  source text not null check (source in ('site-carriere', 'france-travail', 'la-bonne-alternance', 'adzuna', 'jooble')),
   source_id text not null,
   source_url text not null,
   title text not null,

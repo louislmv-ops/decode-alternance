@@ -14,7 +14,7 @@ import { type CompanyPage, companyPage, CRITERIA, MIN_TO_SHOW } from '@/lib/comp
 import { isCommunityOpen } from '@/lib/community/http';
 import { formatEuros } from '@/lib/format';
 import { listOffers } from '@/lib/offers/repository';
-import type { Offer } from '@/lib/offers/types';
+import { type Offer, offerHref } from '@/lib/offers/types';
 import { type Campaign, campaignsForSiren } from '@/lib/recruiters/campaigns';
 
 type Props = { params: Promise<{ siren: string }> };
@@ -166,7 +166,7 @@ export default async function CompanyPageView({ params }: Props) {
             <ul className="e-results" role="list">
               {offers.map((o) => (
                 <li key={o.id}>
-                  <Link href={`/offres/${encodeURIComponent(o.id)}`}>
+                  <Link href={offerHref(o)}>
                     <strong>{o.title}</strong>
                     <span>{o.city ?? ''}</span>
                   </Link>

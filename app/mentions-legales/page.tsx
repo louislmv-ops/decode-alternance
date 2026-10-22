@@ -63,6 +63,10 @@ export default function LegalPage() {
         <ul className="bullets">
           <li>Offres France Travail : API Offres d’emploi, réutilisées selon la licence de France Travail, sans les coordonnées de contact.</li>
           <li>
+            Offres Adzuna et Jooble : interrogées par leurs API publiques, selon leurs conditions. La candidature passe par leur lien vers
+            l’annonce d’origine.
+          </li>
+          <li>
             Offres des sites carrière : lues dans le balisage public JobPosting que les entreprises publient pour les moteurs de recherche,
             dans le respect de leur fichier robots.txt, avec un lien vers l’offre d’origine.
           </li>
