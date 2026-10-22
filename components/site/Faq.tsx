@@ -1,7 +1,3 @@
-'use client';
-
-import { useState } from 'react';
-
 const CARDS = [
   {
     tab: 'Garantie',
@@ -11,7 +7,7 @@ const CARDS = [
   {
     tab: 'Offres',
     q: 'D’où viennent les offres ?',
-    a: 'De France Travail, mises à jour en continu, et des sites carrière des grandes entreprises. Tu postules toujours sur la page d’origine.',
+    a: 'De France Travail, à jour en continu. Tu postules toujours sur la page d’origine de l’offre.',
   },
   {
     tab: 'Données',
@@ -26,26 +22,17 @@ const CARDS = [
 ];
 
 export function Faq() {
-  const [open, setOpen] = useState(0);
-
   return (
-    <section className="faq section" aria-labelledby="faq-title">
-      <h2 id="faq-title" className="section-title faq__title" data-reveal>
+    <section className="faq band" aria-labelledby="faq-title">
+      <h2 id="faq-title" className="section-title" data-reveal>
         Tes questions
       </h2>
-      <div className="faq__stack" data-reveal style={{ '--i': 1 } as React.CSSProperties}>
+      <div className="faq__list">
         {CARDS.map((card, i) => (
-          <div key={card.tab} className={`faq__card faq__card--${(i % 3) + 1}${open === i ? ' is-open' : ''}`} style={{ '--n': i } as React.CSSProperties}>
-            <span className="faq__tab">{card.tab}</span>
-            <h3 className="faq__q">
-              <button type="button" aria-expanded={open === i} aria-controls={`faq-${i}`} onClick={() => setOpen(i)}>
-                {card.q}
-              </button>
-            </h3>
-            <p id={`faq-${i}`} className="faq__a" hidden={open !== i}>
-              {card.a}
-            </p>
-          </div>
+          <details key={card.tab} className="faq__item" open={i === 0} data-reveal style={{ '--i': i } as React.CSSProperties}>
+            <summary className="faq__q">{card.q}</summary>
+            <p className="faq__a">{card.a}</p>
+          </details>
         ))}
       </div>
     </section>

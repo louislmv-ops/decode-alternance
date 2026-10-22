@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '@fontsource-variable/bricolage-grotesque/opsz.css';
+import '@fontsource-variable/figtree/wght.css';
 import './globals.css';
 import './site.css';
 import './app.css';
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#f7f7f5',
+  themeColor: '#0b6b4b',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
