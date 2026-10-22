@@ -138,7 +138,7 @@ export default async function CompanyPageView({ params }: Props) {
           ))}
         </section>
 
-        <Contribute siren={company.siren} name={company.name} />
+        {isCommunityOpen() && <Contribute siren={company.siren} name={company.name} />}
 
         {campaigns.length > 0 && (
           <section className="e-block">

@@ -60,6 +60,7 @@ export function TopBar() {
           <Link
             href="/compte"
             className="topbar__profile"
+            aria-label="Mon compte"
             aria-current={pathname.startsWith('/compte') || pathname.startsWith('/profil') ? 'page' : undefined}
           >
             <IconUser />

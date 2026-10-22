@@ -611,6 +611,10 @@
 }
 
 .panel__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 4px;
   font-size: 14px;
   color: var(--ink);
   text-underline-offset: 0.2em;

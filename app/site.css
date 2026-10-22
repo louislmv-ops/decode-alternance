@@ -564,6 +564,17 @@
   }
 }
 
+@media (max-width: 960px) {
+  /* Sept liens entre 761 et 960 px : on resserre plutôt que d'en cacher. */
+  .topbar__inner {
+    gap: 16px;
+  }
+  .topbar__link {
+    padding: 0 9px;
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 900px) {
   .hero__inner,
   .tool,
