@@ -111,3 +111,17 @@ describe('La bonne alternance', async () => {
     expect(pageOf([a, b], undefined, 1, 1).total).toBe(2);
   });
 });
+
+describe('La bonne alternance : découpage des appels', async () => {
+  const { lbaQueries } = await import('./la-bonne-alternance');
+  it('découpe un département par niveau de diplôme', () => {
+    const q = lbaQueries('75', []);
+    expect(q).toHaveLength(6);
+    expect(q[0]).toEqual({ departements: ['75'] });
+    expect(q.map((x) => x.level).filter(Boolean)).toEqual(['3', '4', '5', '6', '7']);
+  });
+  it('découpe la France en groupes de départements', () => {
+    const deps = Array.from({ length: 10 }, (_, i) => String(i + 1).padStart(2, '0'));
+    expect(lbaQueries(undefined, deps, 4).map((x) => x.departements)).toEqual([deps.slice(0, 4), deps.slice(4, 8), deps.slice(8)]);
+  });
+});
