@@ -9,6 +9,7 @@ import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
 import { PayPanel } from './PayPanel';
+import { Mascot } from '@/components/Mascot';
 
 /** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
 const MAX_TEXT = 12_000;
@@ -79,9 +80,10 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         offerContract={offer.contractKind ?? null}
       />
       {state.status === 'idle' && (
-        <p className="decode-pitch">
-          Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.
-        </p>
+        <div className="decode-pitch decode-pitch--mascot">
+          <Mascot pose="voila" size={64} />
+          <p>Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.</p>
+        </div>
       )}
       {state.status === 'error' && (
         <p className="notice notice--error" role="alert">

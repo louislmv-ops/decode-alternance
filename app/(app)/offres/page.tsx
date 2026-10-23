@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
 import { AutoSubmit } from '@/components/offer/AutoSubmit';
 import { ForYou } from '@/components/offer/ForYou';
+import { Mascot } from '@/components/Mascot';
 import { LocationPrompt } from '@/components/offer/LocationPrompt';
 import { MoreFilters } from '@/components/offer/MoreFilters';
 import { PlacePicker } from '@/components/offer/PlacePicker';
@@ -147,7 +148,12 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
         </div>
 
         {rows.length === 0 ? (
-          <p className="empty">Aucune offre ne correspond. Retire un filtre ou élargis le département.</p>
+          <div className="empty empty--mascot">
+            <Mascot pose="bof" size={88} />
+            <p>
+              Aucune offre ne correspond. Retire un filtre ou ajoute un département. <Link href="/offres">Réinitialiser les filtres</Link>
+            </p>
+          </div>
         ) : (
           <ul className="orows" role="list">
             {rows.map(({ offer, h }) => (

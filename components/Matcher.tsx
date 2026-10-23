@@ -6,6 +6,7 @@ import { useProfile } from '@/components/useProfile';
 import type { CvGuess } from '@/lib/cv/extract';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { savePlace } from '@/lib/place';
+import { Mascot } from '@/components/Mascot';
 import { DOMAINS } from '@/lib/domains';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 
@@ -113,6 +114,7 @@ export function Matcher() {
 
         {step === 'start' ? (
           <div className="matcher__step">
+            <Mascot pose="etudiant" size={72} className="matcher__mascot" />
             <h2 id="matcher-title" className="matcher__title">
               Tes offres, sur mesure.
             </h2>
