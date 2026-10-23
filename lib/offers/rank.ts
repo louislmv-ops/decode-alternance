@@ -1,8 +1,11 @@
-// L'ordre des offres. Par défaut, les plus attirantes d'abord : bien payées, grandes entreprises,
-// postes qualifiés, encore fraîches. Une offre d'il y a un mois passe derrière une offre correcte du jour.
+// L'ordre des offres. Par défaut, les plus attirantes d'abord pour un étudiant d'école de commerce ou
+// d'ingénieurs : grands groupes, postes qualifiés (bac+3 à bac+5), salaire annoncé, encore fraîches.
+// Un poste peu qualifié bien payé (agent de sécurité, auxiliaire de vie…) ne passe pas devant un poste
+// de chef de projet dans un grand groupe : le salaire compte moins que la porte qu'ouvre l'alternance.
+// Une offre d'il y a un mois passe derrière une offre correcte du jour.
 
 import { SMIC } from '@/lib/rules/reference';
-import { isCac40 } from './companies';
+import { CAC40, isCac40 } from './companies';
 import { normalizeText } from './normalize';
 import type { Offer } from './types';
 
@@ -22,6 +25,20 @@ export type RatingOf = (o: Pick<Offer, 'company' | 'companySiren'>) => number | 
 export const STRONG_ROLE =
   /\b(ingenieur|chef de projet|charge d affaires|business develop\w*|data|developpeur|consultant|audit\w*|analyste|controleur de gestion|product|juriste|finance|cybersecurite|architecte|achats?|ressources humaines)\b/;
 
+/**
+ * Postes peu qualifiés ou d'exécution : honorables, mais pas ceux qui font rêver un étudiant de bac+3 à bac+5.
+ * Ils restent listés et cherchables, simplement jamais en tête ni en pépite.
+ */
+export const LOW_ROLE =
+  /\b(auxiliaire de vie|aide a domicile|assistante? de vie|aide soignante?|agente? de (securite|surete|entretien|proprete|service|production|quai|accueil)|desosseu\w*|pareu\w*|boucher|bouchere|boulanger\w*|patissier\w*|preparat\w* de commandes?|cariste|manutention\w*|serveur|serveuse|commis|equipier\w*|employee? (polyvalente?|commerciale?|libre service|de rayon|logistique)|hote(sse)? de caisse|caissier\w*|vendeu\w*|conseill\w* de vente|chauffeur\w*|livreu\w*|magasinier\w*|plombier|electricien\w*|macon|peintre|coiffeu\w*|estheticien\w*|mecanicien\w*|carrossier|cuisinier\w*|operat\w* de production|ouvrier\w*|menuisier|soudeu\w*|technicien\w* de maintenance)\b/;
+
+/** Un poste qui vise un bac+3 à bac+5 : niveau demandé ou intitulé qualifié, et pas un poste d'exécution. */
+export function isQualifiedRole(o: Pick<Offer, 'title' | 'diplomaLevel'>): boolean {
+  const t = normalizeText(o.title);
+  if (LOW_ROLE.test(t)) return false;
+  return (o.diplomaLevel !== null && o.diplomaLevel >= 6) || STRONG_ROLE.test(t);
+}
+
 const SIZE_POINTS = { grande: 3, eti: 1.5, pme: 0.3, tpe: 0 } as const;
 
 export function attractiveness(
@@ -29,14 +46,18 @@ export function attractiveness(
   now = Date.now(),
 ): number {
   let score = 0;
+  const title = normalizeText(o.title);
+  const low = LOW_ROLE.test(title);
   // Payé au SMIC, c'est déjà beaucoup pour une alternance : 4 points ; au minimum d'un 18 ans, aucun.
-  if (o.salaryMonthlyCents !== null) score += Math.min(4, Math.max(0, (o.salaryMonthlyCents / SMIC.monthlyCents - 0.4) * 6.7));
+  // Pour un poste d'exécution, le salaire ne vaut qu'un point : il ne doit pas faire passer l'offre devant.
+  if (o.salaryMonthlyCents !== null) score += Math.min(low ? 1 : 4, Math.max(0, (o.salaryMonthlyCents / SMIC.monthlyCents - 0.4) * 6.7));
   if (o.companySize) score += SIZE_POINTS[o.companySize];
-  if (isCac40(o.company)) score += o.companySize === 'grande' ? 1 : 4;
-  if (o.diplomaLevel === 7) score += 1.5;
-  else if (o.diplomaLevel === 6) score += 1;
+  if (isCac40(o.company)) score += o.companySize === 'grande' ? 1.5 : 4.5;
+  if (o.diplomaLevel === 7) score += 2.5;
+  else if (o.diplomaLevel === 6) score += 1.5;
   else if (o.diplomaLevel === 5) score += 0.3;
-  if (STRONG_ROLE.test(normalizeText(o.title))) score += 1;
+  if (STRONG_ROLE.test(title)) score += 1.5;
+  if (low) score -= 3;
   if (o.direct) score += 0.5;
   const days = Math.max(0, (now - Date.parse(o.publishedAt)) / 86_400_000);
   score -= Math.min(3, days / 10);
@@ -65,6 +86,25 @@ export function sortOffers<T extends Offer>(offers: T[], sort: OfferSort = 'top'
     })
     .map((x) => x.o);
 }
+
+/** Postgres ne replie pas toujours la casse des lettres accentuées : « SÉCURITÉ » doit aussi correspondre. */
+function withUpperAccents(pattern: string): string {
+  return pattern.replace(/\[([^\]]*)\]/g, (_, chars: string) => `[${chars}${chars.toUpperCase().replace(/[A-Z-]/g, '')}]`);
+}
+
+/** LOW_ROLE pour Postgres (intitulés accentués, recherche insensible à la casse). */
+export const LOW_ROLE_SQL = withUpperAccents(
+  "auxiliaire de vie|aide [àa] domicile|assistante? de vie|aide.soignante?|agente? de (s[ée]curit[ée]|s[ûu]ret[ée]|entretien|propret[ée]|service|production|quai|accueil)|d[ée]sosseu|pareu|boucher|boulang|p[âa]tissi|pr[ée]parat[a-z]* de commande|cariste|manutention|serveu|commis|[ée]quipi|employ[ée]e? (polyvalent|commercial|libre.service|de rayon|logistique)|h[ôo]te(sse)? de caisse|caissi|vendeu|conseill[a-z]* de vente|chauffeu|livreu|magasini|plombier|[ée]lectricien|ma[çc]on|peintre|coiffeu|esth[ée]ticien|m[ée]canicien|carrossier|cuisini|op[ée]rat[a-z]* de production|ouvri|menuisier|soudeu|technicien[a-z]* de maintenance",
+);
+
+/** Les groupes du CAC 40 pour Postgres : le nom de l'employeur commence par celui du groupe. */
+export const CAC40_SQL = withUpperAccents(`^(${CAC40.map((c) =>
+  c.company
+    .toLowerCase()
+    .replace(/[’']/g, '.')
+    .replace(/[éèêe]/g, '[éèêe]')
+    .replace(/[-\s]+/g, '[- ]+'),
+).join('|')})( |$)`);
 
 /** STRONG_ROLE pour Postgres, qui compare les intitulés avec leurs accents. */
 export const STRONG_ROLE_SQL =

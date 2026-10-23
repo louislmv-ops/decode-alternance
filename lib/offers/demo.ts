@@ -3,7 +3,7 @@
 // partout où elles apparaissent et disparaissent dès que DATABASE_URL est configuré.
 
 import type { DecodedOffer } from '@/lib/decode/schema';
-import { departmentFromPostalCode, fingerprint, parseSalary, schoolBaitFlags } from './normalize';
+import { departmentFromPostalCode, fingerprint, parseSalaryRange, schoolBaitFlags } from './normalize';
 import type { Offer } from './types';
 
 type DemoInput = Omit<Offer, 'fingerprint' | 'schoolFlags' | 'alsoOn' | 'department' | 'salaryMonthlyCents'>;
@@ -12,7 +12,8 @@ function demo(input: DemoInput): Offer {
   return {
     ...input,
     department: departmentFromPostalCode(input.postalCode),
-    salaryMonthlyCents: parseSalary(input.salaryText),
+    salaryMonthlyCents: parseSalaryRange(input.salaryText)?.minCents ?? null,
+    salaryMaxCents: parseSalaryRange(input.salaryText)?.maxCents ?? null,
     fingerprint: fingerprint(input.company, input.title, input.city),
     schoolFlags: schoolBaitFlags({ company: input.company, title: input.title, description: input.description }),
     alsoOn: [],

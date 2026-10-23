@@ -7,6 +7,7 @@ import {
   htmlToText,
   isAlternance,
   parseSalary,
+  parseSalaryRange,
   schoolBaitFlags,
   sizeFromHeadcount,
 } from './normalize';
@@ -52,6 +53,22 @@ describe('detectDiplomaLevel', () => {
   });
 });
 
+describe('parseSalaryRange', () => {
+  it('garde les deux bornes d’une fourchette, jamais le haut comme salaire', () => {
+    expect(parseSalaryRange('de 1400€ à 1800€')).toEqual({ minCents: 140_000, maxCents: 180_000 });
+    expect(parseSalaryRange('35 à 45 k€ par an')).toEqual({ minCents: 291_667, maxCents: 375_000 });
+    expect(parseSalaryRange('jusqu’à 1 900 € brut')).toEqual({ minCents: null, maxCents: 190_000 });
+    expect(parseSalaryRange('de 85 % à 100 % du SMIC')?.minCents).toBe(158_697);
+    expect(parseSalaryRange('bac+3 a 1800 €')).toEqual({ minCents: 180_000, maxCents: null });
+  });
+  it('lit une fourchette dans le texte d’une annonce', async () => {
+    const { salaryRangeFromDescription } = await import('./normalize');
+    expect(salaryRangeFromDescription('Salaire : de 1 400 à 1 800 € brut par mois selon profil.')).toEqual({ minCents: 140_000, maxCents: 180_000 });
+    expect(salaryRangeFromDescription('Rémunération : de 27% à 100% du SMIC selon l’âge.')).toBeNull();
+    expect(salaryRangeFromDescription('Salaire jusqu’à 1 900 € brut mensuel.')).toEqual({ minCents: null, maxCents: 190_000 });
+  });
+});
+
 describe('parseSalary', () => {
   it('lit un montant mensuel', () => {
     expect(parseSalary('1 200 € brut par mois')).toBe(120_000);
@@ -69,6 +86,9 @@ describe('parseSalary', () => {
   });
   it('prend la borne basse d’une fourchette', () => {
     expect(parseSalary('Entre 1 100 € et 1 300 € par mois')).toBe(110_000);
+    expect(parseSalary('1 400 à 1 800 € brut mensuel')).toBe(140_000);
+    expect(parseSalary('Jusqu’à 1 800 € selon profil')).toBeNull();
+    expect(parseSalary('De 27 % à 100 % du SMIC selon ton âge')).toBeNull();
   });
   it('renvoie null quand rien n’est chiffré', () => {
     expect(parseSalary('Selon grille légale')).toBeNull();
