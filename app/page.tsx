@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
@@ -48,43 +49,55 @@ export default async function Home() {
       <SiteNav />
       <main className="home">
         <section className="hero2" aria-labelledby="hero-title">
-          <h1 id="hero-title" className="hero2__title">
-            Trouve ton alternance. En clair.
-          </h1>
-          <p className="hero2__lead">Les offres traduites, ton salaire calculé, les pièges écartés. Gratuit.</p>
+          <div className="hero2__content">
+            <h1 id="hero-title" className="hero2__title">
+              Trouve ton alternance. En clair.
+            </h1>
+            <p className="hero2__lead">Les offres traduites, ton salaire calculé, les pièges écartés. Gratuit.</p>
 
-          <form className="hero2__search" action="/offres" method="get" role="search">
-            <label className="hero2__field">
-              <span className="hero2__label">Métier</span>
-              <input type="search" name="q" placeholder="Marketing, boulanger, développeur…" autoComplete="off" />
-            </label>
-            <label className="hero2__field">
-              <span className="hero2__label">Où</span>
-              <select name="dep" defaultValue="">
-                <option value="">Toute la France</option>
-                {DEPARTMENT_OPTIONS.map((d) => (
-                  <option key={d.code} value={d.code}>
-                    {d.code} · {d.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button type="submit" className="hero2__go">
-              C’est parti
-            </button>
-          </form>
+            <form className="hero2__search" action="/offres" method="get" role="search">
+              <label className="hero2__field">
+                <span className="hero2__label">Métier</span>
+                <input type="search" name="q" placeholder="Marketing, boulanger, développeur…" autoComplete="off" />
+              </label>
+              <label className="hero2__field">
+                <span className="hero2__label">Où</span>
+                <select name="dep" defaultValue="">
+                  <option value="">Toute la France</option>
+                  {DEPARTMENT_OPTIONS.map((d) => (
+                    <option key={d.code} value={d.code}>
+                      {d.code} · {d.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button type="submit" className="hero2__go">
+                C’est parti
+              </button>
+            </form>
 
-          <p className="hero2__alt">
-            Pas d’idée ? <MatchButton className="hero2__match">Ton CV ou 4 questions</MatchButton>
-          </p>
+            <p className="hero2__alt">
+              Pas d’idée ? <MatchButton className="hero2__match">Ton CV ou 4 questions</MatchButton>
+            </p>
 
-          <ul className="hero2__domains" role="list" aria-label="Recherches par domaine">
-            {DOMAINS.slice(0, 6).map((d) => (
-              <li key={d.label}>
-                <Link href={`/offres?q=${encodeURIComponent(d.query)}`}>{d.label}</Link>
-              </li>
-            ))}
-          </ul>
+            <ul className="hero2__domains" role="list" aria-label="Recherches par domaine">
+              {DOMAINS.slice(0, 6).map((d) => (
+                <li key={d.label}>
+                  <Link href={`/offres?q=${encodeURIComponent(d.query)}`}>{d.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="hero2__photo">
+            <Image
+              src="/accueil-etudiants.jpg"
+              alt="Deux étudiants assis dans un parc regardent des offres sur un ordinateur portable"
+              fill
+              priority
+              quality={85}
+              sizes="(min-width: 960px) 42vw, 100vw"
+            />
+          </div>
         </section>
 
         <section className="steps" aria-labelledby="steps-title">
@@ -109,7 +122,9 @@ export default async function Home() {
 
         <section className="home-latest" aria-labelledby="latest-title">
           <div className="offers__bar">
-            <h2 id="latest-title">{departments.length === 1 ? `Les meilleures offres, ${DEPARTMENT_NAMES[departments[0]!]}` : 'Les meilleures offres du moment'}</h2>
+            <h2 id="latest-title">
+              {departments.length === 1 ? `Les meilleures offres, ${DEPARTMENT_NAMES[departments[0]!]}` : 'Les meilleures offres du moment'}
+            </h2>
             {page?.mode === 'exemples' && <span className="num">exemples fictifs</span>}
             <Link href="/offres" className="link">
               Toutes les offres

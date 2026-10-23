@@ -9,6 +9,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // La photo de l'accueil est servie en qualité 85 : nette sur écran Retina, toujours légère.
+  images: { qualities: [75, 85] },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
