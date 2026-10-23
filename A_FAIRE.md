@@ -13,6 +13,17 @@ Ce que seul le propriétaire des comptes peut faire. Le code est prêt : dès qu
    - Key `FRANCE_TRAVAIL_CLIENT_SECRET`, Value : la clé secrète
 5. Save, puis Deployments, « ⋯ » sur le dernier, Redeploy.
 
+## 0. Toutes les offres d'alternance, chaque matin (Neon + GitHub, gratuit)
+
+1. neon.tech → Sign up (avec GitHub ou Google) → Create project : nom `decode`, région **Europe (Frankfurt)**, Postgres par défaut.
+2. Sur le tableau de bord du projet : **Connect** → copier la « connection string » (elle commence par `postgresql://`, case « Pooled connection » cochée).
+3. Vercel → Settings → Environment Variables : `DATABASE_URL` = la connection string (Sensitive). Puis Redeploy.
+4. GitHub → dépôt decode-alternance → Settings → Secrets and variables → Actions → New repository secret :
+   - `DATABASE_URL` = la même connection string
+   - `LBA_API_TOKEN` = ton jeton La bonne alternance
+5. GitHub → onglet **Actions** → « Collecte des offres » → **Run workflow**. 15 à 30 minutes. Les tables se créent toutes seules.
+6. Ensuite, la collecte repasse chaque nuit vers 4 h (heure UTC). Le site lit la base : toutes les offres, plus de 404.
+
 ## 1 ter. La bonne alternance (gratuit, la meilleure source)
 
 Jeton personnel obtenu sur api.apprentissage.beta.gouv.fr → `LBA_API_TOKEN` dans Vercel, puis Redeploy. Le jeton est valable un an : penser à le renouveler.

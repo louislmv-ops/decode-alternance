@@ -185,9 +185,17 @@ export async function saveDecode(offerId: string, decoded: DecodedOffer, model: 
 }
 
 /** Combien d'offres la collecte a mises en base ; échoue si la table n'existe pas encore. */
-export async function countStoredOffers(): Promise<number> {
-  const [row] = await db()<{ n: number }[]>`select count(*)::int as n from offers`;
+export async function countStoredOffers(source?: OfferSource): Promise<number> {
+  const s = db();
+  const [row] = await s<{ n: number }[]>`select count(*)::int as n from offers ${source ? s`where source = ${source}` : s``}`;
   return row?.n ?? 0;
+}
+
+/** Crée ou met à jour les tables des offres (db/schema.sql), sans rien effacer : la collecte le fait d'elle-même. */
+export async function ensureOfferSchema(): Promise<void> {
+  const { readFile } = await import('node:fs/promises');
+  const { join } = await import('node:path');
+  await db().unsafe(await readFile(join(process.cwd(), 'db', 'schema.sql'), 'utf8'));
 }
 
 export async function closeDb(): Promise<void> {

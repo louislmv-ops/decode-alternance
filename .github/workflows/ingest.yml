@@ -1,8 +1,9 @@
-# Collecte quotidienne des offres. Elle tourne sur GitHub Actions plutôt qu'en cron Vercel :
-# le plan Hobby de Vercel limite les crons à un par jour et les fonctions à quelques minutes,
-# alors qu'une collecte complète de France Travail prend plus longtemps.
+# Collecte quotidienne des offres, chaque nuit : toute La bonne alternance (15 à 30 minutes), France Travail
+# si ses identifiants sont là, et les sites carrière renseignés. Elle tourne sur GitHub Actions plutôt qu'en
+# cron Vercel : le plan Hobby de Vercel limite les fonctions à quelques minutes.
 # Secrets à créer dans Settings → Secrets and variables → Actions :
-# DATABASE_URL, FRANCE_TRAVAIL_CLIENT_ID, FRANCE_TRAVAIL_CLIENT_SECRET, BOT_CONTACT.
+# DATABASE_URL et LBA_API_TOKEN (indispensables) ; FRANCE_TRAVAIL_CLIENT_ID, FRANCE_TRAVAIL_CLIENT_SECRET, BOT_CONTACT (facultatifs).
+# Premier lancement à la main : onglet Actions → « Collecte des offres » → Run workflow.
 name: Collecte des offres
 
 on:
@@ -16,6 +17,7 @@ jobs:
     timeout-minutes: 120
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      LBA_API_TOKEN: ${{ secrets.LBA_API_TOKEN }}
       FRANCE_TRAVAIL_CLIENT_ID: ${{ secrets.FRANCE_TRAVAIL_CLIENT_ID }}
       FRANCE_TRAVAIL_CLIENT_SECRET: ${{ secrets.FRANCE_TRAVAIL_CLIENT_SECRET }}
       BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
