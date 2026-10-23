@@ -20,8 +20,15 @@ export function isPublicHost(host: string): boolean {
   return /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/.test(host) && !/(^|\.)(localhost|local|internal|lan)$/.test(host);
 }
 
-export function logoSrc(offer: Pick<Offer, 'logoUrl' | 'companySite'>): string | null {
+/** Noms qui ne désignent pas une entreprise : pas la peine de chercher un logo. */
+const NO_NAME = /^(entreprise|societe|confidentiel|anonyme|non communique|non renseigne|n c)\b/i;
+
+export function logoSrc(offer: Pick<Offer, 'logoUrl' | 'companySite'> & { company?: string | null; source?: Offer['source'] }): string | null {
   if (offer.logoUrl && /^https:\/\//i.test(offer.logoUrl) && domainOf(offer.logoUrl)) return `/api/logo?u=${encodeURIComponent(offer.logoUrl)}`;
   const domain = domainOf(offer.companySite);
-  return domain ? `/api/logo?d=${encodeURIComponent(domain)}` : null;
+  if (domain) return `/api/logo?d=${encodeURIComponent(domain)}`;
+  // Les entreprises des exemples sont fictives : surtout ne pas leur trouver le logo d'une vraie.
+  if (offer.source === 'exemple') return null;
+  const name = offer.company?.trim();
+  return name && name.length >= 2 && !NO_NAME.test(name) ? `/api/logo?n=${encodeURIComponent(name)}` : null;
 }

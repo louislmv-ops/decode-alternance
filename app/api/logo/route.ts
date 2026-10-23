@@ -1,4 +1,6 @@
 import { domainOf, isPublicHost } from '@/lib/offers/logo';
+import { resolveLogo } from '@/lib/offers/logo-resolve';
+import { USER_AGENT } from '@/lib/offers/connectors/http';
 
 const MAX_BYTES = 512 * 1024;
 const WEEK = 7 * 24 * 3600;
@@ -21,14 +23,19 @@ export async function GET(request: Request) {
     } catch {
       target = null;
     }
-  } else {
+  } else if (params.get('d')) {
     const domain = domainOf(params.get('d'));
     if (domain) target = favicon(domain);
+  } else if (params.get('n')) {
+    // Seulement le nom de l'entreprise : on cherche son logo (Wikidata, puis son site).
+    const found = await resolveLogo(params.get('n')!.slice(0, 120));
+    if (found?.kind === 'image') target = found.url;
+    else if (found?.kind === 'domain') target = favicon(found.domain);
   }
   if (!target) return notFound();
 
   try {
-    const res = await fetch(target, { signal: AbortSignal.timeout(5000), redirect: 'follow' });
+    const res = await fetch(target, { signal: AbortSignal.timeout(5000), redirect: 'follow', headers: { 'User-Agent': USER_AGENT } });
     const type = res.headers.get('content-type') ?? '';
     if (!res.ok || !type.startsWith('image/')) return notFound();
     const body = await res.arrayBuffer();
