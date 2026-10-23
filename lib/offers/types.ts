@@ -58,6 +58,10 @@ export interface Offer {
   schoolFlags: string[];
   /** Autres sources où la même offre a été vue. */
   alsoOn: OfferSource[];
+  /** Site de l'entreprise, quand la source le donne : sert à afficher son logo. */
+  companySite?: string | null;
+  /** Logo fourni par la source elle-même. */
+  logoUrl?: string | null;
 }
 
 export interface OfferFilters {

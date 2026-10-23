@@ -21,6 +21,7 @@ export interface LbaJob {
     name?: string | null;
     brand?: string | null;
     legal_name?: string | null;
+    website?: string | null;
     size?: string | null;
     location?: { address?: string };
   };
@@ -78,6 +79,7 @@ export function lbaToOffer(job: LbaJob): Offer | null {
     fingerprint: fingerprint(company, title, city),
     schoolFlags: schoolBaitFlags({ company, title, description }),
     alsoOn: [],
+    companySite: job.workplace?.website ?? null,
   };
 }
 

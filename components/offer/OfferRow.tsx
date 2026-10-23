@@ -5,6 +5,8 @@ import type { Highlights } from '@/lib/offers/highlights';
 import { payTier } from '@/lib/offers/pay-tier';
 import { cleanTitle } from '@/lib/offers/title';
 import { type Offer, offerHref } from '@/lib/offers/types';
+import { logoSrc } from '@/lib/offers/logo';
+import { CompanyLogo } from './CompanyLogo';
 import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 
@@ -17,6 +19,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
   const diff = h.pay && h.pay.verdict !== 'sous-le-minimum' && h.pay.diffPercent > 0 ? `+${h.pay.diffPercent} % vs ton minimum` : null;
   return (
     <li className={`orow${h.pepite ? ' is-pepite' : ''}`}>
+      <CompanyLogo src={logoSrc(offer)} name={offer.company} />
       <div className="orow__body">
         <p className="orow__company">
           <span>{offer.company ?? 'Entreprise non nommée'}</span>

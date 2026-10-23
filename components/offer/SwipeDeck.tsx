@@ -5,11 +5,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTracker } from '@/components/useTracker';
 import { formatEuros } from '@/lib/format';
 import type { PayTier } from '@/lib/offers/pay-tier';
+import { CompanyLogo } from './CompanyLogo';
 import { PayEuros } from './PayTier';
 
 export interface SwipeCard {
   id: string;
   href: string;
+  logo: string | null;
   company: string;
   title: string;
   facts: string;
@@ -130,6 +132,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <span className={`swipe__stamp swipe__stamp--pass${dx < -40 ? ' is-on' : ''}`} aria-hidden="true">
             Je passe
           </span>
+          <CompanyLogo key={card.id} src={card.logo} name={card.company} size={56} />
           <p className="orow__company">
             <span>{card.company}</span>
             {card.pepite && <span className="orow__flag">Pépite</span>}

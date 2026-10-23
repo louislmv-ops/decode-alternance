@@ -9,6 +9,7 @@ import { payTier } from '@/lib/offers/pay-tier';
 import { listOffers } from '@/lib/offers/repository';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/types';
+import { logoSrc } from '@/lib/offers/logo';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 
 export const metadata: Metadata = { title: 'Mode swipe', robots: { index: false } };
@@ -27,6 +28,7 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
     .map(({ offer, h }) => ({
       id: offer.id,
       href: offerHref(offer),
+      logo: logoSrc(offer),
       company: offer.company ?? 'Entreprise non nommée',
       title: cleanTitle(offer.title),
       facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt)]
