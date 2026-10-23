@@ -11,7 +11,7 @@ import {
   fingerprint,
   htmlToText,
   isAlternance,
-  parseSalary,
+  parseSalaryRange,
   schoolBaitFlags,
 } from '../normalize';
 import type { CompanySizeTag, Offer } from '../types';
@@ -37,7 +37,7 @@ interface JobPostingLd {
   identifier?: { value?: string | number } | string;
   hiringOrganization?: { name?: string; logo?: string | { url?: string }; sameAs?: string; url?: string } | string;
   jobLocation?: JobLocationLd | JobLocationLd[];
-  baseSalary?: { value?: { value?: number; minValue?: number; unitText?: string } | number; currency?: string };
+  baseSalary?: { value?: { value?: number; minValue?: number; maxValue?: number; unitText?: string } | number; currency?: string };
   educationRequirements?: string | { credentialCategory?: string } | { credentialCategory?: string }[];
 }
 
@@ -77,14 +77,17 @@ export function extractJobPostings(html: string): JobPostingLd[] {
   return found;
 }
 
-function salaryFromLd(ld: JobPostingLd): { text: string | null; cents: number | null } {
+function salaryFromLd(ld: JobPostingLd): { text: string | null; cents: number | null; maxCents: number | null } {
   const raw = ld.baseSalary?.value;
-  if (raw === undefined) return { text: null, cents: null };
+  if (raw === undefined) return { text: null, cents: null, maxCents: null };
   const amount = typeof raw === 'number' ? raw : (raw.minValue ?? raw.value);
-  if (typeof amount !== 'number') return { text: null, cents: null };
+  if (typeof amount !== 'number') return { text: null, cents: null, maxCents: null };
   const unit = typeof raw === 'number' ? 'MONTH' : (raw.unitText ?? 'MONTH').toUpperCase();
-  const text = `${amount} € par ${unit === 'YEAR' ? 'an' : unit === 'HOUR' ? 'heure' : 'mois'}`;
-  return { text, cents: parseSalary(text) };
+  const per = unit === 'YEAR' ? 'an' : unit === 'HOUR' ? 'heure' : 'mois';
+  const max = typeof raw === 'number' ? undefined : raw.maxValue;
+  const text = typeof max === 'number' && max > amount ? `${amount} à ${max} € par ${per}` : `${amount} € par ${per}`;
+  const range = parseSalaryRange(text);
+  return { text, cents: range?.minCents ?? null, maxCents: range?.maxCents ?? null };
 }
 
 export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: CareerSite): Offer | null {
@@ -121,6 +124,7 @@ export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: Caree
     diplomaLevel: detectDiplomaLevel(`${education} ${title} ${description.slice(0, 2000)}`),
     salaryText: salary.text,
     salaryMonthlyCents: salary.cents,
+    salaryMaxCents: salary.maxCents,
     startDate: null,
     publishedAt: ld.datePosted ? new Date(ld.datePosted).toISOString() : new Date().toISOString(),
     description,

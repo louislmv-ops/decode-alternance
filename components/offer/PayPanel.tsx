@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useProfile } from '@/components/useProfile';
-import { formatEuros } from '@/lib/format';
+import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
 import { SMIC } from '@/lib/rules/reference';
 import { apprenticeNetThresholdCents, comparePay, CONTRACT_NAMES, contractForOffer, minimumSalary } from '@/lib/rules/salary';
@@ -14,6 +14,7 @@ import { conventionLink } from '@/lib/rules/conventions';
  */
 export function PayPanel({
   announcedCents,
+  announcedMaxCents = null,
   context,
   company,
   sourceLabel,
@@ -21,6 +22,8 @@ export function PayPanel({
   offerContract = null,
 }: {
   announcedCents: number | null;
+  /** Haut de la fourchette annoncée, ou plafond d'un « jusqu'à » : jamais présenté comme le salaire. */
+  announcedMaxCents?: number | null;
   context: PayContext | null;
   company: string | null;
   sourceLabel: string;
@@ -50,14 +53,18 @@ export function PayPanel({
 
       <div className="pay">
         <div>
-          <p className="ui-label">{e.source === 'annonce' ? 'Annoncé' : e.source === 'alternants' ? 'Estimé pour toi' : 'Au moins'}</p>
+          <p className="ui-label">
+            {e.source === 'annonce' ? (announcedMaxCents ? 'Fourchette annoncée' : 'Annoncé') : e.source === 'alternants' ? 'Estimé pour toi' : 'Au moins'}
+          </p>
           <p className="pay__figure num">
             {e.source === 'alternants' && '≈ '}
-            {formatEuros(e.cents, 0)}
+            {e.source === 'annonce' ? formatPay(e.cents, announcedMaxCents) : formatEuros(e.cents, 0)}
           </p>
           <p className="pay__src">
             {e.source === 'annonce'
               ? `brut par mois, dans l’annonce (${sourceLabel})`
+              : announcedMaxCents
+                ? `l’annonce dit « jusqu’à ${formatEuros(announcedMaxCents, 0)} » sans montant garanti : compte sur ton minimum légal`
               : e.source === 'alternants'
                 ? `d’après ${e.count} alternants de cette entreprise`
                 : e.legalGrid
@@ -92,13 +99,19 @@ export function PayPanel({
           ? pay.verdict === 'sous-le-minimum'
             ? 'Sous le minimum légal : l’employeur doit payer au moins ton minimum.'
             : pay.diffPercent > 0
-              ? `${formatEuros(pay.diffCents)} de plus que ton minimum, soit +${pay.diffPercent} %.`
+              ? `${announcedMaxCents ? 'Au moins ' : ''}${formatEuros(pay.diffCents, 0)} de plus que ton minimum, soit +${pay.diffPercent} %.`
               : 'Payé au minimum légal.'
           : e.source === 'alternants'
             ? `C’est une estimation : pose la question du salaire exact à l’entretien. Il ne peut pas être sous ${formatEuros(minimum.cents, 0)}.`
             : 'L’employeur ne peut pas payer moins. Pose la question du salaire exact à l’entretien.'}{' '}
         {contract === 'apprentissage' && `En apprentissage, sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
       </p>
+      {perks.length > 0 && <p className="panel__note">En plus : {perks.join(' · ')}</p>}
+
+      <details className="fold pay__more">
+        <summary className="fold__head">
+          <span className="pay__h">Le détail du calcul</span>
+        </summary>
       <p className="panel__note">
         {fromOffer
           ? `Minimum calculé pour un ${contract === 'apprentissage' ? 'contrat d’apprentissage' : 'contrat de professionnalisation'}, comme l’indique l’offre, sur la base du SMIC.`
@@ -109,8 +122,6 @@ export function PayPanel({
             : 'À ton âge, tu as droit au plus élevé entre le SMIC et 85 % du salaire minimum de ta convention collective (SMC) : ton minimum peut être plus haut.'
           : 'Certaines conventions (banque, BTP, Syntec…) ont leur propre grille d’alternants, plus favorable : ton minimum peut être plus haut.'}
       </p>
-      {perks.length > 0 && <p className="panel__note">En plus : {perks.join(' · ')}</p>}
-
       {contract === 'apprentissage' && (
         <>
           <h3 className="pay__h">Sur toute la durée de ton apprentissage (base SMIC)</h3>
@@ -126,6 +137,8 @@ export function PayPanel({
           </dl>
         </>
       )}
+
+      </details>
 
       <h3 className="pay__h">Ce qu’en disent les alternants</h3>
       {jobs.length > 0 && (
@@ -176,6 +189,10 @@ export function PayPanel({
         </p>
       )}
 
+      <details className="fold pay__more">
+        <summary className="fold__head">
+          <span className="pay__h">Convention collective et sources</span>
+        </summary>
       {(context?.conventions.length ?? 0) > 0 && (
         <>
           <h3 className="pay__h">Convention collective</h3>
@@ -206,6 +223,7 @@ export function PayPanel({
           <li>Convention collective : annuaire des entreprises (recherche-entreprises.api.gouv.fr), d’après les déclarations de l’employeur.</li>
         )}
       </ul>
+      </details>
     </section>
   );
 }

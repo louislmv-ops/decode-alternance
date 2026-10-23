@@ -16,6 +16,8 @@ create table if not exists offers (
   diploma_level smallint check (diploma_level between 3 and 7),
   salary_text text,
   salary_monthly_cents integer,
+  -- Haut de la fourchette annoncée : seulement pour afficher « de … à … ».
+  salary_max_cents integer,
   start_date date,
   published_at timestamptz not null,
   description text not null,
@@ -34,6 +36,7 @@ create table if not exists offers (
 -- Bases créées avant l'ajout du code ROME.
 alter table offers add column if not exists rome_code text;
 alter table offers add column if not exists easy_apply boolean not null default false;
+alter table offers add column if not exists salary_max_cents integer;
 
 create index if not exists offers_fingerprint on offers (fingerprint);
 create index if not exists offers_department on offers (department);

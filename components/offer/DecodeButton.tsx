@@ -9,7 +9,6 @@ import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
 import { PayPanel } from './PayPanel';
-import { Mascot } from '@/components/Mascot';
 
 /** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
 const MAX_TEXT = 12_000;
@@ -64,6 +63,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       </div>
       <OfferFacts
         payCents={offer.salaryCents}
+        payMaxCents={offer.salaryMaxCents ?? null}
         minimumCents={minimum.cents}
         community={offer.pay ?? null}
         company={offer.company}
@@ -74,15 +74,15 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
       <PayPanel
         announcedCents={offer.salaryCents}
+        announcedMaxCents={offer.salaryMaxCents ?? null}
         context={offer.pay ?? null}
         company={offer.company}
         sourceLabel={offer.sourceLabel}
         offerContract={offer.contractKind ?? null}
       />
       {state.status === 'idle' && (
-        <div className="decode-pitch decode-pitch--mascot">
-          <Mascot pose="voila" size={64} />
-          <p>Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.</p>
+        <div className="decode-pitch">
+          <p>Un clic : l’offre résumée en clair, les points forts, les pièges et comment sortir du lot.</p>
         </div>
       )}
       {state.status === 'error' && (

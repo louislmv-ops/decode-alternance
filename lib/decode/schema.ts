@@ -40,7 +40,11 @@ export const DecodedOfferSchema = z.object({
   }),
   salaire: z.object({
     annonce: z.string().nullable().describe('Le salaire tel qu’écrit, ou null'),
-    mensuelBrutEuros: z.number().nullable().describe('Montant mensuel brut si l’annonce le chiffre, sinon null'),
+    mensuelBrutEuros: z
+      .number()
+      .nullable()
+      .describe('Montant mensuel brut garanti : la borne basse d’une fourchette ; null pour « jusqu’à », « selon profil » ou la grille légale'),
+    maxBrutEuros: z.number().nullable().optional().describe('Borne haute mensuelle brute d’une fourchette ou d’un « jusqu’à », sinon null'),
     avantages: z.array(z.string()),
   }),
   pointsForts: z.array(z.string()),

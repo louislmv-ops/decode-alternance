@@ -82,33 +82,102 @@ export function detectDiplomaLevel(text: string): DiplomaLevel | null {
 
 const HOURS_PER_MONTH = 151.67;
 
+/** Au-delà de 4 000 € brut par mois, ce n'est pas un salaire d'alternant : chiffre d'affaires, CDI, prime… */
+const MAX_ALTERNANCE_CENTS = 400_000;
+
 /**
- * Montant mensuel brut en centimes à partir d'un libellé de salaire d'annonce.
- * Une fourchette donne sa borne basse : c'est ce qui est réellement promis.
+ * Ce que l'annonce promet vraiment. `minCents` est le seul chiffre qu'on affiche comme acquis ; `maxCents` ne sert
+ * qu'à montrer une fourchette, jamais à la place du minimum (« jusqu'à 1 800 € » ne promet pas 1 800 €).
  */
-export function parseSalary(text: string | null | undefined): number | null {
-  if (!text) return null;
-  const t = stripAccents(text.toLowerCase()).replace(/ | /g, ' ');
+export interface SalaryRange {
+  minCents: number | null;
+  maxCents: number | null;
+}
 
-  const smic = t.match(/(\d{2,3})\s*%\s*(du\s+)?smic/);
-  if (smic?.[1]) return Math.round((SMIC.monthlyCents * Number(smic[1])) / 100);
+const NUM = String.raw`\d{1,3}(?:[ .]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?`;
+const UNIT = String.raw`k\s*(?:€|eur\b|euros?)|€|eur\b|euros?|%\s*(?:du\s+|de\s+)?smic`;
+const CONNECTOR = String.raw`\s*(?:€|eur\b|euros?|%(?:\s*(?:du\s+)?smic)?)?\s*(?:brut\s*)?(?:a|au|et|-|–|—|\/)\s*`;
+const RANGE_RE = new RegExp(String.raw`(${NUM})\s*(k)?${CONNECTOR}(${NUM})\s*(${UNIT})`);
+const SINGLE_RE = new RegExp(String.raw`(${NUM})\s*(${UNIT})`);
+const UP_TO = /(jusqu.?\s?a|maximum|max\.?|plafond|pouvant aller)\s*(de\s+)?$/;
 
-  const amount = t.match(/(\d{1,3}(?:[ .]\d{3})+|\d+)(?:[.,](\d{1,2}))?\s*(k)?\s*(?:€|eur|euros)/);
-  if (!amount?.[1]) return null;
-  let value = Number(amount[1].replace(/[ .]/g, '')) + (amount[2] ? Number(`0.${amount[2]}`) : 0);
-  if (amount[3]) value *= 1000;
+const toNumber = (raw: string) => {
+  const m = raw.match(/^(\d{1,3}(?:[ .]\d{3})+|\d+)(?:[.,](\d{1,2}))?$/);
+  if (!m?.[1]) return Number.NaN;
+  return Number(m[1].replace(/[ .]/g, '')) + (m[2] ? Number(`0.${m[2]}`) : 0);
+};
 
-  const after = t.slice(amount.index ?? 0);
-  if (/(heure|horaire|\/\s*h\b)/.test(after.slice(0, 40)) || value < 40) value *= HOURS_PER_MONTH;
-  else if (/(an\b|annuel|par an|\/\s*an|brut annuel|k)/.test(after.slice(0, 40)) || value > 8000) value /= 12;
-
-  const cents = Math.round(value * 100);
-  // Un salaire d'alternant hors de cette plage est presque toujours une erreur de lecture.
+/** Un montant et son unité, ramenés au mois brut, en centimes ; rien s'il n'est pas plausible pour un alternant. */
+function monthlyCents(value: number, unit: string, after: string, thousands = false): number | null {
+  if (!Number.isFinite(value)) return null;
+  if (/smic/.test(unit)) {
+    if (value < 20 || value > 200) return null;
+    return Math.round((SMIC.monthlyCents * value) / 100);
+  }
+  let v = thousands || /^k/.test(unit) ? value * 1000 : value;
+  const next = after.slice(0, 40);
+  if (/(heure|horaire|\/\s*h\b)/.test(next) || v < 40) v *= HOURS_PER_MONTH;
+  else if (/(\ban\b|annuel|par an|\/\s*an|brut annuel)/.test(next) || thousands || /^k/.test(unit) || v > 8000) v /= 12;
+  const cents = Math.round(v * 100);
   return cents >= 30_000 && cents <= MAX_ALTERNANCE_CENTS ? cents : null;
 }
 
-/** Au-delà de 4 000 € brut par mois, ce n'est pas un salaire d'alternant : chiffre d'affaires, CDI, prime… */
-const MAX_ALTERNANCE_CENTS = 400_000;
+/**
+ * Une fourchette en % du SMIC qui part des minimums légaux (« de 27 % à 100 % du SMIC selon l'âge ») est la grille
+ * de la loi, pas une promesse de l'entreprise. Au-delà de 80 % au départ, c'est une vraie fourchette.
+ */
+const isLegalGridRange = (unit: string, low: number, high: number) => /smic/.test(unit) && low < 80 && high > low;
+
+/**
+ * Le salaire d'un libellé d'annonce : une fourchette garde ses deux bornes, « jusqu'à » n'a pas de minimum,
+ * un pourcentage du SMIC est converti. Rien d'inventé : sans montant clair, null.
+ */
+export function parseSalaryRange(text: string | null | undefined): SalaryRange | null {
+  if (!text) return null;
+  const t = stripAccents(text.toLowerCase()).replace(/[  ]/g, ' ');
+  const range = t.match(RANGE_RE);
+  if (range) return readRange(t, range);
+  const single = t.match(SINGLE_RE);
+  return single ? readSingle(t, single) : null;
+}
+
+/** Une fourchette trouvée par RANGE_RE ; une grille légale renvoie un minimum et un maximum vides. */
+function readRange(t: string, range: RegExpMatchArray): SalaryRange | null {
+  const unit = range[4] ?? '';
+  const lowRaw = toNumber(range[1] ?? '');
+  const highRaw = toNumber(range[3] ?? '');
+  if (isLegalGridRange(unit, lowRaw, highRaw)) return null;
+  const after = t.slice((range.index ?? 0) + range[0].length);
+  const thousands = Boolean(range[2]) || /^k/.test(unit);
+  // « bac+3 à 1 800 € » : le premier nombre n'est pas un salaire. Une vraie fourchette garde le même ordre de grandeur.
+  if (!/smic/.test(unit) && !thousands && lowRaw < 40 && highRaw >= 40) return readSingle(t, Object.assign([`${range[3]} ${unit}`, range[3], unit], { index: (range.index ?? 0) + range[0].length - `${range[3]} ${unit}`.length }) as unknown as RegExpMatchArray);
+  const low = monthlyCents(lowRaw, unit, after, thousands);
+  const high = monthlyCents(highRaw, unit, after, thousands);
+  if (low !== null && high !== null && low * 2.5 < high) return { minCents: high, maxCents: null };
+  if (low !== null && high !== null) {
+    const [a, b] = low <= high ? [low, high] : [high, low];
+    return { minCents: a, maxCents: b > a ? b : null };
+  }
+  if (low === null && high === null) return null;
+  // Une seule borne plausible : on ne garde que la plus basse des deux qu'on sait lire, sans fourchette.
+  return { minCents: low ?? high, maxCents: null };
+}
+
+function readSingle(t: string, single: RegExpMatchArray): SalaryRange | null {
+  const at = single.index ?? 0;
+  const cents = monthlyCents(toNumber(single[1] ?? ''), single[2] ?? '', t.slice(at + single[0].length));
+  if (cents === null) return null;
+  if (UP_TO.test(t.slice(Math.max(0, at - 30), at))) return { minCents: null, maxCents: cents };
+  return { minCents: cents, maxCents: null };
+}
+
+/**
+ * Montant mensuel brut en centimes, celui qu'on peut annoncer sans mentir : la borne basse d'une fourchette,
+ * jamais un « jusqu'à ».
+ */
+export function parseSalary(text: string | null | undefined): number | null {
+  return parseSalaryRange(text)?.minCents ?? null;
+}
 
 const PAY_WORDS = /(salaire|remuneration|gratification|brut|smic|par mois|mensuel)/;
 const NOT_PAY = /(chiffre d.affaires|\bca\b|prime|budget|capital|levee|investi|million|milliard|cdi|a l.issue|apres (ton|votre|l).?alternance|frais|cout|tarif)/;
@@ -118,9 +187,9 @@ const NOT_PAY = /(chiffre d.affaires|\bca\b|prime|budget|capital|levee|investi|m
  * rémunération (« salaire », « brut », « par mois »…) et rien d'autre : un chiffre d'affaires, une prime ou le
  * salaire d'un futur CDI ne doivent jamais faire croire à un gros salaire d'alternant.
  */
-export function salaryFromDescription(text: string | null | undefined): number | null {
+export function salaryRangeFromDescription(text: string | null | undefined): SalaryRange | null {
   if (!text) return null;
-  const t = stripAccents(text.toLowerCase()).replace(/ | /g, ' ');
+  const t = stripAccents(text.toLowerCase()).replace(/[  ]/g, ' ');
   const amounts = t.matchAll(/(\d{2,3})\s*%\s*(du\s+)?smic|(\d{1,3}(?:[ .]\d{3})+|\d+)(?:[.,]\d{1,2})?\s*k?\s*(?:€|eur\b|euros)/g);
   for (const m of amounts) {
     const at = m.index ?? 0;
@@ -128,10 +197,31 @@ export function salaryFromDescription(text: string | null | undefined): number |
     const after = t.slice(at, at + m[0].length + 30);
     const context = `${before} ${after}`;
     if (!PAY_WORDS.test(context) || NOT_PAY.test(context)) continue;
-    const cents = parseSalary(t.slice(at, at + m[0].length + 40));
-    if (cents !== null) return cents;
+    // Le début d'une fourchette (« de 1 400 à 1 800 € ») précède le montant trouvé : on regarde juste avant.
+    const windowStart = Math.max(0, at - 30);
+    const windowText = t.slice(windowStart, at + m[0].length + 40);
+    const range = windowText.match(RANGE_RE);
+    const end = at - windowStart + m[0].length;
+    if (range && (range.index ?? 0) + range[0].length >= end - 2 && (range.index ?? 0) < at - windowStart + 1) {
+      const unit = range[4] ?? '';
+      // « de 27 % à 100 % du SMIC selon ton âge » : c'est la grille légale, pas un montant.
+      if (isLegalGridRange(unit, toNumber(range[1] ?? ''), toNumber(range[3] ?? ''))) return null;
+      const found = readRange(windowText, range);
+      if (found) return found;
+      continue;
+    }
+    const single = t.slice(at).match(SINGLE_RE);
+    if (single && (single.index ?? 0) === 0) {
+      const found = readSingle(t, Object.assign(single, { index: at }) as RegExpMatchArray);
+      if (found) return found;
+    }
   }
   return null;
+}
+
+/** La borne basse du salaire écrit dans une annonce, ou rien. */
+export function salaryFromDescription(text: string | null | undefined): number | null {
+  return salaryRangeFromDescription(text)?.minCents ?? null;
 }
 
 /** Département à partir d'un code postal (Corse et outre-mer compris). */

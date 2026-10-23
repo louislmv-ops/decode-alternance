@@ -34,3 +34,12 @@ export function daysBetween(fromIso: string, to: Date): number {
 function startOfDay(d: Date): number {
   return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
 }
+
+/**
+ * Le salaire annoncé, tel qu'il est promis : « 1 400 € », ou « 1 400 à 1 800 € » pour une fourchette.
+ * Le haut d'une fourchette n'apparaît jamais seul.
+ */
+export function formatPay(minCents: number, maxCents: number | null | undefined): string {
+  if (maxCents && maxCents > minCents) return `${euros0.format(minCents / 100).replace(/\s*€$/, '')} à ${formatEuros(maxCents, 0)}`;
+  return formatEuros(minCents, 0);
+}

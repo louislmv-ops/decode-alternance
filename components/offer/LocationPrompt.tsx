@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { IconPin } from '@/components/app/Icons';
-import { Mascot } from '@/components/Mascot';
 import { useState } from 'react';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { locateDepartment, savePlace } from '@/lib/place';
@@ -29,7 +28,6 @@ export function LocationPrompt() {
 
   return (
     <section className="locate" aria-labelledby="locate-title">
-      <Mascot pose="salut" size={64} className="locate__mascot" />
       <p id="locate-title" className="locate__title">
         Tu cherches où ?
       </p>

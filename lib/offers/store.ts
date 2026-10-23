@@ -5,7 +5,7 @@ import type { DecodedOffer } from '@/lib/decode/schema';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SMIC } from '@/lib/rules/reference';
 import { PAGE_SIZE } from './filter';
-import { STRONG_ROLE_SQL } from './rank';
+import { CAC40_SQL, LOW_ROLE_SQL, STRONG_ROLE_SQL } from './rank';
 import type { CompanySizeTag, Offer, OfferContract, OfferFilters, OfferPage, OfferSource } from './types';
 
 let sql: postgres.Sql | null = null;
@@ -35,6 +35,7 @@ interface OfferRow {
   diploma_level: number | null;
   salary_text: string | null;
   salary_monthly_cents: number | null;
+  salary_max_cents?: number | null;
   start_date: Date | null;
   published_at: Date;
   description: string;
@@ -62,6 +63,7 @@ function toOffer(row: OfferRow): Offer {
     diplomaLevel: row.diploma_level as DiplomaLevel | null,
     salaryText: row.salary_text,
     salaryMonthlyCents: row.salary_monthly_cents,
+    salaryMaxCents: row.salary_max_cents ?? null,
     startDate: row.start_date ? row.start_date.toISOString().slice(0, 10) : null,
     publishedAt: row.published_at.toISOString(),
     description: row.description,
@@ -91,6 +93,7 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
     diploma_level: o.diplomaLevel,
     salary_text: o.salaryText,
     salary_monthly_cents: o.salaryMonthlyCents,
+    salary_max_cents: o.salaryMaxCents ?? null,
     start_date: o.startDate,
     published_at: o.publishedAt,
     description: o.description,
@@ -107,7 +110,7 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
       source_url = excluded.source_url, title = excluded.title, company = excluded.company,
       company_size = excluded.company_size, city = excluded.city, postal_code = excluded.postal_code,
       department = excluded.department, contract = excluded.contract, diploma_level = excluded.diploma_level,
-      salary_text = excluded.salary_text, salary_monthly_cents = excluded.salary_monthly_cents,
+      salary_text = excluded.salary_text, salary_monthly_cents = excluded.salary_monthly_cents, salary_max_cents = excluded.salary_max_cents,
       description = excluded.description, fingerprint = excluded.fingerprint,
       school_flags = excluded.school_flags, rome_code = excluded.rome_code, easy_apply = excluded.easy_apply, seen_at = now()`;
 }
@@ -119,12 +122,14 @@ export async function removeStale(source: OfferSource, cutoff: Date): Promise<nu
   return result.count;
 }
 
-/** La note de attractiveness() (lib/offers/rank.ts) en SQL, pour trier toute la base, sans le bonus CAC 40 (noms accentués). */
+/** La note de attractiveness() (lib/offers/rank.ts) en SQL, pour trier toute la base. */
 const TOP_ORDER = (s: ReturnType<typeof db>) => s`(
-    coalesce(least(4, greatest(0, (salary_monthly_cents::float / ${SMIC.monthlyCents} - 0.4) * 6.7)), 0)
+    coalesce(least(case when title ~* ${LOW_ROLE_SQL} then 1 else 4 end, greatest(0, (salary_monthly_cents::float / ${SMIC.monthlyCents} - 0.4) * 6.7)), 0)
     + case company_size when 'grande' then 3 when 'eti' then 1.5 when 'pme' then 0.3 else 0 end
-    + case diploma_level when 7 then 1.5 when 6 then 1 when 5 then 0.3 else 0 end
-    + case when title ~* ${STRONG_ROLE_SQL} then 1 else 0 end
+    + case when coalesce(company, '') ~* ${CAC40_SQL} then (case when company_size = 'grande' then 1.5 else 4.5 end) else 0 end
+    + case diploma_level when 7 then 2.5 when 6 then 1.5 when 5 then 0.3 else 0 end
+    + case when title ~* ${STRONG_ROLE_SQL} then 1.5 else 0 end
+    - case when title ~* ${LOW_ROLE_SQL} then 3 else 0 end
     + case when direct then 0.5 else 0 end
     - least(3, extract(epoch from now() - published_at) / 864000)
   ) desc, published_at desc`;

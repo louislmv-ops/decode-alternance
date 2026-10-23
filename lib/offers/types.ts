@@ -47,6 +47,8 @@ export interface Offer {
   salaryText: string | null;
   /** Salaire mensuel brut annoncé, en centimes, quand il est chiffré. */
   salaryMonthlyCents: number | null;
+  /** Haut de la fourchette annoncée, quand l'annonce en donne une. Jamais affiché seul comme le salaire. */
+  salaryMaxCents?: number | null;
   startDate: string | null;
   publishedAt: string;
   /** Texte brut de l'annonce, utilisé pour la traduction. */

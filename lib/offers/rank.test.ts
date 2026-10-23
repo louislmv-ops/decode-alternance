@@ -12,6 +12,11 @@ describe('attractiveness', () => {
     expect(attractiveness({ ...base, salaryMonthlyCents: 180_000 }, now)).toBeGreaterThan(plain);
     expect(attractiveness({ ...base, title: 'Ingénieur data' }, now)).toBeGreaterThan(plain);
   });
+  it('ne fait pas passer un poste d’exécution bien payé devant un poste qualifié d’un grand groupe', () => {
+    const security = attractiveness({ ...base, title: 'Futur Agent de Sécurité', companySize: 'grande', salaryMonthlyCents: 186_700 }, now);
+    const pm = attractiveness({ ...base, title: 'Chef de projet marketing', companySize: 'grande', diplomaLevel: 7, salaryMonthlyCents: null }, now);
+    expect(pm).toBeGreaterThan(security);
+  });
   it('fait reculer les offres anciennes', () => {
     expect(attractiveness({ ...base, publishedAt: '2026-09-01T08:00:00Z' }, now)).toBeLessThan(attractiveness(base, now));
   });

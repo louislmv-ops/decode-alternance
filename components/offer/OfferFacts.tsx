@@ -1,4 +1,4 @@
-import { formatEuros } from '@/lib/format';
+import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
 import { payTier } from '@/lib/offers/pay-tier';
 import { PayEuros } from './PayTier';
@@ -6,6 +6,7 @@ import { PayEuros } from './PayTier';
 /** L'essentiel d'une offre en quatre cases : la paie, le lieu, le rythme, le contrat. */
 export function OfferFacts({
   payCents,
+  payMaxCents = null,
   minimumCents,
   community = null,
   company,
@@ -14,6 +15,8 @@ export function OfferFacts({
   contract,
 }: {
   payCents: number | null;
+  /** Haut de la fourchette, ou plafond d'un « jusqu'à » quand l'annonce ne garantit pas de montant. */
+  payMaxCents?: number | null;
   minimumCents: number;
   community?: PayContext | null;
   company: string | null;
@@ -31,10 +34,12 @@ export function OfferFacts({
           <PayEuros tier={payTier(e.cents, minimumCents)} size="large" />
           <span className="facts__sub num">
             {e.source === 'annonce'
-              ? `${formatEuros(e.cents, 0)} brut / mois`
+              ? `${formatPay(e.cents, payMaxCents)} brut / mois`
               : e.source === 'alternants'
                 ? `≈ ${formatEuros(e.cents, 0)} · ${e.count} alternants`
-                : `Au moins ${formatEuros(e.cents, 0)} · minimum légal`}
+                : payMaxCents
+                  ? `Au moins ${formatEuros(e.cents, 0)}, jusqu’à ${formatEuros(payMaxCents, 0)} selon profil`
+                  : `Au moins ${formatEuros(e.cents, 0)} · minimum légal`}
           </span>
         </dd>
       </div>

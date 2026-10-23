@@ -25,6 +25,8 @@ export interface OfferMeta {
   sourceUrl: string;
   sourceLabel: string;
   salaryCents: number | null;
+  /** Haut de la fourchette annoncée, ou plafond d'un « jusqu'à ». */
+  salaryMaxCents?: number | null;
   schoolFlags: string[];
   isExample: boolean;
   contract: string | null;
@@ -67,7 +69,11 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const [added, setAdded] = useState(false);
 
   const minimum = minimumSalary({ contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
-  const offerCents = offer?.salaryCents ?? (decoded.salaire.mensuelBrutEuros !== null ? Math.round(decoded.salaire.mensuelBrutEuros * 100) : null);
+  // Pour une offre de la base, seul le montant lu dans l'annonce compte ; l'IA ne chiffre qu'une offre collée à la main.
+  const aiMin = decoded.salaire.mensuelBrutEuros !== null ? Math.round(decoded.salaire.mensuelBrutEuros * 100) : null;
+  const aiMax = decoded.salaire.maxBrutEuros ? Math.round(decoded.salaire.maxBrutEuros * 100) : null;
+  const offerCents = offer && !offer.isExample ? offer.salaryCents : (offer?.salaryCents ?? aiMin);
+  const offerMaxCents = offer && !offer.isExample ? (offer.salaryMaxCents ?? null) : (offer?.salaryMaxCents ?? aiMax);
   const pay = offerCents !== null ? comparePay(offerCents, minimum.cents) : null;
   const big = decoded.entreprise.taille === 'grande';
   const alerts = [
@@ -139,6 +145,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
 
       <OfferFacts
         payCents={offerCents}
+        payMaxCents={offerMaxCents}
         minimumCents={minimum.cents}
         community={offer?.pay ?? null}
         company={company || null}
@@ -163,17 +170,51 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             {(big || pay?.verdict === 'bien-paye' || schoolBait) && (
               <div className="tags">
                 {big && !schoolBait && <span className="pepite stroke">Grande entreprise</span>}
-                {pay?.verdict === 'bien-paye' && !schoolBait && <span className="pepite stroke">+{pay.diffPercent} % au-dessus de ton minimum</span>}
+                {pay?.verdict === 'bien-paye' && !schoolBait && (
+                  <span className="pepite stroke">
+                    {offerMaxCents ? 'Au moins ' : ''}+{pay.diffPercent} % au-dessus de ton minimum
+                  </span>
+                )}
                 {schoolBait && <span className="pill pill--alert">À vérifier avant de postuler</span>}
               </div>
             )}
             {decoded.entreprise.ceQuElleFait && <p className="lead-sub">{decoded.entreprise.ceQuElleFait}</p>}
           </section>
 
+          {(decoded.pointsForts.length > 0 || decoded.limites.length > 0) && (
+            <section className="panel" aria-labelledby="proscons-title">
+              <h2 id="proscons-title" className="sr-only">
+                Les plus et les moins
+              </h2>
+              <div className="split">
+                {decoded.pointsForts.length > 0 && (
+                  <div>
+                    <p className="ui-label">Les +</p>
+                    <ul className="bullets">
+                      {decoded.pointsForts.slice(0, 3).map((x, i) => (
+                        <li key={i}>{x}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {decoded.limites.length > 0 && (
+                  <div>
+                    <p className="ui-label">À savoir</p>
+                    <ul className="bullets bullets--ink limits">
+                      {decoded.limites.slice(0, 3).map((x, i) => (
+                        <li key={i}>{x}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           <details className="panel fold" aria-labelledby="missions-title">
             <summary className="panel__head fold__head">
-              <h2 id="missions-title">Les missions, traduites</h2>
-              <span className="panel__meta">{decoded.missions.length} missions</span>
+              <h2 id="missions-title">Toutes les missions</h2>
+              <span className="panel__meta">{decoded.missions.length}</span>
             </summary>
             <ul className="missions" role="list">
               {decoded.missions.map((m, i) => (
@@ -184,61 +225,17 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 </li>
               ))}
             </ul>
+            {decoded.apprentissages.length > 0 && (
+              <p className="panel__note">
+                <strong>Tu vas apprendre :</strong> {decoded.apprentissages.join(' · ')}
+              </p>
+            )}
           </details>
-
-          <details className="panel fold" aria-labelledby="semaine-title">
-            <summary className="panel__head fold__head">
-              <h2 id="semaine-title">Ta semaine probable</h2>
-              <Chip c="deduit" />
-            </summary>
-            <dl className="week">
-              {decoded.semaineType.map((s, i) => (
-                <div key={i}>
-                  <dt>{s.moment}</dt>
-                  <dd>{s.activite}</dd>
-                </div>
-              ))}
-            </dl>
-          </details>
-
-          <section className="panel" aria-labelledby="learn-title">
-            <div className="split">
-              <div>
-                <div className="panel__head">
-                  <h2 id="learn-title">Ce que tu vas apprendre</h2>
-                </div>
-                <ul className="bullets">
-                  {decoded.apprentissages.map((x, i) => (
-                    <li key={i}>{x}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <div className="panel__head">
-                  <h2>Points forts, points faibles</h2>
-                </div>
-                {decoded.pointsForts.length > 0 && (
-                  <ul className="bullets">
-                    {decoded.pointsForts.map((x, i) => (
-                      <li key={i}>{x}</li>
-                    ))}
-                  </ul>
-                )}
-                {decoded.limites.length > 0 && (
-                  <ul className="bullets bullets--ink limits">
-                    {decoded.limites.map((x, i) => (
-                      <li key={i}>{x}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </section>
 
           <details className="panel fold" aria-labelledby="questions-title">
             <summary className="panel__head fold__head">
               <h2 id="questions-title">Questions à poser</h2>
-              <CopyButton text={decoded.questionsAPoser.map((q) => `- ${q}`).join('\n')} label="Copier les questions" />
+              <CopyButton text={decoded.questionsAPoser.map((q) => `- ${q}`).join('\n')} label="Copier" />
             </summary>
             <ul className="questions" role="list">
               {decoded.questionsAPoser.map((q, i) => (
@@ -251,22 +248,6 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               </p>
             )}
           </details>
-
-          {decoded.jargon.length > 0 && (
-            <details className="panel fold" aria-labelledby="jargon-title">
-              <summary className="panel__head fold__head">
-                <h2 id="jargon-title">Le jargon traduit</h2>
-              </summary>
-              <dl className="glossary">
-                {decoded.jargon.map((j, i) => (
-                  <div key={i}>
-                    <dt>« {j.expression} »</dt>
-                    <dd>{j.traduction}</dd>
-                  </div>
-                ))}
-              </dl>
-            </details>
-          )}
         </div>
 
         <aside className="detail__rail" aria-label="Vérifications et contacts">
@@ -283,33 +264,24 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             </section>
           )}
 
-          {decoded.aMettreEnAvant.length > 0 && (
-            <section className="panel" aria-labelledby="cv-title">
-              <div className="panel__head">
-                <h2 id="cv-title">Fais la différence</h2>
-              </div>
-              <ul className="bullets">
-                {decoded.aMettreEnAvant.map((x, i) => (
-                  <li key={i}>{x}</li>
-                ))}
-              </ul>
-            </section>
-          )}
           {company && decoded.equipe.aContacter.length > 0 && (
             <section className="panel" aria-labelledby="team-title">
               <div className="panel__head">
-                <h2 id="team-title">Trouve qui contacter</h2>
+                <h2 id="team-title">Sors du lot</h2>
               </div>
-              <p className="panel__note panel__note--first">
-                Service à viser : <strong>{decoded.equipe.service}</strong>
+              {decoded.aMettreEnAvant.length > 0 && (
+                <ul className="bullets">
+                  {decoded.aMettreEnAvant.slice(0, 3).map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
+              )}
+              <p className="panel__note">
+                Écris au service <strong>{decoded.equipe.service}</strong>, pas seulement aux RH :{' '}
+                {decoded.equipe.aContacter.slice(0, 2).join(', ')}.
               </p>
-              <ul className="bullets team-roles">
-                {decoded.equipe.aContacter.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
               <ul className="search-links" role="list">
-                {searches.slice(0, 3).map((s) => (
+                {searches.slice(0, 2).map((s) => (
                   <li key={s.url}>
                     <a href={s.url} target="_blank" rel="noopener noreferrer" className="search-link">
                       <span>{s.label}</span>
@@ -337,6 +309,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
 
           <PayPanel
             announcedCents={offerCents}
+            announcedMaxCents={offerMaxCents}
             context={offer?.pay ?? null}
             company={company || null}
             sourceLabel={offer?.sourceLabel ?? 'l’annonce'}
