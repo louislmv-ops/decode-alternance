@@ -29,6 +29,19 @@ async function hasStoredOffers(): Promise<boolean> {
   return value;
 }
 
+/** La base contient-elle des offres de La bonne alternance ? Vérifié au plus toutes les 10 minutes. */
+let storedLba: { until: number; value: boolean } | null = null;
+
+async function hasStoredLba(): Promise<boolean> {
+  if (!(await hasStoredOffers())) return false;
+  if (storedLba && storedLba.until > Date.now()) return storedLba.value;
+  const value = await countStoredOffers('la-bonne-alternance')
+    .then((n) => n > 0)
+    .catch(() => false);
+  storedLba = { until: Date.now() + 600_000, value };
+  return value;
+}
+
 async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
   if (isLiveConfigured()) return liveSearch(filters);
@@ -36,7 +49,9 @@ async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
 }
 
 export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
-  const aggregators = isAggregatorsConfigured();
+  // La collecte de nuit range toute La bonne alternance en base : inutile de l'interroger en plus à chaque visite.
+  const withLba = !(await hasStoredLba());
+  const aggregators = isAggregatorsConfigured(withLba);
   const primary = await primarySearch(filters).catch((error) => {
     // Sans agrégateur, une panne de la source principale doit se voir ; avec, ils prennent le relais.
     if (!aggregators) throw error;
@@ -46,7 +61,7 @@ export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
   if (!aggregators) return primary ?? filterOffers(DEMO_OFFERS, filters, 'exemples');
 
   const pageSize = primary?.pageSize ?? 20;
-  const extra = await aggregatorSearch(filters, primary ? Math.ceil(pageSize / 2) : pageSize);
+  const extra = await aggregatorSearch(filters, primary ? Math.ceil(pageSize / 2) : pageSize, withLba);
   // Les agrégateurs ne savent filtrer ni la taille, ni le secteur, ni le salaire : on le fait ici.
   const kept = extra.offers.filter((o) => matchesFilters(o, filters));
   const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort, filters.sort === 'reviews' ? await companyRatingOf() : undefined);

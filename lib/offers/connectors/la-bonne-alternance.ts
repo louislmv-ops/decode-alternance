@@ -108,6 +108,8 @@ export interface LbaQuery {
   departements?: string[];
   /** Niveau européen du diplôme visé, de 3 à 7. */
   level?: string;
+  /** Codes ROME des métiers, pour découper une recherche qui dépasse le plafond. */
+  romes?: string[];
 }
 
 /** Un appel : l'API renvoie au plus 150 offres par source (450 en tout), d'où le découpage fait par l'appelant. */
@@ -115,6 +117,7 @@ export async function fetchLba(query: LbaQuery = {}): Promise<Offer[]> {
   const params = new URLSearchParams();
   for (const d of query.departements ?? []) params.append('departements', d);
   if (query.level) params.set('target_diploma_level', query.level);
+  if (query.romes?.length) params.set('romes', query.romes.join(','));
   const res = await fetchText(`${api()}/job/v1/search${params.size ? `?${params}` : ''}`, {
     headers: { Authorization: `Bearer ${process.env.LBA_API_TOKEN}`, Accept: 'application/json' },
     timeoutMs: 15_000,

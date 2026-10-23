@@ -146,22 +146,23 @@ const jooble: Search = async (filters, page, perPage) => {
   });
 };
 
-function sources(): Search[] {
+/** withLba : faux quand la base contient déjà toute La bonne alternance, collectée la nuit. */
+function sources(withLba = true): Search[] {
   const list: Search[] = [];
-  if (isLbaConfigured()) list.push(lba);
+  if (withLba && isLbaConfigured()) list.push(lba);
   if (isAdzunaConfigured()) list.push(adzuna);
   if (isJoobleConfigured()) list.push(jooble);
   return list;
 }
 
-export function isAggregatorsConfigured(): boolean {
-  return sources().length > 0;
+export function isAggregatorsConfigured(withLba = true): boolean {
+  return sources(withLba).length > 0;
 }
 
 /** Une page de chaque source. Une source en panne ne bloque pas les autres. */
-export async function aggregatorSearch(filters: OfferFilters, perSource: number): Promise<Result> {
+export async function aggregatorSearch(filters: OfferFilters, perSource: number, withLba = true): Promise<Result> {
   const page = Math.max(1, filters.page ?? 1);
-  const results = await Promise.allSettled(sources().map((search) => search(filters, page, perSource)));
+  const results = await Promise.allSettled(sources(withLba).map((search) => search(filters, page, perSource)));
   const ok = results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []));
   for (const r of results) if (r.status === 'rejected') console.error(r.reason);
   const offers = ok.flatMap((r) => r.offers);
