@@ -43,6 +43,7 @@ export default async function OfferPage({ params, searchParams }: Props) {
     sourceUrl: offer.sourceUrl,
     sourceLabel: offer.direct ? 'Direct entreprise' : SOURCE_LABELS[offer.source],
     salaryCents: offer.salaryMonthlyCents,
+    salaryMaxCents: offer.salaryMaxCents ?? null,
     schoolFlags: offer.schoolFlags,
     isExample: offer.source === 'exemple',
     department: offer.department,
