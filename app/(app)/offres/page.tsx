@@ -13,6 +13,14 @@ import { highlights } from '@/lib/offers/highlights';
 import { listOffers } from '@/lib/offers/repository';
 import type { OfferFilters } from '@/lib/offers/types';
 
+/** Les sources à citer sous la liste, comme leurs conditions le demandent. */
+const VIA = [
+  { source: 'la-bonne-alternance', label: 'La bonne alternance', href: 'https://labonnealternance.apprentissage.beta.gouv.fr' },
+  { source: 'france-travail', label: 'France Travail', href: 'https://www.francetravail.fr' },
+  { source: 'adzuna', label: 'Adzuna', href: 'https://www.adzuna.fr' },
+  { source: 'jooble', label: 'Jooble', href: 'https://fr.jooble.org' },
+] as const;
+
 export const metadata: Metadata = {
   title: 'Offres d’alternance',
   description: 'Les offres d’alternance avec leur paie notée en €, ton salaire minimum comparé et les offres d’écoles écartées.',
@@ -146,19 +154,24 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           </ul>
         )}
 
-        {rows.some(({ offer }) => offer.source === 'adzuna' || offer.source === 'jooble') && (
-          <p className="offers__via">
-            Une partie des offres via{' '}
-            <a href="https://www.adzuna.fr" target="_blank" rel="noopener noreferrer" className="link">
-              Adzuna
-            </a>{' '}
-            et{' '}
-            <a href="https://fr.jooble.org" target="_blank" rel="noopener noreferrer" className="link">
-              Jooble
-            </a>
-            , qui regroupent des annonces publiées sur d’autres sites.
-          </p>
-        )}
+        {(() => {
+          const via = VIA.filter((v) => rows.some(({ offer }) => offer.source === v.source));
+          if (via.length === 0) return null;
+          return (
+            <p className="offers__via">
+              Offres via{' '}
+              {via.map((v, i) => (
+                <span key={v.source}>
+                  {i > 0 && (i === via.length - 1 ? ' et ' : ', ')}
+                  <a href={v.href} target="_blank" rel="noopener noreferrer" className="link">
+                    {v.label}
+                  </a>
+                </span>
+              ))}
+              .
+            </p>
+          );
+        })()}
 
         {pages > 1 && (
           <nav className="pager" aria-label="Pages">

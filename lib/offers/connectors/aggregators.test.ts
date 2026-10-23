@@ -66,3 +66,48 @@ describe('lieux et liens', () => {
     expect(offerHref({ id: 'adzuna:1', source: 'adzuna', sourceUrl: 'https://www.adzuna.fr/land/ad/1' })).toBe('/offres/adzuna%3A1?u=https%3A%2F%2Fwww.adzuna.fr%2Fland%2Fad%2F1');
   });
 });
+
+describe('La bonne alternance', async () => {
+  const { lbaToOffer, pageOf } = await import('./la-bonne-alternance');
+  const job = {
+    identifier: { id: 'abc123', partner_job_id: 'p1', partner_label: 'La bonne alternance' },
+    workplace: { name: 'GROUPE ORVANE', brand: 'Orvane', size: '50-99', location: { address: '12 rue de la Paix 75002 Paris' } },
+    apply: { url: 'https://labonnealternance.apprentissage.beta.gouv.fr/emploi/abc123' },
+    contract: { type: ['Apprentissage'], start: '2027-09-01T00:00:00.000Z' },
+    offer: {
+      title: 'Assistant marketing',
+      description: 'Tu participes aux campagnes.',
+      desired_skills: ['Canva'],
+      access_conditions: [],
+      publication: { creation: '2026-10-20T08:00:00.000Z' },
+      target_diploma: { european: '6' },
+      status: 'Active',
+    },
+  };
+
+  it('normalise une offre', () => {
+    const o = lbaToOffer(job)!;
+    expect(o.id).toBe('la-bonne-alternance:abc123');
+    expect(o.company).toBe('Orvane');
+    expect(o.department).toBe('75');
+    expect(o.city).toBe('Paris');
+    expect(o.contract).toBe('apprentissage');
+    expect(o.diplomaLevel).toBe(6);
+    expect(o.companySize).toBe('pme');
+    expect(o.startDate).toBe('2027-09-01');
+    expect(o.description).toContain('Compétences attendues : Canva');
+  });
+
+  it('écarte une offre pourvue ou sans lien', () => {
+    expect(lbaToOffer({ ...job, offer: { ...job.offer, status: 'Filled' } })).toBeNull();
+    expect(lbaToOffer({ ...job, apply: {} })).toBeNull();
+  });
+
+  it('filtre par mots et pagine', () => {
+    const a = lbaToOffer(job)!;
+    const b = lbaToOffer({ ...job, identifier: { id: 'b' }, offer: { ...job.offer, title: 'Boulanger', publication: { creation: '2026-10-21T08:00:00.000Z' } } })!;
+    expect(pageOf([a, b], 'marketing', 1, 10).offers.map((o) => o.title)).toEqual(['Assistant marketing']);
+    expect(pageOf([a, b], undefined, 1, 1).offers[0]?.title).toBe('Boulanger');
+    expect(pageOf([a, b], undefined, 1, 1).total).toBe(2);
+  });
+});

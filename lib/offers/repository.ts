@@ -73,7 +73,7 @@ export async function findOffer(id: string): Promise<Offer | null> {
     if (offer) return offer;
   }
   if (isLiveConfigured() && id.startsWith('france-travail:')) return liveOffer(id.slice('france-travail:'.length));
-  if (id.startsWith('adzuna:') || id.startsWith('jooble:')) return recallAggregatorOffer(id);
+  if (id.startsWith('adzuna:') || id.startsWith('jooble:') || id.startsWith('la-bonne-alternance:')) return recallAggregatorOffer(id);
   return null;
 }
 

@@ -13,6 +13,10 @@ Ce que seul le propriétaire des comptes peut faire. Le code est prêt : dès qu
    - Key `FRANCE_TRAVAIL_CLIENT_SECRET`, Value : la clé secrète
 5. Save, puis Deployments, « ⋯ » sur le dernier, Redeploy.
 
+## 1 ter. La bonne alternance (gratuit, la meilleure source)
+
+Jeton personnel obtenu sur api.apprentissage.beta.gouv.fr → `LBA_API_TOKEN` dans Vercel, puis Redeploy. Le jeton est valable un an : penser à le renouveler.
+
 ## 1 bis. Plus d'offres, tout de suite : Adzuna et Jooble (gratuit)
 
 Deux agrégateurs qui regroupent les annonces de centaines de sites. Leurs offres s'ajoutent à celles de France Travail ou de la base, sans doublons ni offres d'écoles. Il n'y a pas d'API qui donne 100 % des offres : personne ne les a toutes.
