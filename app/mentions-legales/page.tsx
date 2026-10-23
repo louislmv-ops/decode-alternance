@@ -98,7 +98,6 @@ export default function LegalPage() {
             Liste des écoles et organismes de formation écartés des offres : reprise du dépôt public de La bonne alternance
             (mission-apprentissage/labonnealternance), © 2023 La bonne alternance, licence MIT.
           </li>
-          <li>Mascotte : Fluent Emoji de Microsoft, © Microsoft Corporation, licence MIT.</li>
           <li>Département à partir de ta position : API Géo de l’État (geo.api.gouv.fr). La position n’est pas conservée.</li>
           <li>Secteurs : codes ROME du métier, donnés par France Travail et La bonne alternance.</li>
           <li>SMIC : {SMIC.source}.</li>
