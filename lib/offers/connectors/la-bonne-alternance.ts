@@ -86,9 +86,17 @@ export function lbaToOffer(job: LbaJob): Offer | null {
 }
 
 /** Toutes les offres d'un département (ou de la France entière), en un appel. */
-export async function fetchLba(department?: string): Promise<Offer[]> {
+export interface LbaQuery {
+  departements?: string[];
+  /** Niveau européen du diplôme visé, de 3 à 7. */
+  level?: string;
+}
+
+/** Un appel : l'API renvoie au plus 150 offres par source (450 en tout), d'où le découpage fait par l'appelant. */
+export async function fetchLba(query: LbaQuery = {}): Promise<Offer[]> {
   const params = new URLSearchParams();
-  if (department) params.set('departements', department);
+  for (const d of query.departements ?? []) params.append('departements', d);
+  if (query.level) params.set('target_diploma_level', query.level);
   const res = await fetchText(`${api()}/job/v1/search${params.size ? `?${params}` : ''}`, {
     headers: { Authorization: `Bearer ${process.env.LBA_API_TOKEN}`, Accept: 'application/json' },
     timeoutMs: 15_000,
@@ -97,6 +105,18 @@ export async function fetchLba(department?: string): Promise<Offer[]> {
   const data = JSON.parse(res.text) as { jobs?: LbaJob[]; warnings?: { message: string }[] };
   if (data.warnings?.length) console.warn('La bonne alternance :', data.warnings.map((w) => w.message).join(' · '));
   return (data.jobs ?? []).map(lbaToOffer).filter((o): o is Offer => o !== null);
+}
+
+/**
+ * Les appels qui, ensemble, dépassent la limite de 450 : pour un département, un appel par niveau de
+ * diplôme (plus un sans niveau, pour les offres qui n'en donnent pas) ; pour toute la France, un appel
+ * par groupe de quelques départements.
+ */
+export function lbaQueries(department: string | undefined, allDepartments: string[], groupSize = 4): LbaQuery[] {
+  if (department) return [{ departements: [department] }, ...['3', '4', '5', '6', '7'].map((level) => ({ departements: [department], level }))];
+  const groups: LbaQuery[] = [];
+  for (let i = 0; i < allDepartments.length; i += groupSize) groups.push({ departements: allDepartments.slice(i, i + groupSize) });
+  return groups;
 }
 
 /** Une page de résultats, filtrée par mots côté Décode puisque l'API ne le fait pas. */
