@@ -10,7 +10,8 @@ export const DECODE_MODEL = process.env.DECODE_MODEL || 'claude-opus-5-5';
 /** Au-delà, une annonce est presque toujours une page entière collée par erreur. */
 export const MAX_OFFER_CHARS = 12_000;
 
-export function isDecodeConfigured(): boolean {
+/** Claude : la meilleure traduction, et la seule IA à qui l'on confie des CV (pas d'entraînement sur les données). */
+export function isClaudeConfigured(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY);
 }
 
@@ -25,7 +26,7 @@ export class DecodeError extends Error {
 
 let client: Anthropic | null = null;
 
-export async function decodeOffer(offerText: string): Promise<{ decoded: DecodedOffer; model: string }> {
+export async function decodeWithClaude(offerText: string): Promise<{ decoded: DecodedOffer; model: string }> {
   client ??= new Anthropic();
   try {
     const response = await client.beta.messages.parse({

@@ -27,10 +27,13 @@ Deux agrégateurs qui regroupent les annonces de centaines de sites. Leurs offre
 
 Leurs conditions demandent de les citer (c'est fait sous la liste des offres) et de passer par leurs liens pour postuler (c'est le cas).
 
-## 2. Le bouton « Décoder » (Anthropic)
+## 2. Le bouton « Décoder » (gratuit avec Google Gemini)
 
-1. console.anthropic.com, Settings, API Keys, Create Key ; ajouter quelques euros de crédit dans Billing.
-2. Vercel : Key `ANTHROPIC_API_KEY`, Value : la clé. Puis Redeploy.
+1. aistudio.google.com, connexion avec un compte Google, « Get API key », « Create API key ». Pas de carte bancaire.
+2. Vercel : `AI_PROVIDER` = `gemini`, `AI_API_KEY` = la clé (Sensitive coché). Puis Redeploy.
+3. Le palier gratuit limite le nombre d'appels par jour : `AI_DAILY_LIMIT` (200 par défaut) arrête les traductions avant. Une offre déjà traduite ne coûte plus rien.
+4. Autres choix gratuits : `mistral` (console.mistral.ai, offre Experiment) ou `groq` (console.groq.com).
+5. Plus tard, pour une meilleure qualité : `ANTHROPIC_API_KEY` (payant), prioritaire si présente.
 
 ## 3. Les comptes, les alertes et la commu
 

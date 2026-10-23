@@ -1,5 +1,5 @@
 import { extractText, getDocumentProxy } from 'unpdf';
-import { isDecodeConfigured } from '@/lib/decode/claude';
+import { isClaudeConfigured } from '@/lib/decode/claude';
 import { readCvWithClaude } from '@/lib/cv/claude';
 import { guessFromCv } from '@/lib/cv/extract';
 import { allow, clientKey } from '@/lib/rate-limit';
@@ -36,7 +36,8 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Ce PDF ne contient pas de texte lisible (CV en image ?). Réponds plutôt aux questions.' }, { status: 422 });
   }
 
-  if (isDecodeConfigured()) {
+  // Un CV contient des données personnelles : seulement avec Claude, jamais avec un palier gratuit.
+  if (isClaudeConfigured()) {
     try {
       return Response.json({ guess: await readCvWithClaude(text), by: 'ia' });
     } catch (error) {

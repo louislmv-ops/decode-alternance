@@ -1,5 +1,5 @@
 import { z } from 'zod/v4';
-import { decodeOffer, DecodeError, isDecodeConfigured, MAX_OFFER_CHARS } from '@/lib/decode/claude';
+import { decodeOffer, DecodeError, isDecodeConfigured, MAX_OFFER_CHARS } from '@/lib/decode/ai';
 import { findDecode, findOffer, rememberDecode } from '@/lib/offers/repository';
 import { isDatabaseConfigured, saveDecode } from '@/lib/offers/store';
 import { allow, clientKey } from '@/lib/rate-limit';
@@ -7,7 +7,8 @@ import { allow, clientKey } from '@/lib/rate-limit';
 export const maxDuration = 120;
 
 const Body = z.union([
-  z.object({ offerId: z.string().min(1).max(300) }),
+  // Le texte accompagne l'identifiant quand l'offre vient d'un agrégateur, gardée seulement en mémoire.
+  z.object({ offerId: z.string().min(1).max(300), text: z.string().trim().max(MAX_OFFER_CHARS).optional() }),
   z.object({ text: z.string().trim().min(120).max(MAX_OFFER_CHARS) }),
 ]);
 
@@ -43,10 +44,12 @@ export async function POST(request: Request) {
   try {
     if ('offerId' in parsed.data) {
       const offer = await findOffer(parsed.data.offerId);
-      if (!offer) return Response.json({ error: 'Cette offre n’existe plus.' }, { status: 404 });
-      const { decoded, model } = await decodeOffer(`${offer.title}\n${offer.company ?? ''}\n${offer.city ?? ''}\n\n${offer.description}`);
-      rememberDecode(offer.id, decoded);
-      if (isDatabaseConfigured() && !offer.id.startsWith('exemple:')) {
+      const text = offer ? `${offer.title}\n${offer.company ?? ''}\n${offer.city ?? ''}\n\n${offer.description}` : parsed.data.text;
+      if (!text || text.length < 60) return Response.json({ error: 'Cette offre n’existe plus.' }, { status: 404 });
+      const { decoded, model } = await decodeOffer(text);
+      // Seul un texte connu du serveur est gardé pour les autres visiteurs : un texte envoyé par le navigateur pourrait être truqué.
+      if (offer) rememberDecode(offer.id, decoded);
+      if (offer && isDatabaseConfigured() && !offer.id.startsWith('exemple:')) {
         // Sans table des offres (base utilisée seulement pour les comptes), la mémoire suffit.
         await saveDecode(offer.id, decoded, model).catch(() => {});
       }

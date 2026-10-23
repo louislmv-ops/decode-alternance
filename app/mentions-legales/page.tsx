@@ -17,6 +17,14 @@ const LEGAL = {
   contact: process.env.LEGAL_CONTACT || process.env.NEXT_PUBLIC_CONTACT_EMAIL || null,
 };
 
+const AI_PROVIDER_NAMES: Record<string, string> = { gemini: 'Google', mistral: 'Mistral AI', groq: 'Groq' };
+
+/** Le fournisseur réellement branché : Anthropic si sa clé est là, sinon l'IA gratuite choisie. */
+function aiProvider(): string {
+  if (process.env.ANTHROPIC_API_KEY) return 'Anthropic';
+  return AI_PROVIDER_NAMES[(process.env.AI_PROVIDER || 'gemini').toLowerCase()] ?? 'Anthropic';
+}
+
 export default function LegalPage() {
   return (
     <>
@@ -49,8 +57,9 @@ export default function LegalPage() {
           Décode. Un cookie technique garde ton âge, ton année et ton type de contrat pour afficher les salaires comparés à ton minimum.
         </p>
         <p>
-          Quand tu colles une offre pour la traduire, son texte est envoyé à notre fournisseur d’intelligence artificielle (Anthropic)
-          pour être traité, puis Décode ne le conserve pas. N’y colle pas tes coordonnées.
+          Quand tu fais traduire une offre, son texte est envoyé à notre fournisseur d’intelligence artificielle ({aiProvider()}) pour
+          être traité, puis Décode ne conserve pas le texte que tu as collé. Avec une offre gratuite, ce fournisseur peut se servir du
+          texte pour améliorer ses modèles : n’y colle jamais tes coordonnées. Ton CV n’est jamais envoyé à une IA gratuite.
         </p>
         <p>Décode ne lit aucune donnée sur LinkedIn et ne contacte personne à ta place.</p>
 
