@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
+import { IconPin } from '@/components/app/Icons';
 import { DEPARTMENT_NAMES, DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { locateDepartment, MAX_DEPARTMENTS, savePlace } from '@/lib/place';
 
@@ -70,7 +71,13 @@ export function PlacePicker({ formId, selected }: { formId: string; selected: st
           </button>
         </div>
         <button type="button" className="btn btn--small sheet__locate" onClick={locate} disabled={status.busy}>
-          {status.busy ? 'Localisation…' : '📍 Me localiser'}
+          {status.busy ? (
+            'Localisation…'
+          ) : (
+            <>
+              <IconPin /> Me localiser
+            </>
+          )}
         </button>
         {status.error && (
           <p className="sheet__error" role="alert">

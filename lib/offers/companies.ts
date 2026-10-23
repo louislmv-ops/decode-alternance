@@ -54,6 +54,22 @@ export const CAC40: Cac40Entry[] = [
   { company: 'Vinci', careersUrl: null },
 ];
 
+const fold = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+const CAC40_NAMES = CAC40.map((c) => fold(c.company));
+
+/** L'employeur est-il un groupe du CAC 40 ? Le nom doit commencer par celui du groupe (« BNP Paribas SA », « Orange Business »). */
+export function isCac40(company: string | null | undefined): boolean {
+  if (!company) return false;
+  const name = fold(company);
+  return CAC40_NAMES.some((n) => name === n || name.startsWith(`${n} `));
+}
+
 /** Les sites prêts à être lus : ceux dont l'adresse a été vérifiée. */
 export function careerSites(): CareerSite[] {
   return CAC40.filter((c): c is Cac40Entry & { careersUrl: string } => Boolean(c.careersUrl)).map((c) => ({

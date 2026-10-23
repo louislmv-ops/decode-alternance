@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { IconPin } from '@/components/app/Icons';
 import { useState } from 'react';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { locateDepartment, savePlace } from '@/lib/place';
@@ -33,7 +34,13 @@ export function LocationPrompt() {
       <p className="locate__text">On te montre d’abord les offres près de chez toi. Tu pourras ajouter d’autres départements.</p>
       <div className="locate__actions">
         <button type="button" className="btn btn--small" onClick={locate} disabled={status.busy}>
-          {status.busy ? 'Localisation…' : '📍 Me localiser'}
+          {status.busy ? (
+            'Localisation…'
+          ) : (
+            <>
+              <IconPin /> Me localiser
+            </>
+          )}
         </button>
         <label className="locate__select">
           <span className="sr-only">Choisir un département</span>

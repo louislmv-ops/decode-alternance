@@ -119,7 +119,7 @@ export async function removeStale(source: OfferSource, cutoff: Date): Promise<nu
   return result.count;
 }
 
-/** La même note que attractiveness() (lib/offers/rank.ts), en SQL, pour trier toute la base. */
+/** La note de attractiveness() (lib/offers/rank.ts) en SQL, pour trier toute la base, sans le bonus CAC 40 (noms accentués). */
 const TOP_ORDER = (s: ReturnType<typeof db>) => s`(
     coalesce(least(4, greatest(0, (salary_monthly_cents::float / ${SMIC.monthlyCents} - 0.4) * 6.7)), 0)
     + case company_size when 'grande' then 3 when 'eti' then 1.5 when 'pme' then 0.3 else 0 end
