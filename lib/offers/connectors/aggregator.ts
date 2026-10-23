@@ -39,6 +39,7 @@ export function aggregatorOffer(input: {
   description: string;
   salaryText: string | null;
   salaryMonthlyCents: number | null;
+  salaryMaxCents?: number | null;
   publishedAt: string;
 }): Offer | null {
   if (!input.title || !input.sourceUrl || !isAlternance(input.title, input.description)) return null;
@@ -58,6 +59,7 @@ export function aggregatorOffer(input: {
     diplomaLevel: detectDiplomaLevel(`${input.title} ${input.description}`),
     salaryText: input.salaryText,
     salaryMonthlyCents: input.salaryMonthlyCents,
+    salaryMaxCents: input.salaryMaxCents ?? null,
     startDate: null,
     publishedAt: Number.isNaN(published.getTime()) ? new Date().toISOString() : published.toISOString(),
     description: input.description,

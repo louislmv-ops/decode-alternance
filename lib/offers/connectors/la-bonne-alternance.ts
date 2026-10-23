@@ -3,7 +3,7 @@
 // réutilisables gratuitement. Jeton personnel : LBA_API_TOKEN. Limite : 60 appels par minute.
 // La route ne cherche ni par mot-clé ni par page : on filtre par département, puis ici par mots.
 
-import { normalizeText, departmentFromPostalCode, fingerprint, salaryFromDescription, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
+import { normalizeText, departmentFromPostalCode, fingerprint, salaryRangeFromDescription, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { type OfferSort, type RatingOf, sortOffers } from '../rank';
 import type { Offer, OfferContract } from '../types';
@@ -61,6 +61,7 @@ export function lbaToOffer(job: LbaJob): Offer | null {
   ]
     .filter(Boolean)
     .join('\n\n');
+  const salary = salaryRangeFromDescription(description);
   return {
     id: `la-bonne-alternance:${id}`,
     source: 'la-bonne-alternance',
@@ -75,7 +76,8 @@ export function lbaToOffer(job: LbaJob): Offer | null {
     contract,
     diplomaLevel: level >= 3 && level <= 7 ? (level as DiplomaLevel) : null,
     salaryText: null,
-    salaryMonthlyCents: salaryFromDescription(description),
+    salaryMonthlyCents: salary?.minCents ?? null,
+    salaryMaxCents: salary?.maxCents ?? null,
     startDate: job.contract?.start ? job.contract.start.slice(0, 10) : null,
     publishedAt: job.offer?.publication?.creation ?? new Date().toISOString(),
     description,

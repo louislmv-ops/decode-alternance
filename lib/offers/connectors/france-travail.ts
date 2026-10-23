@@ -9,7 +9,7 @@ import {
   detectContract,
   detectDiplomaLevel,
   fingerprint,
-  parseSalary,
+  parseSalaryRange,
   schoolBaitFlags,
   sizeFromHeadcount,
 } from '../normalize';
@@ -100,7 +100,8 @@ export function toOffer(o: FtOffer): Offer {
     contract,
     diplomaLevel: detectDiplomaLevel(`${levelText} ${o.intitule} ${description.slice(0, 1500)}`),
     salaryText,
-    salaryMonthlyCents: parseSalary(salaryText),
+    salaryMonthlyCents: parseSalaryRange(salaryText)?.minCents ?? null,
+    salaryMaxCents: parseSalaryRange(salaryText)?.maxCents ?? null,
     startDate: null,
     publishedAt: o.dateCreation,
     description,

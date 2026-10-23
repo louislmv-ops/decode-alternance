@@ -1,7 +1,7 @@
 // Jooble (jooble.org/api/about) : un autre agrégateur, clé gratuite sur demande : JOOBLE_API_KEY.
 
 import { DEPARTMENT_NAMES } from '@/lib/departments';
-import { htmlToText, parseSalary } from '../normalize';
+import { htmlToText, parseSalaryRange } from '../normalize';
 import type { Offer } from '../types';
 import { aggregatorOffer, departmentFromPlace } from './aggregator';
 import { fetchText } from './http';
@@ -35,7 +35,8 @@ export function joobleToOffer(job: JoobleJob, department: string | null = null):
     department: departmentFromPlace([location]) ?? department,
     description: htmlToText(job.snippet ?? ''),
     salaryText: job.salary?.trim() || null,
-    salaryMonthlyCents: parseSalary(job.salary),
+    salaryMonthlyCents: parseSalaryRange(job.salary)?.minCents ?? null,
+    salaryMaxCents: parseSalaryRange(job.salary)?.maxCents ?? null,
     publishedAt: job.updated ?? '',
   });
 }
