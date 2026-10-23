@@ -85,6 +85,12 @@ export default function LegalPage() {
             Offres des sites carrière : lues dans le balisage public JobPosting que les entreprises publient pour les moteurs de recherche,
             dans le respect de leur fichier robots.txt, avec un lien vers l’offre d’origine.
           </li>
+          <li>
+            Liste des écoles et organismes de formation écartés des offres : reprise du dépôt public de La bonne alternance
+            (mission-apprentissage/labonnealternance), © 2023 La bonne alternance, licence MIT.
+          </li>
+          <li>Département à partir de ta position : API Géo de l’État (geo.api.gouv.fr). La position n’est pas conservée.</li>
+          <li>Secteurs : codes ROME du métier, donnés par France Travail et La bonne alternance.</li>
           <li>SMIC : {SMIC.source}.</li>
           <li>Rémunération : articles D6222-26, L6325-8 et D6325-15 du Code du travail.</li>
           <li>Aides à l’employeur : décret n° 2026-168 du 6 mars 2026.</li>

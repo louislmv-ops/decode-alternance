@@ -1,4 +1,5 @@
 import type { DiplomaLevel } from '@/lib/rules/employer';
+import type { OfferSort } from './rank';
 
 /** D'où vient une offre. L'ordre de `SOURCE_PRIORITY` décide laquelle garder quand une offre est publiée deux fois. */
 export type OfferSource = 'site-carriere' | 'france-travail' | 'la-bonne-alternance' | 'adzuna' | 'jooble' | 'exemple';
@@ -60,6 +61,12 @@ export interface Offer {
   alsoOn: OfferSource[];
   /** Site de l'entreprise, quand la source le donne : sert à afficher son logo. */
   companySite?: string | null;
+  /** On peut postuler en ligne avec son CV, sans passer par le site du recruteur (La bonne alternance). */
+  easyApply?: boolean;
+  /** Convention collective de l'employeur (IDCC), quand la source la donne. */
+  idcc?: string | null;
+  /** Code ROME du métier, quand la source le donne : sert au filtre par secteur. */
+  romeCode?: string | null;
   /** SIREN de l'employeur, quand la source le donne : relie l'offre aux salaires et avis déclarés. */
   companySiren?: string | null;
   /** Logo fourni par la source elle-même. */
@@ -68,11 +75,22 @@ export interface Offer {
 
 export interface OfferFilters {
   q?: string;
-  department?: string;
+  /** Un ou plusieurs départements ; vide pour toute la France. */
+  departments?: string[];
   contract?: OfferContract;
   level?: DiplomaLevel;
-  bigCompany?: boolean;
+  sizes?: CompanySizeTag[];
+  /** Secteurs (voir SECTORS) : lettre du domaine ROME, ou M18 pour l'informatique. */
+  sectors?: string[];
+  /** Seulement les offres qui chiffrent le salaire. */
+  withSalary?: boolean;
+  /** Publiées depuis au plus ce nombre de jours. */
+  sinceDays?: number;
   direct?: boolean;
+  /** Seulement les offres à candidature simplifiée. */
+  easyApply?: boolean;
+  /** Par défaut, les plus attirantes d'abord. */
+  sort?: OfferSort;
   page?: number;
 }
 

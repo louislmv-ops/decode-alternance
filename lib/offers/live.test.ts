@@ -44,7 +44,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe('liveSearch', () => {
   it('interroge chaque nature d’alternance du référentiel et additionne les totaux', async () => {
-    const page = await liveSearch({ q: 'marketing digital', department: '75' });
+    const page = await liveSearch({ q: 'marketing digital', departments: ['75'], sort: 'recent' });
     expect(page.mode).toBe('direct');
     expect(page.total).toBe(1500);
     expect(page.offers.map((o) => o.id)).toEqual(['france-travail:FS-1', 'france-travail:E2-1']);

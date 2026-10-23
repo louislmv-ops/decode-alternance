@@ -18,7 +18,13 @@ export function relativeDays(iso: string, now: Date = new Date()): string {
   const days = Math.floor((startOfDay(now) - startOfDay(new Date(iso))) / 86_400_000);
   if (days <= 0) return 'aujourd’hui';
   if (days === 1) return 'hier';
-  return `il y a ${days} jours`;
+  if (days < 7) return `il y a ${days} jours`;
+  if (days < 30) {
+    const weeks = Math.floor(days / 7);
+    return weeks === 1 ? 'il y a 1 semaine' : `il y a ${weeks} semaines`;
+  }
+  const months = Math.floor(days / 30);
+  return months >= 12 ? 'il y a plus d’un an' : `il y a ${months} mois`;
 }
 
 export function daysBetween(fromIso: string, to: Date): number {

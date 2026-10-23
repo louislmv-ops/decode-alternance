@@ -130,3 +130,16 @@ describe('fingerprint et écriture inclusive', () => {
     );
   });
 });
+
+describe('écoles connues (liste La bonne alternance) et code NAF 85', async () => {
+  const { isKnownSchool, schoolBaitFlags } = await import('./normalize');
+  it('reconnaît une école de la liste, même avec accents ou suffixe', () => {
+    expect(isKnownSchool('Youschool')).toBe(true);
+    expect(isKnownSchool('WIN Lyon')).toBe(true);
+    expect(isKnownSchool('Boulangerie Martin')).toBe(false);
+  });
+  it('signale un employeur du secteur de l’enseignement', () => {
+    expect(schoolBaitFlags({ company: 'Société X', title: 'Assistant', description: '', naf: '8559A' })).toHaveLength(1);
+    expect(schoolBaitFlags({ company: 'Société X', title: 'Assistant', description: '', naf: '4711D' })).toHaveLength(0);
+  });
+});

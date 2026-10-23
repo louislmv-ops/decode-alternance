@@ -23,7 +23,12 @@ async function main() {
   let sent = 0;
   for (const account of accounts) {
     const since = account.lastAlertAt ?? new Date(Date.now() - 86_400_000);
-    const page = await listOffers({ q: account.savedSearch.q, department: account.savedSearch.dep, level: account.savedSearch.niveau as DiplomaLevel | undefined });
+    const page = await listOffers({
+      q: account.savedSearch.q,
+      departments: account.savedSearch.dep ? [account.savedSearch.dep] : [],
+      level: account.savedSearch.niveau as DiplomaLevel | undefined,
+      sort: 'recent',
+    });
     if (page.mode === 'exemples') break;
     const fresh = page.offers.filter((o) => new Date(o.publishedAt) > since);
     if (fresh.length > 0) {

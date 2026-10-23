@@ -22,10 +22,18 @@ create table if not exists offers (
   direct boolean not null default false,
   fingerprint text not null,
   school_flags text[] not null default '{}',
+  -- Code ROME du métier : sert au filtre par secteur.
+  rome_code text,
+  -- Candidature simplifiée possible (La bonne alternance).
+  easy_apply boolean not null default false,
   -- Dernière fois que la collecte a vu l'offre : une offre qui n'est plus vue est retirée.
   seen_at timestamptz not null default now(),
   unique (source, source_id)
 );
+
+-- Bases créées avant l'ajout du code ROME.
+alter table offers add column if not exists rome_code text;
+alter table offers add column if not exists easy_apply boolean not null default false;
 
 create index if not exists offers_fingerprint on offers (fingerprint);
 create index if not exists offers_department on offers (department);
@@ -42,7 +50,9 @@ create table if not exists offer_decodes (
 );
 
 -- Une offre publiée sur plusieurs sites n'apparaît qu'une fois : on garde la source la plus directe.
-create or replace view offers_unique as
+-- Recréée à chaque fois : la liste des colonnes de « o.* » suit celle de la table.
+drop view if exists offers_unique;
+create view offers_unique as
 select distinct on (fingerprint)
   o.*,
   array(

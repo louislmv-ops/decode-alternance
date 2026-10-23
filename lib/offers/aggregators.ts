@@ -7,6 +7,7 @@ import { isJoobleConfigured, searchJooble } from './connectors/jooble';
 import { after } from 'next/server';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { fetchLba, isLbaConfigured, type LbaQuery, lbaQueries, pageOf } from './connectors/la-bonne-alternance';
+import { matchesFilters } from './filter';
 import type { Offer, OfferFilters } from './types';
 
 type Result = { offers: Offer[]; total: number };
@@ -111,11 +112,19 @@ export async function lbaOffers(department: string | undefined): Promise<Offer[]
   return entry.offers;
 }
 
-const lba: Search = async (filters, page, perPage) => pageOf(await lbaOffers(filters.department), filters.q, page, perPage);
+/** Plusieurs départements : la réunion de leurs collectes, chacune gardée à part. */
+const lba: Search = async (filters, page, perPage) => {
+  const places = filters.departments?.length ? filters.departments : [undefined];
+  const all = (await Promise.all(places.map((d) => lbaOffers(d)))).flat();
+  return pageOf(all.filter((o) => matchesFilters(o, filters)), filters.q, page, perPage, filters.sort);
+};
+
+/** Adzuna et Jooble ne cherchent qu'un lieu à la fois : on leur donne le premier choisi. */
+const firstPlace = (filters: OfferFilters) => filters.departments?.[0];
 
 const adzuna: Search = (filters, page, perPage) =>
-  remember(`adzuna:${filters.q ?? ''}:${filters.department ?? ''}:${page}:${perPage}`, 10 * 60_000, () =>
-    searchAdzuna({ q: filters.q, department: filters.department, page, perPage }),
+  remember(`adzuna:${filters.q ?? ''}:${firstPlace(filters) ?? ''}:${page}:${perPage}`, 10 * 60_000, () =>
+    searchAdzuna({ q: filters.q, department: firstPlace(filters), page, perPage }),
   );
 
 /**
@@ -126,12 +135,12 @@ const JOOBLE_DAILY = Number(process.env.JOOBLE_DAILY || 15);
 let joobleDay = { date: '', calls: 0 };
 const jooble: Search = async (filters, page, perPage) => {
   if (page > 1) return { offers: [], total: 0 };
-  return remember(`jooble:${filters.q ?? ''}:${filters.department ?? ''}`, 12 * 3_600_000, async () => {
+  return remember(`jooble:${filters.q ?? ''}:${firstPlace(filters) ?? ''}`, 12 * 3_600_000, async () => {
     const today = new Date().toISOString().slice(0, 10);
     if (joobleDay.date !== today) joobleDay = { date: today, calls: 0 };
     if (joobleDay.calls >= JOOBLE_DAILY) return { offers: [], total: 0 };
     joobleDay.calls += 1;
-    return searchJooble({ q: filters.q, department: filters.department, page: 1, perPage });
+    return searchJooble({ q: filters.q, department: firstPlace(filters), page: 1, perPage });
   });
 };
 

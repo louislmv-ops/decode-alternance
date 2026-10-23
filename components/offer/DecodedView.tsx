@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useProfile } from '@/components/useProfile';
 import { useTracker } from '@/components/useTracker';
 import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
-import { formatEuros } from '@/lib/format';
+import { formatEuros, relativeDays } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
 import { RHYTHMS } from '@/lib/profile';
 import { comparePay, minimumSalary } from '@/lib/rules/salary';
@@ -30,6 +30,8 @@ export interface OfferMeta {
   contract: string | null;
   department: string | null;
   diplomaLevel: DiplomaLevel | null;
+  publishedAt?: string;
+  easyApply?: boolean;
   /** Salaires déclarés, avis et convention collective de l'entreprise, rassemblés côté serveur. */
   pay?: PayContext | null;
 }
@@ -86,7 +88,12 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const alreadyTracked = Boolean(offer && apps.some((a) => a.url === offer.sourceUrl && a.company === company)) || added;
   const realSource = offer && /^https?:\/\//.test(offer.sourceUrl);
 
-  const meta = [company || 'Entreprise non nommée', offer?.sourceLabel]
+  const meta = [
+    company || 'Entreprise non nommée',
+    offer?.sourceLabel,
+    offer?.publishedAt ? `publiée ${relativeDays(offer.publishedAt)}` : null,
+    offer?.easyApply ? '⚡ Candidature simplifiée' : null,
+  ]
     .filter(Boolean)
     .join(' · ');
 

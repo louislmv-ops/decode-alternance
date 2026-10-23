@@ -37,6 +37,7 @@ export interface FtOffer {
   natureContrat?: string;
   salaire?: { libelle?: string; commentaire?: string };
   trancheEffectifEtab?: string;
+  romeCode?: string;
   formations?: { niveauLibelle?: string; domaineLibelle?: string }[];
   origineOffre?: { urlOrigine?: string };
   alternance?: boolean;
@@ -107,6 +108,7 @@ export function toOffer(o: FtOffer): Offer {
     fingerprint: fingerprint(company, o.intitule, city),
     schoolFlags: schoolBaitFlags({ company, title: o.intitule, description }),
     alsoOn: [],
+    romeCode: o.romeCode ?? null,
     companySite: o.entreprise?.url ?? null,
     logoUrl: o.entreprise?.logo ?? null,
   };

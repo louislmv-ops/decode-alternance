@@ -3,7 +3,9 @@
 import postgres from 'postgres';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import type { DiplomaLevel } from '@/lib/rules/employer';
+import { SMIC } from '@/lib/rules/reference';
 import { PAGE_SIZE } from './filter';
+import { STRONG_ROLE_SQL } from './rank';
 import type { CompanySizeTag, Offer, OfferContract, OfferFilters, OfferPage, OfferSource } from './types';
 
 let sql: postgres.Sql | null = null;
@@ -39,6 +41,8 @@ interface OfferRow {
   direct: boolean;
   fingerprint: string;
   school_flags: string[];
+  rome_code?: string | null;
+  easy_apply?: boolean;
   also_on?: OfferSource[];
 }
 
@@ -65,6 +69,8 @@ function toOffer(row: OfferRow): Offer {
     fingerprint: row.fingerprint,
     schoolFlags: row.school_flags,
     alsoOn: row.also_on ?? [],
+    romeCode: row.rome_code ?? null,
+    easyApply: row.easy_apply ?? false,
   };
 }
 
@@ -91,6 +97,8 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
     direct: o.direct,
     fingerprint: o.fingerprint,
     school_flags: o.schoolFlags,
+    rome_code: o.romeCode ?? null,
+    easy_apply: o.easyApply ?? false,
   }));
   const s = db();
   await s`
@@ -101,7 +109,7 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
       department = excluded.department, contract = excluded.contract, diploma_level = excluded.diploma_level,
       salary_text = excluded.salary_text, salary_monthly_cents = excluded.salary_monthly_cents,
       description = excluded.description, fingerprint = excluded.fingerprint,
-      school_flags = excluded.school_flags, seen_at = now()`;
+      school_flags = excluded.school_flags, rome_code = excluded.rome_code, easy_apply = excluded.easy_apply, seen_at = now()`;
 }
 
 /** Retire les offres d'une source qu'aucune collecte n'a revues depuis `cutoff`. */
@@ -111,15 +119,35 @@ export async function removeStale(source: OfferSource, cutoff: Date): Promise<nu
   return result.count;
 }
 
+/** La même note que attractiveness() (lib/offers/rank.ts), en SQL, pour trier toute la base. */
+const TOP_ORDER = (s: ReturnType<typeof db>) => s`(
+    coalesce(least(4, greatest(0, (salary_monthly_cents::float / ${SMIC.monthlyCents} - 0.4) * 6.7)), 0)
+    + case company_size when 'grande' then 3 when 'eti' then 1.5 when 'pme' then 0.3 else 0 end
+    + case diploma_level when 7 then 1.5 when 6 then 1 when 5 then 0.3 else 0 end
+    + case when title ~* ${STRONG_ROLE_SQL} then 1 else 0 end
+    + case when direct then 0.5 else 0 end
+    - least(3, extract(epoch from now() - published_at) / 864000)
+  ) desc, published_at desc`;
+
 export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
   const s = db();
   // Les offres d'écoles déguisées ne sont jamais listées.
   const conditions = [s`cardinality(school_flags) = 0`];
-  if (filters.department) conditions.push(s`department = ${filters.department}`);
+  if (filters.departments?.length) conditions.push(s`department = any(${filters.departments})`);
   if (filters.contract) conditions.push(s`contract = ${filters.contract}`);
   if (filters.level) conditions.push(s`(diploma_level is null or diploma_level <= ${filters.level})`);
-  if (filters.bigCompany) conditions.push(s`company_size = 'grande'`);
+  if (filters.sizes?.length) conditions.push(s`company_size = any(${filters.sizes})`);
+  if (filters.sectors?.length) {
+    // « M18 » : l'informatique ; une lettre seule : tout le domaine ROME, informatique comprise sauf si on l'exclut.
+    const sectorConds = filters.sectors.map((x) =>
+      x === 'M18' ? s`rome_code like 'M18%'` : x === 'M' ? s`(rome_code like 'M%' and rome_code not like 'M18%')` : s`rome_code like ${`${x}%`}`,
+    );
+    conditions.push(s`(${sectorConds.reduce((acc, c) => s`${acc} or ${c}`)})`);
+  }
+  if (filters.withSalary) conditions.push(s`salary_monthly_cents is not null`);
+  if (filters.sinceDays) conditions.push(s`published_at > now() - ${`${filters.sinceDays} days`}::interval`);
   if (filters.direct) conditions.push(s`direct`);
+  if (filters.easyApply) conditions.push(s`easy_apply`);
   if (filters.q) {
     conditions.push(
       s`to_tsvector('french', title || ' ' || coalesce(company, '') || ' ' || coalesce(city, '')) @@ plainto_tsquery('french', ${filters.q})`,
@@ -129,7 +157,7 @@ export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
   const page = Math.max(1, filters.page ?? 1);
 
   const [rows, count] = await Promise.all([
-    s<OfferRow[]>`select * from offers_unique where ${where} order by published_at desc limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
+    s<OfferRow[]>`select * from offers_unique where ${where} order by ${filters.sort === 'recent' ? s`published_at desc` : TOP_ORDER(s)} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
     s<{ n: number }[]>`select count(*)::int as n from offers_unique where ${where}`,
   ]);
   return { offers: rows.map(toOffer), total: count[0]?.n ?? 0, page, pageSize: PAGE_SIZE, mode: 'base' };

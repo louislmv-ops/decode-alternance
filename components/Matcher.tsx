@@ -1,10 +1,11 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProfile } from '@/components/useProfile';
 import type { CvGuess } from '@/lib/cv/extract';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
+import { savePlace } from '@/lib/place';
 import { DOMAINS } from '@/lib/domains';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 
@@ -39,7 +40,6 @@ export function MatchButton({ className, children }: { className?: string; child
 export function Matcher() {
   const [profile, setProfile] = useProfile();
   const router = useRouter();
-  const pathname = usePathname();
   const dialog = useRef<HTMLDialogElement>(null);
   const [step, setStep] = useState<Step>('start');
   const [job, setJob] = useState('');
@@ -68,19 +68,6 @@ export function Matcher() {
     return () => window.removeEventListener(OPEN_EVENT, open);
   }, [open]);
 
-  // Première visite des offres sans profil : on propose de cibler, une seule fois.
-  useEffect(() => {
-    if (pathname !== '/offres' || profile.filled) return;
-    let seen = false;
-    try {
-      seen = window.localStorage.getItem(SEEN_KEY) === '1';
-    } catch {
-      seen = true;
-    }
-    if (seen) return;
-    const timer = window.setTimeout(open, 1200);
-    return () => window.clearTimeout(timer);
-  }, [pathname, profile.filled, open]);
 
   async function readCv(file: File) {
     setCv({ status: 'reading' });
@@ -104,9 +91,10 @@ export function Matcher() {
 
   function finish() {
     setProfile({ ...profile, job: job.trim(), department, level: level ?? profile.level, age });
+    savePlace(department ? [department] : []);
     const params = new URLSearchParams();
     if (job.trim()) params.set('q', job.trim());
-    if (department) params.set('dep', department);
+    params.set('dep', department ?? 'fr');
     if (level) params.set('niveau', String(level));
     dialog.current?.close();
     router.push(`/offres${params.size ? `?${params}` : ''}`);

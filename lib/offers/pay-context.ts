@@ -25,7 +25,7 @@ export async function payContext(offer: Offer): Promise<PayContext> {
   if (offer.source === 'exemple') return empty;
 
   const { siren, idcc } = await sirenAndConventions(offer);
-  const conventions = idcc.map((code) => ({ idcc: code, name: CONVENTION_NAMES[code] ?? null }));
+  const conventions = [...new Set([...(offer.idcc ? [offer.idcc] : []), ...idcc])].map((code) => ({ idcc: code, name: CONVENTION_NAMES[code] ?? null }));
   const withSiren = { ...offer, companySiren: siren };
   const community = (await communityPayFor([withSiren])).get(offer.id) ?? null;
   const page = siren && isAccountsConfigured() ? await companyPage(siren).catch(() => null) : null;

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { useProfile } from '@/components/useProfile';
+import { relativeDays } from '@/lib/format';
 import { minimumSalary } from '@/lib/rules/salary';
 import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
@@ -40,7 +41,15 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       <div className="title-row">
         <div>
           <h1>{offer.title}</h1>
-          <p className="title-row__sub">{[offer.company ?? 'Entreprise non nommée', offer.city, offer.sourceLabel].filter(Boolean).join(' · ')}</p>
+          <p className="title-row__sub">{[
+              offer.company ?? 'Entreprise non nommée',
+              offer.city,
+              offer.sourceLabel,
+              offer.publishedAt ? `publiée ${relativeDays(offer.publishedAt)}` : null,
+              offer.easyApply ? '⚡ Candidature simplifiée' : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}</p>
         </div>
         <div className="title-row__actions">
           <button type="button" className="ui-btn ui-btn--primary" onClick={decode} disabled={state.status === 'loading'}>

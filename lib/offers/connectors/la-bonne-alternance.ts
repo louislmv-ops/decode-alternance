@@ -5,6 +5,7 @@
 
 import { normalizeText, departmentFromPostalCode, fingerprint, parseSalary, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
 import type { DiplomaLevel } from '@/lib/rules/employer';
+import { type OfferSort, sortOffers } from '../rank';
 import type { Offer, OfferContract } from '../types';
 import { departmentFromPlace } from './aggregator';
 import { fetchText } from './http';
@@ -23,15 +24,17 @@ export interface LbaJob {
     legal_name?: string | null;
     website?: string | null;
     siret?: string | null;
+    domain?: { idcc?: number | null; naf?: { code?: string } | null };
     size?: string | null;
     location?: { address?: string };
   };
-  apply?: { url?: string };
+  apply?: { url?: string; recipient_id?: string | null };
   contract?: { type?: string[]; start?: string | null };
   offer?: {
     title?: string;
     description?: string;
     desired_skills?: string[];
+    rome_codes?: string[];
     access_conditions?: string[];
     publication?: { creation?: string | null };
     target_diploma?: { european?: string } | null;
@@ -78,8 +81,11 @@ export function lbaToOffer(job: LbaJob): Offer | null {
     description,
     direct: false,
     fingerprint: fingerprint(company, title, city),
-    schoolFlags: schoolBaitFlags({ company, title, description }),
+    schoolFlags: schoolBaitFlags({ company, title, description, naf: job.workplace?.domain?.naf?.code, legalName: job.workplace?.legal_name }),
     alsoOn: [],
+    romeCode: job.offer?.rome_codes?.[0] ?? null,
+    easyApply: Boolean(job.apply?.recipient_id),
+    idcc: job.workplace?.domain?.idcc ? String(job.workplace.domain.idcc).padStart(4, '0') : null,
     companySite: job.workplace?.website ?? null,
     companySiren: /^\d{14}$/.test(job.workplace?.siret ?? '') ? job.workplace!.siret!.slice(0, 9) : null,
   };
@@ -120,7 +126,7 @@ export function lbaQueries(department: string | undefined, allDepartments: strin
 }
 
 /** Une page de résultats, filtrée par mots côté Décode puisque l'API ne le fait pas. */
-export function pageOf(offers: Offer[], q: string | undefined, page: number, perPage: number): { offers: Offer[]; total: number } {
+export function pageOf(offers: Offer[], q: string | undefined, page: number, perPage: number, sort: OfferSort = 'recent'): { offers: Offer[]; total: number } {
   const words = normalizeText(q ?? '').split(' ').filter(Boolean);
   const matching = words.length
     ? offers.filter((o) => {
@@ -128,6 +134,6 @@ export function pageOf(offers: Offer[], q: string | undefined, page: number, per
         return words.every((w) => hay.includes(w));
       })
     : offers;
-  const sorted = [...matching].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const sorted = sortOffers(matching, sort);
   return { offers: sorted.slice((page - 1) * perPage, page * perPage), total: sorted.length };
 }
