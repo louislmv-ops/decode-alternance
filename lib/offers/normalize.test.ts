@@ -143,3 +143,20 @@ describe('écoles connues (liste La bonne alternance) et code NAF 85', async () 
     expect(schoolBaitFlags({ company: 'Société X', title: 'Assistant', description: '', naf: '4711D' })).toHaveLength(0);
   });
 });
+
+describe('salaire lu dans le texte libre d’une annonce', async () => {
+  const { salaryFromDescription } = await import('./normalize');
+  it('retient un montant présenté comme une rémunération', () => {
+    expect(salaryFromDescription('Missions variées. Rémunération : 1 480 € brut mensuel + 13e mois.')).toBe(148_000);
+    expect(salaryFromDescription('Salaire selon la grille : 61 % du SMIC.')).not.toBeNull();
+  });
+  it('ignore chiffre d’affaires, primes et salaire d’un futur CDI', () => {
+    expect(salaryFromDescription('Entreprise de 200 salariés, 45 000 000 € de chiffre d’affaires.')).toBeNull();
+    expect(salaryFromDescription('Prime de cooptation de 1 500 € brut.')).toBeNull();
+    expect(salaryFromDescription('À l’issue de l’alternance, CDI à 42 000 € brut par an.')).toBeNull();
+    expect(salaryFromDescription('Budget formation de 3 000 € par an pour toi.')).toBeNull();
+  });
+  it('n’invente rien sans montant', () => {
+    expect(salaryFromDescription('Rémunération selon profil.')).toBeNull();
+  });
+});

@@ -3,7 +3,7 @@
 // réutilisables gratuitement. Jeton personnel : LBA_API_TOKEN. Limite : 60 appels par minute.
 // La route ne cherche ni par mot-clé ni par page : on filtre par département, puis ici par mots.
 
-import { normalizeText, departmentFromPostalCode, fingerprint, parseSalary, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
+import { normalizeText, departmentFromPostalCode, fingerprint, salaryFromDescription, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { type OfferSort, type RatingOf, sortOffers } from '../rank';
 import type { Offer, OfferContract } from '../types';
@@ -75,7 +75,7 @@ export function lbaToOffer(job: LbaJob): Offer | null {
     contract,
     diplomaLevel: level >= 3 && level <= 7 ? (level as DiplomaLevel) : null,
     salaryText: null,
-    salaryMonthlyCents: parseSalary(description),
+    salaryMonthlyCents: salaryFromDescription(description),
     startDate: job.contract?.start ? job.contract.start.slice(0, 10) : null,
     publishedAt: job.offer?.publication?.creation ?? new Date().toISOString(),
     description,
@@ -92,6 +92,18 @@ export function lbaToOffer(job: LbaJob): Offer | null {
 }
 
 /** Toutes les offres d'un département (ou de la France entière), en un appel. */
+/** Une offre seule, par son identifiant : la fiche d'une offre que ce serveur n'a pas en mémoire. */
+export async function fetchLbaOffer(id: string): Promise<Offer | null> {
+  const res = await fetchText(`${api()}/job/v1/offer/${encodeURIComponent(id)}`, {
+    headers: { Authorization: `Bearer ${process.env.LBA_API_TOKEN}`, Accept: 'application/json' },
+    timeoutMs: 8_000,
+  });
+  if (res.status !== 200) return null;
+  const data = JSON.parse(res.text) as LbaJob | { job?: LbaJob } | { jobs?: LbaJob[] };
+  const job = 'identifier' in data ? (data as LbaJob) : 'job' in data && data.job ? data.job : 'jobs' in data ? data.jobs?.[0] : undefined;
+  return job ? lbaToOffer(job) : null;
+}
+
 export interface LbaQuery {
   departements?: string[];
   /** Niveau européen du diplôme visé, de 3 à 7. */

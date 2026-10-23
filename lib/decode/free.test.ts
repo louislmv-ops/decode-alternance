@@ -36,6 +36,14 @@ describe('traduction par une IA gratuite', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it('passe au modèle suivant quand Google en a retiré un', async () => {
+    vi.stubEnv('AI_PROVIDER', 'gemini');
+    const fetchMock = vi.fn().mockResolvedValueOnce(new Response('{}', { status: 404 })).mockResolvedValueOnce(reply(JSON.stringify(valid)));
+    vi.stubGlobal('fetch', fetchMock);
+    const { decodeWithFreeAi } = await import('./free');
+    await expect(decodeWithFreeAi('Offre')).resolves.toMatchObject({ model: 'gemini-3.5-flash-lite' });
+  });
+
   it('traduit un quota épuisé en message clair', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 429 })));
     const { decodeWithFreeAi } = await import('./free');
