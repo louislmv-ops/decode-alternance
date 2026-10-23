@@ -35,7 +35,7 @@ interface JobPostingLd {
   employmentType?: string | string[];
   url?: string;
   identifier?: { value?: string | number } | string;
-  hiringOrganization?: { name?: string } | string;
+  hiringOrganization?: { name?: string; logo?: string | { url?: string }; sameAs?: string; url?: string } | string;
   jobLocation?: JobLocationLd | JobLocationLd[];
   baseSalary?: { value?: { value?: number; minValue?: number; unitText?: string } | number; currency?: string };
   educationRequirements?: string | { credentialCategory?: string } | { credentialCategory?: string }[];
@@ -128,6 +128,8 @@ export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: Caree
     fingerprint: fingerprint(site.company, title, city),
     schoolFlags: schoolBaitFlags({ company: site.company, title, description }),
     alsoOn: [],
+    companySite: (typeof ld.hiringOrganization === 'object' ? ld.hiringOrganization.sameAs || ld.hiringOrganization.url : null) || site.careersUrl,
+    logoUrl: typeof ld.hiringOrganization === 'object' ? (typeof ld.hiringOrganization.logo === 'string' ? ld.hiringOrganization.logo : ld.hiringOrganization.logo?.url) ?? null : null,
   };
 }
 
