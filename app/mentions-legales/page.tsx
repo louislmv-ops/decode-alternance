@@ -74,6 +74,10 @@ export default function LegalPage() {
         <ul className="bullets">
           <li>Offres France Travail : API Offres d’emploi, réutilisées selon la licence de France Travail, sans les coordonnées de contact.</li>
           <li>
+            Offres La bonne alternance : API Apprentissage du ministère du Travail, réutilisées selon ses conditions, avec lien vers
+            l’offre pour postuler.
+          </li>
+          <li>
             Offres Adzuna et Jooble : interrogées par leurs API publiques, selon leurs conditions. La candidature passe par leur lien vers
             l’annonce d’origine.
           </li>

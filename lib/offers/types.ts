@@ -82,7 +82,7 @@ export interface OfferPage {
 }
 
 /** Hôtes vers lesquels une fiche d'agrégateur oubliée peut renvoyer : jamais une adresse quelconque. */
-const AGGREGATOR_HOSTS = /(^|\.)(adzuna\.(fr|com)|jooble\.org)$/;
+const AGGREGATOR_HOSTS = /(^|\.)(adzuna\.(fr|com)|jooble\.org|apprentissage\.beta\.gouv\.fr)$/;
 
 export function isAggregatorUrl(url: string): boolean {
   try {
@@ -96,5 +96,7 @@ export function isAggregatorUrl(url: string): boolean {
 /** Adresse de la fiche Décode d'une offre ; pour un agrégateur, elle garde le lien d'origine en secours. */
 export function offerHref(offer: Pick<Offer, 'id' | 'source' | 'sourceUrl'>): string {
   const base = `/offres/${encodeURIComponent(offer.id)}`;
-  return offer.source === 'adzuna' || offer.source === 'jooble' ? `${base}?u=${encodeURIComponent(offer.sourceUrl)}` : base;
+  return offer.source === 'adzuna' || offer.source === 'jooble' || offer.source === 'la-bonne-alternance'
+    ? `${base}?u=${encodeURIComponent(offer.sourceUrl)}`
+    : base;
 }
