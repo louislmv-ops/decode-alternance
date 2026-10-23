@@ -8,9 +8,9 @@
 
 :root {
   --bg: #ffffff;
-  --surface: #f2f5f3;
+  --surface: #f2ede3;
   --ink: #0f1f1a;
-  --muted: #4f5f58;
+  --muted: #58564c;
   --brand: #0b6b4b;
   --brand-dark: #07513a;
   --brand-ink: #ffffff;
@@ -40,13 +40,13 @@
   --tint-5: #d4f35a;
   --tint-6: #ebfab0;
 
-  /* L'appli : un fond à peine teinté, des cartes blanches. */
-  --ground: #f4f7f5;
+  /* L'appli : un fond crème, chaud, et des cartes blanches. */
+  --ground: #f6f2ea;
   --card: #ffffff;
-  --border: #e1e8e4;
-  --rule: #edf1ee;
-  --control: #c9d4ce;
-  --active: #e6efe9;
+  --border: #e7e0d2;
+  --rule: #eee8dd;
+  --control: #d3cbbb;
+  --active: #ece5d7;
 
   /* Une seule famille, Archivo : normale pour lire, élargie et noire pour les titres. */
   --font: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
