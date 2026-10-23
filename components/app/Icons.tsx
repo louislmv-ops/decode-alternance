@@ -69,6 +69,13 @@ export const IconOut = () => (
   </svg>
 );
 
+export const IconPin = () => (
+  <svg {...base}>
+    <path d="M8 14s4.5-4.2 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 9.8 8 14 8 14z" />
+    <circle cx="8" cy="6.5" r="1.6" />
+  </svg>
+);
+
 export const IconChat = () => (
   <svg {...base}>
     <path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z" />
