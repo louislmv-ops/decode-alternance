@@ -8,10 +8,12 @@ import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
 import { formatEuros } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
 import { RHYTHMS } from '@/lib/profile';
-import { apprenticeNetThresholdCents, comparePay, minimumSalary } from '@/lib/rules/salary';
+import { comparePay, minimumSalary } from '@/lib/rules/salary';
 import { IconOut } from '@/components/app/Icons';
 import { CopyButton } from './CopyButton';
 import { MatchPanel } from './Match';
+import { PayPanel } from './PayPanel';
+import type { PayContext } from '@/lib/offers/pay-estimate';
 import { OfferFacts } from './OfferFacts';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 
@@ -28,6 +30,8 @@ export interface OfferMeta {
   contract: string | null;
   department: string | null;
   diplomaLevel: DiplomaLevel | null;
+  /** Salaires déclarés, avis et convention collective de l'entreprise, rassemblés côté serveur. */
+  pay?: PayContext | null;
 }
 
 const CERTITUDE: Record<Certitude, string> = { dit: 'Dit', deduit: 'Déduit', inconnu: 'Inconnu' };
@@ -127,6 +131,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
       <OfferFacts
         payCents={offerCents}
         minimumCents={minimum.cents}
+        community={offer?.pay ?? null}
         company={company || null}
         place={[decoded.lieu.ville ?? offer?.city, decoded.lieu.precision].filter(Boolean).join(', ') || null}
         rhythm={decoded.contrat.rythme}
@@ -321,42 +326,13 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             </section>
           )}
 
-          <details className="panel fold" aria-labelledby="pay-title">
-            <summary className="panel__head fold__head">
-              <h2 id="pay-title">Salaire</h2>
-              <Link href="/profil" className="panel__link">
-                {profile.age} ans, {profile.year}
-                {profile.year === 1 ? 're' : 'e'} année
-              </Link>
-            </summary>
-            <div className="pay">
-              <div>
-                <p className="ui-label">Annoncé</p>
-                <p className="pay__figure num">{offerCents !== null ? formatEuros(offerCents) : 'Non chiffré'}</p>
-              </div>
-              <div>
-                <p className="ui-label">Ton minimum légal</p>
-                <p className="pay__figure pay__figure--min num">{formatEuros(minimum.cents)}</p>
-              </div>
-            </div>
-            {offerCents !== null && (
-              <div className="bullet-bar" aria-hidden="true">
-                <span className="bullet-bar__fill" style={{ width: `${Math.min(100, (offerCents / Math.max(offerCents, minimum.cents)) * 100)}%` }} />
-                <span className="bullet-bar__tick" style={{ left: `${Math.min(100, (minimum.cents / Math.max(offerCents, minimum.cents)) * 100)}%` }} />
-              </div>
-            )}
-            <p className="panel__note">
-              {pay
-                ? pay.verdict === 'sous-le-minimum'
-                  ? 'Sous le minimum légal : l’employeur doit payer au moins ton minimum.'
-                  : pay.diffPercent > 0
-                    ? `${formatEuros(pay.diffCents)} de plus que ton minimum, soit +${pay.diffPercent} %.`
-                    : 'Payé au minimum légal.'
-                : 'Sans montant, compte sur ton minimum légal et pose la question.'}{' '}
-              {profile.contract === 'apprentissage' && `Sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
-            </p>
-            {decoded.salaire.avantages.length > 0 && <p className="panel__note">En plus : {decoded.salaire.avantages.join(' · ')}</p>}
-          </details>
+          <PayPanel
+            announcedCents={offerCents}
+            context={offer?.pay ?? null}
+            company={company || null}
+            sourceLabel={offer?.sourceLabel ?? 'l’annonce'}
+            perks={decoded.salaire.avantages}
+          />
 
           <details className="panel fold" aria-labelledby="contract-title">
             <summary className="panel__head fold__head">

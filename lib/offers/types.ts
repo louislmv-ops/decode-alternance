@@ -60,6 +60,8 @@ export interface Offer {
   alsoOn: OfferSource[];
   /** Site de l'entreprise, quand la source le donne : sert à afficher son logo. */
   companySite?: string | null;
+  /** SIREN de l'employeur, quand la source le donne : relie l'offre aux salaires et avis déclarés. */
+  companySiren?: string | null;
   /** Logo fourni par la source elle-même. */
   logoUrl?: string | null;
 }

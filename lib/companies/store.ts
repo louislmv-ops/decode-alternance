@@ -6,6 +6,10 @@ import { z } from 'zod/v4';
 import { ensureCommunitySchema } from '@/lib/community/store';
 import { db } from '@/lib/offers/store';
 import { minimumSalary } from '@/lib/rules/salary';
+import { isAccountsConfigured } from '@/lib/account/store';
+import { coreName } from '@/lib/offers/logo-resolve';
+import { type CommunityPay, summarizePercents } from '@/lib/offers/pay-estimate';
+import type { Offer } from '@/lib/offers/types';
 import type { CompanyRef } from './search';
 import { HIRED, isTopForApprentices, MIN_TO_SHOW, type PublicReview, type ReviewStats, type SalaryStats } from './shared';
 
@@ -408,4 +412,63 @@ export async function markWorkVerified(accountId: string, siren: string, domain:
   await ensureSchema();
   await db()`insert into work_verifications (account_id, siren, domain) values (${accountId}, ${siren}, ${domain})
     on conflict (account_id, siren) do update set domain = excluded.domain, verified_at = now()`;
+}
+
+/** Les entreprises où au moins MIN_TO_SHOW alternants ont déclaré leur salaire, gardées 10 minutes en mémoire. */
+interface PayCompany {
+  names: string[];
+  pay: CommunityPay;
+}
+let payCache: { until: number; list: Promise<PayCompany[]> } | null = null;
+
+function payCompanies(): Promise<PayCompany[]> {
+  if (payCache && payCache.until > Date.now()) return payCache.list;
+  const list = (async () => {
+    await ensureSchema();
+    const rows = await db()<{ siren: string; name: string; percents: number[] }[]>`
+      select c.siren, c.name, array_agg((p.gross_cents::float / p.minimum_cents - 1) * 100) as percents
+      from salary_reports p join companies c on c.siren = p.siren
+      where not p.hidden and p.minimum_cents > 0
+      group by c.siren, c.name having count(*) >= ${MIN_TO_SHOW}`;
+    return rows.map((r) => ({ names: companyNames(r.name), pay: summarizePercents(r.siren, r.percents.map(Number)) }));
+  })();
+  list.catch(() => (payCache = null));
+  payCache = { until: Date.now() + 10 * 60_000, list };
+  return list;
+}
+
+/** « Decathlon France (Decathlon) » se reconnaît sous « Decathlon France » comme sous « Decathlon ». */
+export function companyNames(official: string): string[] {
+  const inside = official.match(/\(([^)]+)\)/)?.[1];
+  return [official, official.replace(/\([^)]*\)/g, ''), inside].map((n) => (n ? coreName(n) : '')).filter((n) => n.length >= 2);
+}
+
+/** Les salaires déclarés pour l'entreprise de chaque offre : par SIREN quand la source le donne, sinon par le nom exact. */
+export async function communityPayFor(offers: Pick<Offer, 'id' | 'company' | 'companySiren' | 'source'>[]): Promise<Map<string, CommunityPay>> {
+  const found = new Map<string, CommunityPay>();
+  if (!isAccountsConfigured()) return found;
+  let list: PayCompany[];
+  try {
+    list = await payCompanies();
+  } catch {
+    return found;
+  }
+  if (list.length === 0) return found;
+  for (const offer of offers) {
+    if (offer.source === 'exemple') continue;
+    const name = offer.company ? coreName(offer.company) : '';
+    const hit = list.find((c) => (offer.companySiren && c.pay.siren === offer.companySiren) || (name.length >= 2 && c.names.includes(name)));
+    if (hit) found.set(offer.id, hit.pay);
+  }
+  return found;
+}
+
+/** Une entreprise déjà connue de la base sous le même nom (pages entreprise créées par les alternants). */
+export async function findCompanySiren(company: string | null): Promise<string | null> {
+  if (!company) return null;
+  const name = coreName(company);
+  if (name.length < 2) return null;
+  await ensureSchema();
+  const rows = await db()<{ siren: string; name: string }[]>`select siren, name from companies`;
+  return rows.find((r) => companyNames(r.name).includes(name))?.siren ?? null;
 }

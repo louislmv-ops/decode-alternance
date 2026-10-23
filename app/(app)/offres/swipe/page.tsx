@@ -5,7 +5,9 @@ import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { relativeDays } from '@/lib/format';
 import { parseFilters } from '@/lib/offers/filter';
 import { highlights } from '@/lib/offers/highlights';
-import { payTier } from '@/lib/offers/pay-tier';
+import { communityPayFor } from '@/lib/companies/store';
+import { payEstimateHint } from '@/lib/offers/pay-estimate';
+import { PAY_TIER_LABELS } from '@/lib/offers/pay-tier';
 import { listOffers } from '@/lib/offers/repository';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/types';
@@ -22,8 +24,9 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
   const filters = parseFilters(params);
   const profile = decodePayCookie((await cookies()).get(PROFILE_COOKIE)?.value);
   const result = await listOffers(filters).catch(() => null);
+  const community = await communityPayFor(result?.offers ?? []);
   const cards: SwipeCard[] = (result?.offers ?? [])
-    .map((offer) => ({ offer, h: highlights(offer, profile) }))
+    .map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }))
     .filter(({ h }) => !h.schoolBait)
     .map(({ offer, h }) => ({
       id: offer.id,
@@ -34,10 +37,8 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt)]
         .filter((x): x is string => Boolean(x))
         .join(' · '),
-      payCents: offer.salaryMonthlyCents,
-      minimumCents: h.minimumCents,
-      tier: payTier(offer.salaryMonthlyCents, h.minimumCents),
-      diffPercent: h.pay && h.pay.diffPercent > 0 ? h.pay.diffPercent : null,
+      tier: h.tier,
+      payHint: payEstimateHint(h.estimate, PAY_TIER_LABELS[h.tier]),
       pepite: h.pepite,
     }));
   const next = new URLSearchParams(Object.entries(params).flatMap(([k, v]) => (typeof v === 'string' && k !== 'page' ? [[k, v]] : [])));

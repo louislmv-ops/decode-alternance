@@ -1,7 +1,7 @@
 import { PAY_TIER_LABELS, type PayTier } from '@/lib/offers/pay-tier';
 
 /** Les « € » : pleins jusqu'à la note, estompés au-delà. */
-export function PayEuros({ tier, size = 'small' }: { tier: PayTier | null; size?: 'small' | 'large' }) {
+export function PayEuros({ tier, size = 'small', hint }: { tier: PayTier | null; size?: 'small' | 'large'; hint?: string }) {
   if (tier === null) {
     return (
       <span className={`euros euros--${size} euros--none`} title="Salaire non chiffré dans l’annonce">
@@ -11,7 +11,7 @@ export function PayEuros({ tier, size = 'small' }: { tier: PayTier | null; size?
     );
   }
   return (
-    <span className={`euros euros--${size}`} title={PAY_TIER_LABELS[tier]}>
+    <span className={`euros euros--${size}`} title={hint ?? PAY_TIER_LABELS[tier]}>
       <span aria-hidden="true">
         {[1, 2, 3].map((n) => (
           <span key={n} className={n <= tier ? 'euros__on' : 'euros__off'}>
@@ -19,7 +19,9 @@ export function PayEuros({ tier, size = 'small' }: { tier: PayTier | null; size?
           </span>
         ))}
       </span>
-      <span className="sr-only">{PAY_TIER_LABELS[tier]}</span>
+      <span className="sr-only">
+        {hint ?? PAY_TIER_LABELS[tier]}
+      </span>
     </span>
   );
 }

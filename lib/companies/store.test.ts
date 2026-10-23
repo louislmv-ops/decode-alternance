@@ -63,3 +63,10 @@ describe('label Top pour les alternants', async () => {
     expect(isTopForApprentices(12, null, null)).toBe(false);
   });
 });
+
+describe('noms d’entreprise', () => {
+  it('reconnaît le nom officiel, sans sigle et le sigle seul', async () => {
+    const { companyNames } = await import('./store');
+    expect(companyNames('Decathlon France (Decathlon)')).toEqual(expect.arrayContaining(['decathlon']));
+  });
+});

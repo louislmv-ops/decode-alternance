@@ -8,6 +8,7 @@ import { SiteNav } from '@/components/site/SiteNav';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { DOMAINS } from '@/lib/domains';
 import { highlights } from '@/lib/offers/highlights';
+import { communityPayFor } from '@/lib/companies/store';
 import { listOffers } from '@/lib/offers/repository';
 import type { OfferPage } from '@/lib/offers/types';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
@@ -32,7 +33,9 @@ async function latestOffers(): Promise<OfferPage | null> {
 export default async function Home() {
   const [page, jar] = await Promise.all([latestOffers(), cookies()]);
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
-  const latest = (page?.offers ?? []).slice(0, 5).map((offer) => ({ offer, h: highlights(offer, profile) }));
+  const offers = (page?.offers ?? []).slice(0, 5);
+  const community = await communityPayFor(offers);
+  const latest = offers.map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }));
 
   return (
     <>
