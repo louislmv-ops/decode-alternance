@@ -2,7 +2,8 @@
 
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { DEMO_DECODES, DEMO_OFFERS } from './demo';
-import { dedupe, filterOffers } from './filter';
+import { dedupe, filterOffers, matchesFilters } from './filter';
+import { sortOffers } from './rank';
 import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer } from './aggregators';
 import { isLiveConfigured, liveOffer, liveSearch } from './live';
@@ -27,15 +28,6 @@ async function hasStoredOffers(): Promise<boolean> {
   return value;
 }
 
-/** Les filtres que les agrégateurs ne savent pas appliquer eux-mêmes. */
-function keepAggregated(o: Offer, filters: OfferFilters): boolean {
-  if (o.schoolFlags.length > 0) return false;
-  if (filters.contract && o.contract !== filters.contract && o.contract !== 'alternance') return false;
-  if (filters.level && o.diplomaLevel !== null && o.diplomaLevel > filters.level) return false;
-  // Taille d'entreprise inconnue et jamais en direct : ces deux filtres les écartent.
-  return !filters.bigCompany && !filters.direct;
-}
-
 async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
   if (isLiveConfigured()) return liveSearch(filters);
@@ -54,8 +46,9 @@ export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
 
   const pageSize = primary?.pageSize ?? 20;
   const extra = await aggregatorSearch(filters, primary ? Math.ceil(pageSize / 2) : pageSize);
-  const kept = extra.offers.filter((o) => keepAggregated(o, filters));
-  const offers = dedupe([...(primary?.offers ?? []), ...kept]).sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  // Les agrégateurs ne savent filtrer ni la taille, ni le secteur, ni le salaire : on le fait ici.
+  const kept = extra.offers.filter((o) => matchesFilters(o, filters));
+  const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort);
   return {
     offers,
     total: (primary?.total ?? 0) + extra.total,

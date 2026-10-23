@@ -3,7 +3,8 @@ import { cookies } from 'next/headers';
 import { SwipeDeck, type SwipeCard } from '@/components/offer/SwipeDeck';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { relativeDays } from '@/lib/format';
-import { parseFilters } from '@/lib/offers/filter';
+import { filtersWithPlace } from '@/lib/offers/filter';
+import { PLACE_COOKIE } from '@/lib/place';
 import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
 import { payEstimateHint } from '@/lib/offers/pay-estimate';
@@ -21,8 +22,9 @@ const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 
 /** Une offre à la fois, plein écran : on garde ou on passe. Mêmes filtres que la liste. */
 export default async function SwipePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const filters = parseFilters(params);
-  const profile = decodePayCookie((await cookies()).get(PROFILE_COOKIE)?.value);
+  const jar = await cookies();
+  const filters = filtersWithPlace(params, jar.get(PLACE_COOKIE)?.value);
+  const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
   const result = await listOffers(filters).catch(() => null);
   const community = await communityPayFor(result?.offers ?? []);
   const cards: SwipeCard[] = (result?.offers ?? [])
@@ -34,7 +36,7 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       logo: logoSrc(offer),
       company: offer.company ?? 'Entreprise non nommée',
       title: cleanTitle(offer.title),
-      facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt)]
+      facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt), offer.easyApply ? '⚡ Candidature simplifiée' : null]
         .filter((x): x is string => Boolean(x))
         .join(' · '),
       tier: h.tier,

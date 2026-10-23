@@ -4,11 +4,14 @@ import Link from 'next/link';
 import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
 import { AutoSubmit } from '@/components/offer/AutoSubmit';
 import { ForYou } from '@/components/offer/ForYou';
+import { LocationPrompt } from '@/components/offer/LocationPrompt';
+import { MoreFilters } from '@/components/offer/MoreFilters';
+import { PlacePicker } from '@/components/offer/PlacePicker';
 import { OfferRow } from '@/components/offer/OfferRow';
-import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 import { DIPLOMA_LEVELS } from '@/lib/rules/employer';
-import { parseFilters } from '@/lib/offers/filter';
+import { filtersQuery, filtersWithPlace, moreFiltersCount } from '@/lib/offers/filter';
+import { PLACE_COOKIE } from '@/lib/place';
 import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
 import { listOffers } from '@/lib/offers/repository';
@@ -28,21 +31,24 @@ export const metadata: Metadata = {
 };
 
 function pageHref(filters: OfferFilters, page: number): string {
-  const params = new URLSearchParams();
-  if (filters.q) params.set('q', filters.q);
-  if (filters.department) params.set('dep', filters.department);
-  if (filters.level) params.set('niveau', String(filters.level));
-  if (filters.contract) params.set('contrat', filters.contract);
-  if (filters.bigCompany) params.set('grandes', '1');
-  if (filters.direct) params.set('direct', '1');
-  if (page > 1) params.set('page', String(page));
-  const qs = params.toString();
-  return qs ? `/offres?${qs}` : '/offres';
+  return `/offres?${filtersQuery(filters, page)}`;
 }
 
+const SINCE_OPTIONS = [
+  { value: '', label: 'Toutes dates' },
+  { value: '1', label: 'Dernières 24 h' },
+  { value: '7', label: 'Cette semaine' },
+  { value: '30', label: 'Ce mois-ci' },
+];
+
 export default async function OffersPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const filters = parseFilters(await searchParams);
-  const profile = decodePayCookie((await cookies()).get(PROFILE_COOKIE)?.value);
+  const [params, jar] = await Promise.all([searchParams, cookies()]);
+  const placeCookie = jar.get(PLACE_COOKIE)?.value;
+  const filters = filtersWithPlace(params, placeCookie);
+  const askPlace = !placeCookie && params.dep === undefined;
+  const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
+  const more = moreFiltersCount(filters);
+  const anyFilter = Boolean(filters.q || filters.level || filters.contract || filters.sinceDays || filters.easyApply || more > 0);
   const result = await listOffers(filters);
   const community = await communityPayFor(result.offers);
   const rows = result.offers.map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }));
@@ -84,17 +90,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           </button>
         </div>
         <div className="osearch__chips">
-          <label className={`chip${filters.department ? ' is-on' : ''}`}>
-            <span className="sr-only">Département</span>
-            <select name="dep" defaultValue={filters.department ?? ''}>
-              <option value="">Toute la France</option>
-              {DEPARTMENT_OPTIONS.map((d) => (
-                <option key={d.code} value={d.code}>
-                  {d.code} · {d.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <PlacePicker formId="osearch" selected={filters.departments ?? []} />
           <label className={`chip${filters.level ? ' is-on' : ''}`}>
             <span className="sr-only">Ton niveau de diplôme</span>
             <select name="niveau" defaultValue={filters.level ? String(filters.level) : ''}>
@@ -106,35 +102,37 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
               ))}
             </select>
           </label>
-          <label className={`chip${filters.contract ? ' is-on' : ''}`}>
-            <span className="sr-only">Contrat</span>
-            <select name="contrat" defaultValue={filters.contract ?? ''}>
-              <option value="">Tous contrats</option>
-              <option value="apprentissage">Apprentissage</option>
-              <option value="professionnalisation">Contrat pro</option>
+          <label className={`chip${filters.sinceDays ? ' is-on' : ''}`}>
+            <span className="sr-only">Date de publication</span>
+            <select name="depuis" defaultValue={filters.sinceDays ? String(filters.sinceDays) : ''}>
+              {SINCE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </label>
           <label className="chip chip--check">
-            <input type="checkbox" name="grandes" value="1" defaultChecked={filters.bigCompany} />
-            <span>Grandes entreprises</span>
+            <input type="checkbox" name="simple" value="1" defaultChecked={filters.easyApply} />
+            <span>⚡ Candidature simplifiée</span>
           </label>
-          {result.mode !== 'direct' && (
-            <label className="chip chip--check">
-              <input type="checkbox" name="direct" value="1" defaultChecked={filters.direct} />
-              <span>Direct entreprise</span>
-            </label>
+          <MoreFilters filters={filters} count={more} />
+          {anyFilter && (
+            <Link href="/offres" className="chip chip--reset">
+              <span>Réinitialiser</span>
+            </Link>
           )}
         </div>
       </form>
       <AutoSubmit formId="osearch" />
 
-      <ForYou />
+      {askPlace ? <LocationPrompt /> : <ForYou />}
 
       {(filters.page ?? 1) <= 1 && <CampaignStrip />}
 
       <section className="results" aria-labelledby="offers-list-title">
         <div className="offers__bar">
-          <h2 id="offers-list-title">Les plus récentes</h2>
+          <h2 id="offers-list-title">{filters.sort === 'recent' ? 'Les plus récentes' : 'Les plus attirantes'}</h2>
           <span className="num">
             {from}–{to} sur {result.total.toLocaleString('fr-FR')}
           </span>

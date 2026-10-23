@@ -5,7 +5,10 @@ import { Faq } from '@/components/site/Faq';
 import { MatchButton } from '@/components/Matcher';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
-import { DEPARTMENT_OPTIONS } from '@/lib/departments';
+import { DEPARTMENT_NAMES, DEPARTMENT_OPTIONS } from '@/lib/departments';
+import { LocationPrompt } from '@/components/offer/LocationPrompt';
+import { filtersWithPlace } from '@/lib/offers/filter';
+import { PLACE_COOKIE } from '@/lib/place';
 import { DOMAINS } from '@/lib/domains';
 import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
@@ -20,9 +23,9 @@ const STEPS = [
   { title: 'Démarque-toi', text: 'Qui contacter dans l’équipe, et le suivi de tes candidatures.', href: '/equipe', action: 'Trouver l’équipe' },
 ];
 
-async function latestOffers(): Promise<OfferPage | null> {
+async function latestOffers(departments: string[]): Promise<OfferPage | null> {
   try {
-    return await listOffers({});
+    return await listOffers({ departments });
   } catch (error) {
     // L'accueil reste lisible si la source des offres ne répond pas.
     console.error(error);
@@ -31,7 +34,10 @@ async function latestOffers(): Promise<OfferPage | null> {
 }
 
 export default async function Home() {
-  const [page, jar] = await Promise.all([latestOffers(), cookies()]);
+  const jar = await cookies();
+  const placeCookie = jar.get(PLACE_COOKIE)?.value;
+  const departments = filtersWithPlace({}, placeCookie).departments ?? [];
+  const page = await latestOffers(departments);
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
   const offers = (page?.offers ?? []).slice(0, 5);
   const community = await communityPayFor(offers);
@@ -99,9 +105,11 @@ export default async function Home() {
           </ol>
         </section>
 
+        {!placeCookie && <LocationPrompt />}
+
         <section className="home-latest" aria-labelledby="latest-title">
           <div className="offers__bar">
-            <h2 id="latest-title">Les dernières offres</h2>
+            <h2 id="latest-title">{departments.length === 1 ? `Les meilleures offres, ${DEPARTMENT_NAMES[departments[0]!]}` : 'Les meilleures offres du moment'}</h2>
             {page?.mode === 'exemples' && <span className="num">exemples fictifs</span>}
             <Link href="/offres" className="link">
               Toutes les offres

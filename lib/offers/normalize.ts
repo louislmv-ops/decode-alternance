@@ -1,4 +1,5 @@
 import { SMIC } from '@/lib/rules/reference';
+import { CFA_COMPANY_NAMES } from './cfa-list';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import type { CompanySizeTag, OfferContract } from './types';
 
@@ -157,11 +158,28 @@ const SCHOOL_PHRASES: [RegExp, string][] = [
  * Indices qu'une « offre » est en réalité une publicité d'école qui cherche des élèves.
  * Chaque indice est une phrase lisible, affichée telle quelle.
  */
-export function schoolBaitFlags(input: { company: string | null; title: string; description: string }): string[] {
+let cfaNames: { set: Set<string>; list: string[] } | null = null;
+
+/** L'annonceur figure-t-il dans la liste des écoles et CFA de La bonne alternance (nom exact ou contenu mot pour mot) ? */
+export function isKnownSchool(company: string | null | undefined): boolean {
+  if (!company) return false;
+  cfaNames ??= (() => {
+    const list = CFA_COMPANY_NAMES.map(normalizeText).filter((n) => n.length >= 3);
+    return { set: new Set(list), list };
+  })();
+  const name = normalizeText(company);
+  if (cfaNames.set.has(name)) return true;
+  const padded = ` ${name} `;
+  return cfaNames.list.some((n) => padded.includes(` ${n} `));
+}
+
+export function schoolBaitFlags(input: { company: string | null; title: string; description: string; naf?: string | null; legalName?: string | null }): string[] {
   const flags: string[] = [];
   const company = normalizeText(input.company ?? '');
   const text = normalizeText(`${input.title} ${input.description}`);
-  if (company && SCHOOL_NAME.test(company)) flags.push('L’annonceur est une école ou un organisme de formation.');
+  // Code NAF 85 : enseignement. Une école qui « recrute » un alternant cherche presque toujours un élève.
+  if ((company && SCHOOL_NAME.test(company)) || /^85/.test(input.naf ?? '') || isKnownSchool(input.company) || isKnownSchool(input.legalName))
+    flags.push('L’annonceur est une école ou un organisme de formation.');
   for (const [pattern, message] of SCHOOL_PHRASES) {
     if (pattern.test(text)) flags.push(message);
   }

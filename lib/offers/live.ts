@@ -4,7 +4,9 @@
 
 import { fetchText } from './connectors/http';
 import { alternanceNatureCodes, API, cachedFtToken, toOffer, type FtOffer } from './connectors/france-travail';
+import { matchesFilters } from './filter';
 import { normalizeText } from './normalize';
+import { sortOffers } from './rank';
 import type { Offer, OfferFilters, OfferPage } from './types';
 
 export const LIVE_PAGE = 20;
@@ -36,30 +38,30 @@ async function get(path: string): Promise<{ status: number; text: string; header
 
 export async function liveSearch(filters: OfferFilters): Promise<OfferPage> {
   const natures = await remember('natures', async () => alternanceNatureCodes(await token()));
-  // Une requête par nature de contrat (apprentissage, professionnalisation), une part de la page chacune.
-  const per = Math.ceil(LIVE_PAGE / Math.max(1, natures.length));
+  // Une requête par nature de contrat (apprentissage, professionnalisation) et par département choisi.
+  const places: (string | undefined)[] = filters.departments?.length ? filters.departments : [undefined];
+  const per = Math.max(1, Math.ceil(LIVE_PAGE / Math.max(1, natures.length * places.length)));
   const page = Math.min(Math.max(1, filters.page ?? 1), Math.floor(MAX_RANGE / per));
   const results = await Promise.all(
-    natures.map((nature) =>
-      remember(`s:${nature}:${filters.q ?? ''}:${filters.department ?? ''}:${page}`, async () => {
-        const params = new URLSearchParams({ natureContrat: nature, sort: '1', range: `${(page - 1) * per}-${page * per - 1}` });
-        if (filters.q) params.set('motsCles', normalizeText(filters.q).split(' ').slice(0, 5).join(','));
-        if (filters.department) params.set('departement', filters.department);
-        const res = await get(`/offres/search?${params}`);
-        if (res.status === 204) return { offers: [] as Offer[], total: 0 };
-        if (res.status !== 200 && res.status !== 206) throw new Error(`France Travail : HTTP ${res.status}`);
-        const offers = ((JSON.parse(res.text) as { resultats?: FtOffer[] }).resultats ?? []).map(toOffer);
-        return { offers, total: Number(res.headers.get('content-range')?.split('/')[1] ?? offers.length) };
-      }),
+    natures.flatMap((nature) =>
+      places.map((place) =>
+        remember(`s:${nature}:${filters.q ?? ''}:${place ?? ''}:${page}:${per}`, async () => {
+          const params = new URLSearchParams({ natureContrat: nature, sort: '1', range: `${(page - 1) * per}-${page * per - 1}` });
+          if (filters.q) params.set('motsCles', normalizeText(filters.q).split(' ').slice(0, 5).join(','));
+          if (place) params.set('departement', place);
+          const res = await get(`/offres/search?${params}`);
+          if (res.status === 204) return { offers: [] as Offer[], total: 0 };
+          if (res.status !== 200 && res.status !== 206) throw new Error(`France Travail : HTTP ${res.status}`);
+          const offers = ((JSON.parse(res.text) as { resultats?: FtOffer[] }).resultats ?? []).map(toOffer);
+          return { offers, total: Number(res.headers.get('content-range')?.split('/')[1] ?? offers.length) };
+        }),
+      ),
     ),
   );
-  const offers = results
-    .flatMap((r) => r.offers)
-    // Les offres d'écoles déguisées ne sont jamais listées.
-    .filter((o) => o.schoolFlags.length === 0)
-    .filter((o) => (!filters.contract || o.contract === filters.contract || o.contract === 'alternance'))
-    .filter((o) => (!filters.level || o.diplomaLevel === null || o.diplomaLevel <= filters.level) && (!filters.bigCompany || o.companySize === 'grande'))
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const offers = sortOffers(
+    results.flatMap((r) => r.offers).filter((o) => matchesFilters(o, filters)),
+    filters.sort,
+  );
   return { offers, total: results.reduce((n, r) => n + r.total, 0), page, pageSize: LIVE_PAGE, mode: 'direct', maxPage: Math.floor(MAX_RANGE / per) };
 }
 

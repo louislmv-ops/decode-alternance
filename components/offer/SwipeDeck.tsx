@@ -133,7 +133,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <CompanyLogo key={card.id} src={card.logo} name={card.company} size={56} />
           <p className="orow__company">
             <span>{card.company}</span>
-            {card.pepite && <span className="orow__flag">Pépite</span>}
+            {card.pepite && <span className="orow__flag">🔥 Pépite</span>}
           </p>
           <h1 className="swipe__title">{card.title}</h1>
           <p className="orow__meta">{card.facts}</p>
