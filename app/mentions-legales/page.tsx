@@ -6,12 +6,15 @@ import { SMIC } from '@/lib/rules/reference';
 export const metadata: Metadata = { title: 'Mentions légales', description: 'Éditeur, hébergeur, données personnelles et sources des offres et des règles de Décode.' };
 
 // Les informations de l'éditeur se règlent dans les variables d'environnement, sans toucher au code.
+// Sans elles, le site est présenté comme édité par un particulier à titre non professionnel, qui peut
+// rester anonyme en ne publiant que l'identité de l'hébergeur (LCEN, art. 6). Ce n'est plus possible
+// dès qu'il y a une activité commerciale : Décode Pro exige alors les vraies informations.
 const LEGAL = {
-  editor: process.env.LEGAL_EDITOR || '[NOM OU RAISON SOCIALE]',
-  address: process.env.LEGAL_ADDRESS || '[ADRESSE]',
-  siren: process.env.LEGAL_SIREN || '[NUMÉRO SIREN]',
-  director: process.env.LEGAL_DIRECTOR || process.env.LEGAL_EDITOR || '[NOM]',
-  contact: process.env.LEGAL_CONTACT || process.env.NEXT_PUBLIC_CONTACT_EMAIL || '[ADRESSE E-MAIL]',
+  editor: process.env.LEGAL_EDITOR || null,
+  address: process.env.LEGAL_ADDRESS || null,
+  siren: process.env.LEGAL_SIREN || null,
+  director: process.env.LEGAL_DIRECTOR || process.env.LEGAL_EDITOR || null,
+  contact: process.env.LEGAL_CONTACT || process.env.NEXT_PUBLIC_CONTACT_EMAIL || null,
 };
 
 export default function LegalPage() {
@@ -20,10 +23,18 @@ export default function LegalPage() {
       <SiteNav />
       <main className="prose-page">
         <h1>Mentions légales</h1>
-        <p>
-          Éditeur du site : {LEGAL.editor}, {LEGAL.address}, SIREN {LEGAL.siren}. Directeur de la publication : {LEGAL.director}.
-          Contact : {LEGAL.contact}.
-        </p>
+        {LEGAL.editor ? (
+          <p>
+            Éditeur du site : {[LEGAL.editor, LEGAL.address, LEGAL.siren ? `SIREN ${LEGAL.siren}` : null].filter(Boolean).join(', ')}. Directeur de la
+            publication : {LEGAL.director}.{LEGAL.contact && ` Contact : ${LEGAL.contact}.`}
+          </p>
+        ) : (
+          <p>
+            Ce site est édité par un particulier, à titre non professionnel. Conformément à l’article 6 de la loi n° 2004-575 du 21 juin
+            2004 pour la confiance dans l’économie numérique, ses éléments d’identification ont été communiqués à l’hébergeur, qui peut les
+            transmettre à l’autorité judiciaire.{LEGAL.contact && ` Contact : ${LEGAL.contact}.`}
+          </p>
+        )}
         <p>Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).</p>
 
         <h2>Ce que Décode fait, et ne fait pas</h2>
@@ -46,7 +57,7 @@ export default function LegalPage() {
         <h2 id="communaute">La commu</h2>
         <p>
           Les messages sont publiés par leurs auteurs, sous leur responsabilité, dans le respect de la charte. Pour signaler un contenu
-          illicite : bouton « Signaler » sous le message, ou écris à {LEGAL.contact}. Le contenu signalé est examiné et retiré s’il
+          illicite : bouton « Signaler » sous le message, {LEGAL.contact ? `ou écris à ${LEGAL.contact}.` : 'ou signale-le à l’hébergeur.'} Le contenu signalé est examiné et retiré s’il
           enfreint la loi ou la charte. Tu peux supprimer tes messages et ton compte à tout moment.
         </p>
 
