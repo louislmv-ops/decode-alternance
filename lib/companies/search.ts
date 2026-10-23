@@ -9,6 +9,8 @@ export interface CompanyRef {
   postalCode: string;
   /** Code de tranche d'effectif INSEE, null s'il n'est pas connu. */
   sizeCode: string | null;
+  /** Conventions collectives déclarées par l'employeur (IDCC), quand l'annuaire les donne. */
+  idcc?: string[];
 }
 
 interface ApiResult {
@@ -18,6 +20,7 @@ interface ApiResult {
   etat_administratif?: string;
   tranche_effectif_salarie?: string | null;
   siege?: { libelle_commune?: string; code_postal?: string };
+  complements?: { liste_idcc?: string[] | null };
 }
 
 const base = () => process.env.ENTREPRISES_API_URL || 'https://recherche-entreprises.api.gouv.fr';
@@ -41,6 +44,7 @@ function toRef(r: ApiResult): CompanyRef {
     city: r.siege?.libelle_commune ? tidyName(r.siege.libelle_commune) : '',
     postalCode: r.siege?.code_postal ?? '',
     sizeCode: r.tranche_effectif_salarie ?? null,
+    idcc: (r.complements?.liste_idcc ?? []).filter((c) => /^\d{1,4}$/.test(c)).map((c) => c.padStart(4, '0')),
   };
 }
 

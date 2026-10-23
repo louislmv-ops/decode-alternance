@@ -7,6 +7,7 @@ import { minimumSalary } from '@/lib/rules/salary';
 import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
+import { PayPanel } from './PayPanel';
 
 /** Une offre pas encore traduite : son texte brut, et le bouton qui demande la traduction. */
 export function UndecodedOffer({ offer, description }: { offer: OfferMeta; description: string }) {
@@ -47,8 +48,17 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
           </button>
         </div>
       </div>
-      <OfferFacts payCents={offer.salaryCents} minimumCents={minimum.cents} company={offer.company} place={offer.city} rhythm={null} contract={offer.contract} />
+      <OfferFacts
+        payCents={offer.salaryCents}
+        minimumCents={minimum.cents}
+        community={offer.pay ?? null}
+        company={offer.company}
+        place={offer.city}
+        rhythm={null}
+        contract={offer.contract}
+      />
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
+      <PayPanel announcedCents={offer.salaryCents} context={offer.pay ?? null} company={offer.company} sourceLabel={offer.sourceLabel} />
       {state.status === 'idle' && (
         <p className="decode-pitch">
           Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.

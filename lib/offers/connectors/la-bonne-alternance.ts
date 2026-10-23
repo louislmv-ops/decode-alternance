@@ -22,6 +22,7 @@ export interface LbaJob {
     brand?: string | null;
     legal_name?: string | null;
     website?: string | null;
+    siret?: string | null;
     size?: string | null;
     location?: { address?: string };
   };
@@ -80,6 +81,7 @@ export function lbaToOffer(job: LbaJob): Offer | null {
     schoolFlags: schoolBaitFlags({ company, title, description }),
     alsoOn: [],
     companySite: job.workplace?.website ?? null,
+    companySiren: /^\d{14}$/.test(job.workplace?.siret ?? '') ? job.workplace!.siret!.slice(0, 9) : null,
   };
 }
 

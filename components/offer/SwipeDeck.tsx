@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTracker } from '@/components/useTracker';
-import { formatEuros } from '@/lib/format';
 import type { PayTier } from '@/lib/offers/pay-tier';
 import { CompanyLogo } from './CompanyLogo';
 import { PayEuros } from './PayTier';
@@ -15,10 +14,9 @@ export interface SwipeCard {
   company: string;
   title: string;
   facts: string;
-  payCents: number | null;
-  minimumCents: number;
-  tier: PayTier | null;
-  diffPercent: number | null;
+  tier: PayTier;
+  /** D'où vient la note : annonce, alternants de l'entreprise ou minimum légal. */
+  payHint: string;
   pepite: boolean;
 }
 
@@ -140,13 +138,8 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <h1 className="swipe__title">{card.title}</h1>
           <p className="orow__meta">{card.facts}</p>
           <div className="swipe__pay">
-            <PayEuros tier={card.tier} size="large" />
-            {card.payCents !== null ? (
-              <strong className="num">{formatEuros(card.payCents, 0)}</strong>
-            ) : (
-              <span className="orow__none">Non chiffré · min. {formatEuros(card.minimumCents, 0)}</span>
-            )}
-            {card.diffPercent !== null && <span className="orow__sub num">+{card.diffPercent} % vs ton minimum</span>}
+            <PayEuros tier={card.tier} size="large" hint={card.payHint} />
+            <span className="orow__sub">{card.payHint}</span>
           </div>
           <Link href={card.href} className="link swipe__open" onPointerDown={(e) => e.stopPropagation()}>
             Voir l’offre décodée

@@ -1072,6 +1072,100 @@
   font-weight: 400;
 }
 
+.pay__src {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+
+.pay__range {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.pay__range span {
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+
+.pay__h {
+  margin-top: 22px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pay__years {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 0;
+}
+
+.pay__years div {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+}
+
+.pay__years dt {
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+
+.pay__years dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.pay__years dd span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.pay__jobs,
+.pay__reviews,
+.pay__sources {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pay__jobs li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.pay__jobs small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pay__reviews li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.pay__review-meta {
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+
+.pay__sources li {
+  padding: 4px 0;
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+
 .bullet-bar {
   position: relative;
   margin-top: 14px;

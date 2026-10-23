@@ -10,6 +10,7 @@ import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 import { DIPLOMA_LEVELS } from '@/lib/rules/employer';
 import { parseFilters } from '@/lib/offers/filter';
 import { highlights } from '@/lib/offers/highlights';
+import { communityPayFor } from '@/lib/companies/store';
 import { listOffers } from '@/lib/offers/repository';
 import type { OfferFilters } from '@/lib/offers/types';
 
@@ -43,7 +44,8 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
   const filters = parseFilters(await searchParams);
   const profile = decodePayCookie((await cookies()).get(PROFILE_COOKIE)?.value);
   const result = await listOffers(filters);
-  const rows = result.offers.map((offer) => ({ offer, h: highlights(offer, profile) }));
+  const community = await communityPayFor(result.offers);
+  const rows = result.offers.map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }));
   const pepites = rows.filter((r) => r.h.pepite).length;
   const from = result.total === 0 ? 0 : (result.page - 1) * result.pageSize + 1;
   const to = Math.min(result.total, result.page * result.pageSize);

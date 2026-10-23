@@ -7,6 +7,7 @@ import { InterviewPrep } from '@/components/pro/InterviewPrep';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
 import { findDecode, findOffer } from '@/lib/offers/repository';
+import { payContext } from '@/lib/offers/pay-context';
 import { isAggregatorUrl, SOURCE_LABELS } from '@/lib/offers/types';
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ u?: string }> };
@@ -31,7 +32,7 @@ export default async function OfferPage({ params, searchParams }: Props) {
     if (u && isAggregatorUrl(u)) redirect(u);
     notFound();
   }
-  const decoded = await findDecode(id);
+  const [decoded, pay] = await Promise.all([findDecode(id), payContext(offer)]);
 
   const meta: OfferMeta = {
     id: offer.id,
@@ -45,6 +46,7 @@ export default async function OfferPage({ params, searchParams }: Props) {
     isExample: offer.source === 'exemple',
     department: offer.department,
     diplomaLevel: offer.diplomaLevel,
+    pay,
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };
 
