@@ -24,3 +24,19 @@ describe('sortOffers', () => {
     expect(sortOffers([old, fresh], 'recent').map((o) => o.id)).toEqual(['b', 'a']);
   });
 });
+
+describe('tri par salaire et par avis', () => {
+  it('met les salaires annoncés les plus hauts devant, les offres sans montant après', () => {
+    const a = { ...base, id: 'a', salaryMonthlyCents: 120_000 };
+    const b = { ...base, id: 'b', salaryMonthlyCents: 180_000 };
+    const c = { ...base, id: 'c', salaryMonthlyCents: null };
+    expect(sortOffers([c, a, b], 'salary').map((o) => o.id)).toEqual(['b', 'a', 'c']);
+  });
+  it('met les entreprises les mieux notées devant', () => {
+    const a = { ...base, id: 'a', company: 'Alpha' };
+    const b = { ...base, id: 'b', company: 'Beta' };
+    const c = { ...base, id: 'c', company: 'Gamma' };
+    const notes: Record<string, number> = { Alpha: 3.2, Beta: 4.6 };
+    expect(sortOffers([c, a, b], 'reviews', (o) => notes[o.company ?? ''] ?? null).map((o) => o.id)).toEqual(['b', 'a', 'c']);
+  });
+});

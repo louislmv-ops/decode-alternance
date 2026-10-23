@@ -5,7 +5,7 @@ import { useProfile } from '@/components/useProfile';
 import { formatEuros } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
 import { SMIC } from '@/lib/rules/reference';
-import { apprenticeNetThresholdCents, comparePay, minimumSalary } from '@/lib/rules/salary';
+import { apprenticeNetThresholdCents, comparePay, CONTRACT_NAMES, contractForOffer, minimumSalary } from '@/lib/rules/salary';
 import { conventionLink } from '@/lib/rules/conventions';
 
 /**
@@ -18,15 +18,20 @@ export function PayPanel({
   company,
   sourceLabel,
   perks = [],
+  offerContract = null,
 }: {
   announcedCents: number | null;
   context: PayContext | null;
   company: string | null;
   sourceLabel: string;
   perks?: string[];
+  /** Le contrat de l'offre quand elle le précise : c'est lui qui fixe le minimum légal. */
+  offerContract?: 'apprentissage' | 'professionnalisation' | 'alternance' | null;
 }) {
   const [profile] = useProfile();
-  const minimum = minimumSalary({ contract: profile.contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const contract = contractForOffer(offerContract, profile.contract);
+  const fromOffer = offerContract === 'apprentissage' || offerContract === 'professionnalisation';
+  const minimum = minimumSalary({ contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   const e = payEstimate(announcedCents, minimum.cents, context?.community ?? null, context?.legalGrid ?? false);
   const pay = announcedCents !== null ? comparePay(announcedCents, minimum.cents) : null;
   const years = ([1, 2, 3] as const).map((year) => minimumSalary({ contract: 'apprentissage', age: profile.age, year, hasBacPro: profile.hasBacPro }));
@@ -39,7 +44,7 @@ export function PayPanel({
         <h2 id="pay-title">Salaire</h2>
         <Link href="/profil" className="panel__link">
           {profile.age} ans, {profile.year}
-          {profile.year === 1 ? 're' : 'e'} année
+          {profile.year === 1 ? 're' : 'e'} année, {CONTRACT_NAMES[contract]}
         </Link>
       </div>
 
@@ -62,7 +67,7 @@ export function PayPanel({
         </div>
         {e.source !== 'minimum' && (
           <div>
-            <p className="ui-label">Ton minimum légal</p>
+            <p className="ui-label">Ton minimum légal ({CONTRACT_NAMES[contract]})</p>
             <p className="pay__figure pay__figure--min num">{formatEuros(minimum.cents, 0)}</p>
           </div>
         )}
@@ -92,13 +97,23 @@ export function PayPanel({
           : e.source === 'alternants'
             ? `C’est une estimation : pose la question du salaire exact à l’entretien. Il ne peut pas être sous ${formatEuros(minimum.cents, 0)}.`
             : 'L’employeur ne peut pas payer moins. Pose la question du salaire exact à l’entretien.'}{' '}
-        {profile.contract === 'apprentissage' && `Sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
+        {contract === 'apprentissage' && `En apprentissage, sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
+      </p>
+      <p className="panel__note">
+        {fromOffer
+          ? `Minimum calculé pour un ${contract === 'apprentissage' ? 'contrat d’apprentissage' : 'contrat de professionnalisation'}, comme l’indique l’offre, sur la base du SMIC.`
+          : `L’offre ne précise pas le contrat (apprentissage ou contrat pro) : minimum calculé pour un ${contract === 'apprentissage' ? 'contrat d’apprentissage' : 'contrat de professionnalisation'}, comme dans ton profil, sur la base du SMIC.`}{' '}
+        {minimum.conventionMayRaise
+          ? contract === 'apprentissage'
+            ? 'À ton âge, si la convention collective fixe pour ton poste un salaire minimum (SMC) supérieur au SMIC, c’est lui qui sert de base : ton minimum peut être plus haut.'
+            : 'À ton âge, tu as droit au plus élevé entre le SMIC et 85 % du salaire minimum de ta convention collective (SMC) : ton minimum peut être plus haut.'
+          : 'Certaines conventions (banque, BTP, Syntec…) ont leur propre grille d’alternants, plus favorable : ton minimum peut être plus haut.'}
       </p>
       {perks.length > 0 && <p className="panel__note">En plus : {perks.join(' · ')}</p>}
 
-      {profile.contract === 'apprentissage' && (
+      {contract === 'apprentissage' && (
         <>
-          <h3 className="pay__h">Sur toute la durée du contrat</h3>
+          <h3 className="pay__h">Sur toute la durée de ton apprentissage (base SMIC)</h3>
           <dl className="pay__years">
             {years.map((y, i) => (
               <div key={i}>
@@ -173,7 +188,8 @@ export function PayPanel({
                 </a>
               </span>
             ))}
-            . Elle peut prévoir un salaire d’alternant plus élevé que le minimum légal : vérifie-la avant de signer.
+            . Si elle fixe un salaire minimum conventionnel (SMC) plus élevé que le SMIC, ou une grille propre aux alternants, ton salaire
+            minimum est calculé dessus : vérifie la grille avant de signer.
           </p>
         </>
       )}

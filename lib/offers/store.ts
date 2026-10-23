@@ -157,7 +157,7 @@ export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
   const page = Math.max(1, filters.page ?? 1);
 
   const [rows, count] = await Promise.all([
-    s<OfferRow[]>`select * from offers_unique where ${where} order by ${filters.sort === 'recent' ? s`published_at desc` : TOP_ORDER(s)} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
+    s<OfferRow[]>`select * from offers_unique where ${where} order by ${filters.sort === 'recent' ? s`published_at desc` : filters.sort === 'salary' ? s`salary_monthly_cents desc nulls last, published_at desc` : TOP_ORDER(s)} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
     s<{ n: number }[]>`select count(*)::int as n from offers_unique where ${where}`,
   ]);
   return { offers: rows.map(toOffer), total: count[0]?.n ?? 0, page, pageSize: PAGE_SIZE, mode: 'base' };

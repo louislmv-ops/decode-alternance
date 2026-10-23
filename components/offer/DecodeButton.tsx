@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { useProfile } from '@/components/useProfile';
 import { relativeDays } from '@/lib/format';
-import { minimumSalary } from '@/lib/rules/salary';
+import { contractForOffer, minimumSalary } from '@/lib/rules/salary';
 import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
@@ -18,7 +18,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
 
   const [profile] = useProfile();
   if (state.status === 'done') return <DecodedView decoded={state.decoded} offer={offer} />;
-  const minimum = minimumSalary({ contract: profile.contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const minimum = minimumSalary({ contract: contractForOffer(offer.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
 
   async function decode() {
     setState({ status: 'loading' });
@@ -67,7 +67,13 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         contract={offer.contract}
       />
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
-      <PayPanel announcedCents={offer.salaryCents} context={offer.pay ?? null} company={offer.company} sourceLabel={offer.sourceLabel} />
+      <PayPanel
+        announcedCents={offer.salaryCents}
+        context={offer.pay ?? null}
+        company={offer.company}
+        sourceLabel={offer.sourceLabel}
+        offerContract={offer.contractKind ?? null}
+      />
       {state.status === 'idle' && (
         <p className="decode-pitch">
           Un clic : les missions en clair, ta semaine type, les pièges, qui contacter dans l’équipe et quoi mettre en avant.

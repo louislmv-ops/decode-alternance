@@ -7,6 +7,7 @@ import { ForYou } from '@/components/offer/ForYou';
 import { LocationPrompt } from '@/components/offer/LocationPrompt';
 import { MoreFilters } from '@/components/offer/MoreFilters';
 import { PlacePicker } from '@/components/offer/PlacePicker';
+import { SortSelect } from '@/components/offer/SortSelect';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 import { DIPLOMA_LEVELS } from '@/lib/rules/employer';
@@ -132,10 +133,11 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
 
       <section className="results" aria-labelledby="offers-list-title">
         <div className="offers__bar">
-          <h2 id="offers-list-title">{filters.sort === 'recent' ? 'Les plus récentes' : 'Les plus attirantes'}</h2>
+          <h2 id="offers-list-title">Les offres</h2>
           <span className="num">
             {from}–{to} sur {result.total.toLocaleString('fr-FR')}
           </span>
+          <SortSelect formId="osearch" value={filters.sort ?? 'top'} />
           <Link href={`/offres/swipe${pageHref(filters, 1).replace('/offres', '')}`} className="offers__swipe">
             Mode swipe
           </Link>

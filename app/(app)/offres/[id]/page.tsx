@@ -48,6 +48,7 @@ export default async function OfferPage({ params, searchParams }: Props) {
     diplomaLevel: offer.diplomaLevel,
     pay,
     publishedAt: offer.publishedAt,
+    contractKind: offer.contract,
     easyApply: offer.easyApply ?? false,
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };

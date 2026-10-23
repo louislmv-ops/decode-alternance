@@ -73,3 +73,12 @@ describe('employerFigures', () => {
     expect(employerFigures({ contract: 'professionnalisation', size: 'moins-de-250', level: 5, disabledWorker: false }).aidCents).toBe(0);
   });
 });
+
+describe('contrat qui fixe le minimum', async () => {
+  const { contractForOffer } = await import('./salary');
+  it('suit le contrat de l’offre quand elle le précise, sinon le profil', () => {
+    expect(contractForOffer('professionnalisation', 'apprentissage')).toBe('professionnalisation');
+    expect(contractForOffer('alternance', 'apprentissage')).toBe('apprentissage');
+    expect(contractForOffer(null, 'professionnalisation')).toBe('professionnalisation');
+  });
+});

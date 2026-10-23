@@ -1,5 +1,5 @@
 import type { PayProfile } from '@/lib/profile';
-import { comparePay, minimumSalary, type PayComparison } from '@/lib/rules/salary';
+import { comparePay, contractForOffer, minimumSalary, type PayComparison } from '@/lib/rules/salary';
 import { type CommunityPay, mentionsLegalGrid, type PayEstimate, payEstimate } from './pay-estimate';
 import { isCac40 } from './companies';
 import { type PayTier, payTier } from './pay-tier';
@@ -22,11 +22,11 @@ export interface Highlights {
 }
 
 export function highlights(
-  offer: Pick<Offer, 'companySize' | 'salaryMonthlyCents' | 'schoolFlags'> & Partial<Pick<Offer, 'salaryText' | 'description' | 'company'>>,
+  offer: Pick<Offer, 'companySize' | 'salaryMonthlyCents' | 'schoolFlags'> & Partial<Pick<Offer, 'salaryText' | 'description' | 'company' | 'contract'>>,
   profile: PayProfile,
   community: CommunityPay | null = null,
 ): Highlights {
-  const minimum = minimumSalary({ contract: profile.contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const minimum = minimumSalary({ contract: contractForOffer(offer.contract, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   const pay = offer.salaryMonthlyCents !== null ? comparePay(offer.salaryMonthlyCents, minimum.cents) : null;
   const estimate = payEstimate(offer.salaryMonthlyCents, minimum.cents, community, mentionsLegalGrid(offer.salaryText, offer.description));
   const bigCompany = offer.companySize === 'grande';

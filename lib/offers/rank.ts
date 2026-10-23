@@ -6,7 +6,17 @@ import { isCac40 } from './companies';
 import { normalizeText } from './normalize';
 import type { Offer } from './types';
 
-export type OfferSort = 'top' | 'recent';
+export type OfferSort = 'top' | 'recent' | 'salary' | 'reviews';
+
+export const SORT_OPTIONS: { value: OfferSort; label: string }[] = [
+  { value: 'top', label: 'Les plus attirantes' },
+  { value: 'recent', label: 'Les plus récentes' },
+  { value: 'salary', label: 'Salaire annoncé le plus haut' },
+  { value: 'reviews', label: 'Entreprises les mieux notées' },
+];
+
+/** La note moyenne des avis d'alternants sur l'employeur d'une offre, quand il y en a assez. */
+export type RatingOf = (o: Pick<Offer, 'company' | 'companySiren'>) => number | null;
 
 /** Intitulés de postes qualifiés, recherchés et souvent mieux payés. */
 export const STRONG_ROLE =
@@ -34,11 +44,26 @@ export function attractiveness(
   return score;
 }
 
-export function sortOffers<T extends Offer>(offers: T[], sort: OfferSort = 'top'): T[] {
+/**
+ * Trie les offres. Salaire et avis : les offres sans montant ou sans note passent après les autres,
+ * elles-mêmes rangées des plus attirantes aux moins attirantes.
+ */
+export function sortOffers<T extends Offer>(offers: T[], sort: OfferSort = 'top', ratingOf?: RatingOf): T[] {
   if (sort === 'recent') return [...offers].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   const now = Date.now();
-  const scored = offers.map((o) => ({ o, s: attractiveness(o, now) }));
-  return scored.sort((a, b) => b.s - a.s || b.o.publishedAt.localeCompare(a.o.publishedAt)).map((x) => x.o);
+  const key = (o: T): number | null =>
+    sort === 'salary' ? o.salaryMonthlyCents : sort === 'reviews' ? (ratingOf?.(o) ?? null) : attractiveness(o, now);
+  const scored = offers.map((o) => ({ o, k: key(o), s: attractiveness(o, now) }));
+  return scored
+    .sort((a, b) => {
+      if (a.k !== b.k) {
+        if (a.k === null) return 1;
+        if (b.k === null) return -1;
+        return b.k - a.k;
+      }
+      return b.s - a.s || b.o.publishedAt.localeCompare(a.o.publishedAt);
+    })
+    .map((x) => x.o);
 }
 
 /** STRONG_ROLE pour Postgres, qui compare les intitulés avec leurs accents. */
