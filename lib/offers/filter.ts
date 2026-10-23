@@ -1,6 +1,6 @@
 import { normalizeText } from './normalize';
 import { MAX_DEPARTMENTS } from '@/lib/place';
-import { sortOffers } from './rank';
+import { type OfferSort, SORT_OPTIONS, sortOffers } from './rank';
 import { SECTOR_CODES, sectorOf } from './sectors';
 import { type CompanySizeTag, SOURCE_PRIORITY, type Offer, type OfferFilters, type OfferPage } from './types';
 
@@ -109,7 +109,7 @@ export function parseFilters(params: Params): OfferFilters {
     sinceDays: SINCE.includes(since) ? since : undefined,
     direct: one('direct') === '1',
     easyApply: one('simple') === '1',
-    sort: one('tri') === 'recent' ? 'recent' : 'top',
+    sort: SORT_OPTIONS.some((o) => o.value === one('tri')) ? (one('tri') as OfferSort) : 'top',
     page: Math.max(1, Number(one('page')) || 1),
   };
 }
@@ -138,12 +138,12 @@ export function filtersQuery(f: OfferFilters, page = 1): URLSearchParams {
   if (f.sinceDays) p.set('depuis', String(f.sinceDays));
   if (f.direct) p.set('direct', '1');
   if (f.easyApply) p.set('simple', '1');
-  if (f.sort === 'recent') p.set('tri', 'recent');
+  if (f.sort && f.sort !== 'top') p.set('tri', f.sort);
   if (page > 1) p.set('page', String(page));
   return p;
 }
 
 /** Nombre de filtres rangés dans « Plus de filtres », pour l'afficher sur le bouton. */
 export function moreFiltersCount(f: OfferFilters): number {
-  return (f.contract ? 1 : 0) + (f.sizes?.length ?? 0) + (f.sectors?.length ?? 0) + (f.withSalary ? 1 : 0) + (f.sinceDays ? 1 : 0) + (f.direct ? 1 : 0) + (f.easyApply ? 1 : 0) + (f.sort === 'recent' ? 1 : 0);
+  return (f.contract ? 1 : 0) + (f.sizes?.length ?? 0) + (f.sectors?.length ?? 0) + (f.withSalary ? 1 : 0) + (f.sinceDays ? 1 : 0) + (f.direct ? 1 : 0) + (f.easyApply ? 1 : 0);
 }

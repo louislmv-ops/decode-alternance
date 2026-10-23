@@ -7,6 +7,7 @@ import { isJoobleConfigured, searchJooble } from './connectors/jooble';
 import { after } from 'next/server';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { fetchLba, isLbaConfigured, type LbaQuery, lbaQueries, pageOf } from './connectors/la-bonne-alternance';
+import { companyRatingOf } from '@/lib/companies/store';
 import { matchesFilters } from './filter';
 import type { Offer, OfferFilters } from './types';
 
@@ -116,7 +117,8 @@ export async function lbaOffers(department: string | undefined): Promise<Offer[]
 const lba: Search = async (filters, page, perPage) => {
   const places = filters.departments?.length ? filters.departments : [undefined];
   const all = (await Promise.all(places.map((d) => lbaOffers(d)))).flat();
-  return pageOf(all.filter((o) => matchesFilters(o, filters)), filters.q, page, perPage, filters.sort);
+  const ratingOf = filters.sort === 'reviews' ? await companyRatingOf() : undefined;
+  return pageOf(all.filter((o) => matchesFilters(o, filters)), filters.q, page, perPage, filters.sort, ratingOf);
 };
 
 /** Adzuna et Jooble ne cherchent qu'un lieu à la fois : on leur donne le premier choisi. */

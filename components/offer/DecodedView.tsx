@@ -8,7 +8,7 @@ import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
 import { formatEuros, relativeDays } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
 import { RHYTHMS } from '@/lib/profile';
-import { comparePay, minimumSalary } from '@/lib/rules/salary';
+import { comparePay, contractForOffer, minimumSalary } from '@/lib/rules/salary';
 import { IconOut } from '@/components/app/Icons';
 import { CopyButton } from './CopyButton';
 import { MatchPanel } from './Match';
@@ -31,6 +31,8 @@ export interface OfferMeta {
   department: string | null;
   diplomaLevel: DiplomaLevel | null;
   publishedAt?: string;
+  /** Type de contrat de l'offre, quand elle le précise : il fixe le minimum légal. */
+  contractKind?: 'apprentissage' | 'professionnalisation' | 'alternance' | null;
   easyApply?: boolean;
   /** Salaires déclarés, avis et convention collective de l'entreprise, rassemblés côté serveur. */
   pay?: PayContext | null;
@@ -64,7 +66,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const { add, apps } = useTracker();
   const [added, setAdded] = useState(false);
 
-  const minimum = minimumSalary({ contract: profile.contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const minimum = minimumSalary({ contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   const offerCents = offer?.salaryCents ?? (decoded.salaire.mensuelBrutEuros !== null ? Math.round(decoded.salaire.mensuelBrutEuros * 100) : null);
   const pay = offerCents !== null ? comparePay(offerCents, minimum.cents) : null;
   const big = decoded.entreprise.taille === 'grande';
@@ -339,6 +341,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             company={company || null}
             sourceLabel={offer?.sourceLabel ?? 'l’annonce'}
             perks={decoded.salaire.avantages}
+            offerContract={offer?.contractKind ?? null}
           />
 
           <details className="panel fold" aria-labelledby="contract-title">

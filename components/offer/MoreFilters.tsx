@@ -29,16 +29,6 @@ export function MoreFilters({ filters, count }: { filters: OfferFilters; count: 
         </div>
 
         <fieldset className="sheet__group">
-          <legend>Ordre</legend>
-          <label className="sheet__opt">
-            <input type="radio" name="tri" value="top" defaultChecked={filters.sort !== 'recent'} /> Les plus attirantes d’abord
-          </label>
-          <label className="sheet__opt">
-            <input type="radio" name="tri" value="recent" defaultChecked={filters.sort === 'recent'} /> Les plus récentes d’abord
-          </label>
-        </fieldset>
-
-        <fieldset className="sheet__group">
           <legend>Contrat</legend>
           <label className="sheet__opt">
             <input type="radio" name="contrat" value="" defaultChecked={!filters.contract} /> Tous

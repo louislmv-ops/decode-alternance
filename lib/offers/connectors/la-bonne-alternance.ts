@@ -5,7 +5,7 @@
 
 import { normalizeText, departmentFromPostalCode, fingerprint, parseSalary, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
 import type { DiplomaLevel } from '@/lib/rules/employer';
-import { type OfferSort, sortOffers } from '../rank';
+import { type OfferSort, type RatingOf, sortOffers } from '../rank';
 import type { Offer, OfferContract } from '../types';
 import { departmentFromPlace } from './aggregator';
 import { fetchText } from './http';
@@ -126,7 +126,14 @@ export function lbaQueries(department: string | undefined, allDepartments: strin
 }
 
 /** Une page de résultats, filtrée par mots côté Décode puisque l'API ne le fait pas. */
-export function pageOf(offers: Offer[], q: string | undefined, page: number, perPage: number, sort: OfferSort = 'recent'): { offers: Offer[]; total: number } {
+export function pageOf(
+  offers: Offer[],
+  q: string | undefined,
+  page: number,
+  perPage: number,
+  sort: OfferSort = 'recent',
+  ratingOf?: RatingOf,
+): { offers: Offer[]; total: number } {
   const words = normalizeText(q ?? '').split(' ').filter(Boolean);
   const matching = words.length
     ? offers.filter((o) => {
@@ -134,6 +141,6 @@ export function pageOf(offers: Offer[], q: string | undefined, page: number, per
         return words.every((w) => hay.includes(w));
       })
     : offers;
-  const sorted = sortOffers(matching, sort);
+  const sorted = sortOffers(matching, sort, ratingOf);
   return { offers: sorted.slice((page - 1) * perPage, page * perPage), total: sorted.length };
 }

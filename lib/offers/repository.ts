@@ -4,6 +4,7 @@ import type { DecodedOffer } from '@/lib/decode/schema';
 import { DEMO_DECODES, DEMO_OFFERS } from './demo';
 import { dedupe, filterOffers, matchesFilters } from './filter';
 import { sortOffers } from './rank';
+import { companyRatingOf } from '@/lib/companies/store';
 import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer } from './aggregators';
 import { isLiveConfigured, liveOffer, liveSearch } from './live';
@@ -48,7 +49,7 @@ export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
   const extra = await aggregatorSearch(filters, primary ? Math.ceil(pageSize / 2) : pageSize);
   // Les agrégateurs ne savent filtrer ni la taille, ni le secteur, ni le salaire : on le fait ici.
   const kept = extra.offers.filter((o) => matchesFilters(o, filters));
-  const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort);
+  const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort, filters.sort === 'reviews' ? await companyRatingOf() : undefined);
   return {
     offers,
     total: (primary?.total ?? 0) + extra.total,

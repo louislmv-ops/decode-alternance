@@ -27,6 +27,13 @@ export interface MinimumSalary {
   conventionMayRaise: boolean;
 }
 
+/** Le contrat qui fixe le minimum : celui de l'offre quand elle le précise, sinon celui du profil. */
+export function contractForOffer(offerContract: string | null | undefined, profileContract: ContractKind): ContractKind {
+  return offerContract === 'apprentissage' || offerContract === 'professionnalisation' ? offerContract : profileContract;
+}
+
+export const CONTRACT_NAMES: Record<ContractKind, string> = { apprentissage: 'apprentissage', professionnalisation: 'contrat pro' };
+
 export function clampYear(year: number): 1 | 2 | 3 {
   if (!Number.isFinite(year) || year <= 1) return 1;
   if (year >= 3) return 3;

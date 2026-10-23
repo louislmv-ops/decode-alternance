@@ -9,44 +9,51 @@ export const metadata: Metadata = {
 /** Vérifié en octobre 2026. Les montants changent : chaque aide renvoie vers sa source officielle. */
 const AIDES = [
   {
+    for: 'Alternance',
     title: 'Mobili-Jeune : une partie de ton loyer',
     text: 'De 10 à 100 € par mois, si tu as moins de 30 ans et que ton entreprise est du secteur privé non agricole. Fais la demande tôt : il y a un délai à respecter autour du début du contrat.',
     href: 'https://www.actionlogement.fr',
     source: 'Action Logement',
   },
   {
+    for: 'Tous',
     title: 'APL : l’aide au logement de la CAF',
     text: 'Elle dépend de ton loyer et de tes revenus. Fais la simulation, ça prend cinq minutes.',
     href: 'https://www.caf.fr',
     source: 'CAF',
   },
   {
+    for: 'Tous',
     title: 'Prime d’activité',
     text: 'Selon ton salaire, tu peux y avoir droit même en alternance. Simulation sur le site de la CAF.',
     href: 'https://www.caf.fr',
     source: 'CAF',
   },
   {
-    title: 'Pas d’impôt sur ton salaire d’apprenti',
+    for: 'Apprentissage seulement',
+    title: 'Pas d’impôt sur ton salaire',
     text: 'Ton salaire d’apprenti n’est pas imposable jusqu’au montant annuel du SMIC. Tu le déclares quand même.',
     href: 'https://www.impots.gouv.fr',
     source: 'impots.gouv.fr',
   },
   {
+    for: 'Apprentissage seulement',
     title: 'Permis de conduire',
     text: 'L’aide nationale de 500 € pour les apprentis a été supprimée par la loi de finances 2026. Restent le permis à 1 € par jour et les aides de ta région.',
     href: 'https://www.service-public.fr',
     source: 'Service-public.fr',
   },
   {
+    for: 'Apprentissage seulement',
     title: 'Carte d’étudiant des métiers',
     text: 'En apprentissage, ton CFA te la remet : elle donne accès aux réductions étudiantes (transports, cinéma, restaurants universitaires…).',
     href: 'https://www.service-public.fr',
     source: 'Service-public.fr',
   },
   {
+    for: 'Alternance',
     title: 'Les aides de ta région',
-    text: 'Transport, hébergement, premier équipement : chaque région a les siennes. Regarde sur le site de ta région, rubrique apprentissage.',
+    text: 'Transport, hébergement, premier équipement : chaque région a les siennes. Regarde sur le site de ta région, rubriques alternance et apprentissage.',
     href: 'https://www.1jeune1solution.gouv.fr/mes-aides',
     source: '1jeune1solution',
   },
@@ -57,11 +64,16 @@ export default function AidesPage() {
     <div className="screen c-screen">
       <div className="c-main">
         <h1 className="c-charte__title">Tes aides</h1>
-        <p className="c-profile__bio">Ce à quoi tu peux avoir droit en alternance, en plus de ton salaire.</p>
+        <p className="c-profile__bio">
+          Ce à quoi tu peux avoir droit en alternance, en plus de ton salaire. L’alternance regroupe deux contrats : l’apprentissage et le contrat de
+          professionnalisation. Certaines aides ne concernent que l’apprentissage.
+        </p>
         <ol className="c-charte">
           {AIDES.map((a) => (
             <li key={a.title}>
-              <strong>{a.title}</strong>
+              <strong>
+                {a.title} <span className="aides__for">{a.for}</span>
+              </strong>
               <span>{a.text}</span>
               <a className="link aides__src" href={a.href} target="_blank" rel="noopener noreferrer">
                 Vérifier sur {a.source}

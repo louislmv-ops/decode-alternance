@@ -9,6 +9,7 @@ import { minimumSalary } from '@/lib/rules/salary';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { coreName } from '@/lib/offers/logo-resolve';
 import { type CommunityPay, summarizePercents } from '@/lib/offers/pay-estimate';
+import type { RatingOf } from '@/lib/offers/rank';
 import type { Offer } from '@/lib/offers/types';
 import type { CompanyRef } from './search';
 import { HIRED, isTopForApprentices, MIN_TO_SHOW, type PublicReview, type ReviewStats, type SalaryStats } from './shared';
@@ -471,4 +472,31 @@ export async function findCompanySiren(company: string | null): Promise<string |
   await ensureSchema();
   const rows = await db()<{ siren: string; name: string }[]>`select siren, name from companies`;
   return rows.find((r) => companyNames(r.name).includes(name))?.siren ?? null;
+}
+
+/** Note moyenne des avis publiés, par entreprise ayant au moins MIN_TO_SHOW avis. Gardée 10 minutes. */
+let ratingCache: { until: number; list: Promise<{ siren: string; names: string[]; overall: number }[]> } | null = null;
+
+export async function companyRatingOf(): Promise<RatingOf> {
+  const none: RatingOf = () => null;
+  if (!isAccountsConfigured()) return none;
+  if (!ratingCache || ratingCache.until < Date.now()) {
+    const list = (async () => {
+      await ensureSchema();
+      const rows = await db()<{ siren: string; name: string; overall: number }[]>`
+        select c.siren, c.name, avg(r.overall)::float as overall
+        from company_reviews r join companies c on c.siren = r.siren
+        where r.status = 'published'
+        group by c.siren, c.name having count(*) >= ${MIN_TO_SHOW}`;
+      return rows.map((r) => ({ siren: r.siren, names: companyNames(r.name), overall: Math.round(r.overall * 10) / 10 }));
+    })();
+    list.catch(() => (ratingCache = null));
+    ratingCache = { until: Date.now() + 10 * 60_000, list };
+  }
+  const list = await ratingCache.list.catch(() => []);
+  if (list.length === 0) return none;
+  return (o) => {
+    const name = o.company ? coreName(o.company) : '';
+    return list.find((c) => (o.companySiren && c.siren === o.companySiren) || (name.length >= 2 && c.names.includes(name)))?.overall ?? null;
+  };
 }
