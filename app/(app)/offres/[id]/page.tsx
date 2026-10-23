@@ -8,9 +8,10 @@ import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
 import { findDecode, findOffer } from '@/lib/offers/repository';
 import { payContext } from '@/lib/offers/pay-context';
-import { isAggregatorUrl, SOURCE_LABELS } from '@/lib/offers/types';
+import { isTrustedSourceLink } from '@/lib/offers/link';
+import { SOURCE_LABELS } from '@/lib/offers/types';
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ u?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ u?: string; s?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const offer = await findOffer(decodeURIComponent((await params).id));
@@ -28,8 +29,8 @@ export default async function OfferPage({ params, searchParams }: Props) {
   const offer = await findOffer(id);
   if (!offer) {
     // Une offre d'agrégateur que ce serveur n'a plus en mémoire : on renvoie vers l'annonce d'origine.
-    const { u } = await searchParams;
-    if (u && isAggregatorUrl(u)) redirect(u);
+    const { u, s } = await searchParams;
+    if (u && isTrustedSourceLink(u, s)) redirect(u);
     notFound();
   }
   const [decoded, pay] = await Promise.all([findDecode(id), payContext(offer)]);

@@ -103,8 +103,35 @@ export function parseSalary(text: string | null | undefined): number | null {
   else if (/(an\b|annuel|par an|\/\s*an|brut annuel|k)/.test(after.slice(0, 40)) || value > 8000) value /= 12;
 
   const cents = Math.round(value * 100);
-  // Un montant mensuel hors de cette plage est presque toujours une erreur de lecture.
-  return cents >= 30_000 && cents <= 800_000 ? cents : null;
+  // Un salaire d'alternant hors de cette plage est presque toujours une erreur de lecture.
+  return cents >= 30_000 && cents <= MAX_ALTERNANCE_CENTS ? cents : null;
+}
+
+/** Au-delà de 4 000 € brut par mois, ce n'est pas un salaire d'alternant : chiffre d'affaires, CDI, prime… */
+const MAX_ALTERNANCE_CENTS = 400_000;
+
+const PAY_WORDS = /(salaire|remuneration|gratification|brut|smic|par mois|mensuel)/;
+const NOT_PAY = /(chiffre d.affaires|\bca\b|prime|budget|capital|levee|investi|million|milliard|cdi|a l.issue|apres (ton|votre|l).?alternance|frais|cout|tarif)/;
+
+/**
+ * Le salaire écrit dans le texte libre d'une annonce. On ne retient un montant que s'il est présenté comme une
+ * rémunération (« salaire », « brut », « par mois »…) et rien d'autre : un chiffre d'affaires, une prime ou le
+ * salaire d'un futur CDI ne doivent jamais faire croire à un gros salaire d'alternant.
+ */
+export function salaryFromDescription(text: string | null | undefined): number | null {
+  if (!text) return null;
+  const t = stripAccents(text.toLowerCase()).replace(/ | /g, ' ');
+  const amounts = t.matchAll(/(\d{2,3})\s*%\s*(du\s+)?smic|(\d{1,3}(?:[ .]\d{3})+|\d+)(?:[.,]\d{1,2})?\s*k?\s*(?:€|eur\b|euros)/g);
+  for (const m of amounts) {
+    const at = m.index ?? 0;
+    const before = t.slice(Math.max(0, at - 70), at);
+    const after = t.slice(at, at + m[0].length + 30);
+    const context = `${before} ${after}`;
+    if (!PAY_WORDS.test(context) || NOT_PAY.test(context)) continue;
+    const cents = parseSalary(t.slice(at, at + m[0].length + 40));
+    if (cents !== null) return cents;
+  }
+  return null;
 }
 
 /** Département à partir d'un code postal (Corse et outre-mer compris). */

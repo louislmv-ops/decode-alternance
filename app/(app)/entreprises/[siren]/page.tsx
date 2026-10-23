@@ -14,7 +14,8 @@ import { type CompanyPage, companyPage, CRITERIA, MIN_TO_SHOW } from '@/lib/comp
 import { isCommunityOpen } from '@/lib/community/http';
 import { formatEuros } from '@/lib/format';
 import { listOffers } from '@/lib/offers/repository';
-import { type Offer, offerHref } from '@/lib/offers/types';
+import { offerHref } from '@/lib/offers/link';
+import type { Offer } from '@/lib/offers/types';
 import { type Campaign, campaignsForSiren } from '@/lib/recruiters/campaigns';
 
 type Props = { params: Promise<{ siren: string }> };

@@ -6,7 +6,7 @@ import { isAdzunaConfigured, searchAdzuna } from './connectors/adzuna';
 import { isJoobleConfigured, searchJooble } from './connectors/jooble';
 import { after } from 'next/server';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
-import { fetchLba, isLbaConfigured, type LbaQuery, lbaQueries, pageOf } from './connectors/la-bonne-alternance';
+import { fetchLba, fetchLbaOffer, isLbaConfigured, type LbaQuery, lbaQueries, pageOf } from './connectors/la-bonne-alternance';
 import { companyRatingOf } from '@/lib/companies/store';
 import { matchesFilters } from './filter';
 import type { Offer, OfferFilters } from './types';
@@ -171,6 +171,14 @@ export async function aggregatorSearch(filters: OfferFilters, perSource: number)
 }
 
 /** La fiche d'une offre déjà montrée dans une liste. */
-export function recallAggregatorOffer(id: string): Offer | null {
-  return seen.get(id) ?? null;
+export async function recallAggregatorOffer(id: string): Promise<Offer | null> {
+  const known = seen.get(id);
+  if (known) return known;
+  // Un autre serveur l'a montrée : La bonne alternance sait la retrouver par son identifiant.
+  if (id.startsWith('la-bonne-alternance:') && isLbaConfigured()) {
+    const offer = await fetchLbaOffer(id.slice('la-bonne-alternance:'.length)).catch(() => null);
+    if (offer) seen.set(offer.id, offer);
+    return offer;
+  }
+  return null;
 }

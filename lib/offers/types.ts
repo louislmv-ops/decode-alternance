@@ -116,11 +116,3 @@ export function isAggregatorUrl(url: string): boolean {
     return false;
   }
 }
-
-/** Adresse de la fiche Décode d'une offre ; pour un agrégateur, elle garde le lien d'origine en secours. */
-export function offerHref(offer: Pick<Offer, 'id' | 'source' | 'sourceUrl'>): string {
-  const base = `/offres/${encodeURIComponent(offer.id)}`;
-  return offer.source === 'adzuna' || offer.source === 'jooble' || offer.source === 'la-bonne-alternance'
-    ? `${base}?u=${encodeURIComponent(offer.sourceUrl)}`
-    : base;
-}

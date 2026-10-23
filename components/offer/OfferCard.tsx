@@ -3,7 +3,8 @@ import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { formatEuros, relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
 import { payTier } from '@/lib/offers/pay-tier';
-import { type Offer, offerHref } from '@/lib/offers/types';
+import { offerHref } from '@/lib/offers/link';
+import type { Offer } from '@/lib/offers/types';
 import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 

@@ -11,7 +11,7 @@ import { payEstimateHint } from '@/lib/offers/pay-estimate';
 import { PAY_TIER_LABELS } from '@/lib/offers/pay-tier';
 import { listOffers } from '@/lib/offers/repository';
 import { cleanTitle } from '@/lib/offers/title';
-import { offerHref } from '@/lib/offers/types';
+import { offerHref } from '@/lib/offers/link';
 import { logoSrc } from '@/lib/offers/logo';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 

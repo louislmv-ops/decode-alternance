@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isAggregatorUrl, offerHref } from '../types';
+import { isAggregatorUrl } from '../types';
 import { adzunaToOffer } from './adzuna';
 import { departmentFromPlace } from './aggregator';
 import { joobleToOffer } from './jooble';
@@ -63,7 +63,6 @@ describe('lieux et liens', () => {
     expect(isAggregatorUrl('https://fr.jooble.org/desc/1')).toBe(true);
     expect(isAggregatorUrl('https://evil.example/adzuna.fr')).toBe(false);
     expect(isAggregatorUrl('http://www.adzuna.fr/x')).toBe(false);
-    expect(offerHref({ id: 'adzuna:1', source: 'adzuna', sourceUrl: 'https://www.adzuna.fr/land/ad/1' })).toBe('/offres/adzuna%3A1?u=https%3A%2F%2Fwww.adzuna.fr%2Fland%2Fad%2F1');
   });
 });
 

@@ -3,7 +3,7 @@
 // Adzuna et de passer par leur lien de redirection pour postuler, ce que fait sourceUrl.
 
 import { DEPARTMENT_NAMES } from '@/lib/departments';
-import { htmlToText, parseSalary } from '../normalize';
+import { htmlToText, salaryFromDescription } from '../normalize';
 import type { Offer } from '../types';
 import { aggregatorOffer, departmentFromPlace, plausibleMonthly } from './aggregator';
 import { fetchText } from './http';
@@ -44,7 +44,7 @@ export function adzunaToOffer(job: AdzunaJob, department: string | null = null):
     department: departmentFromPlace([...area.slice(2).reverse(), job.location?.display_name]) ?? department,
     description,
     salaryText: monthly ? `${Math.round(monthly / 100)} € brut par mois` : null,
-    salaryMonthlyCents: monthly ?? parseSalary(description),
+    salaryMonthlyCents: monthly ?? salaryFromDescription(description),
     publishedAt: job.created ?? '',
   });
 }
