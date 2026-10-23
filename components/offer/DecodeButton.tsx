@@ -10,6 +10,9 @@ import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
 import { PayPanel } from './PayPanel';
 
+/** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
+const MAX_TEXT = 12_000;
+
 /** Une offre pas encore traduite : son texte brut, et le bouton qui demande la traduction. */
 export function UndecodedOffer({ offer, description }: { offer: OfferMeta; description: string }) {
   const [state, setState] = useState<{ status: 'idle' | 'loading' } | { status: 'error'; message: string } | { status: 'done'; decoded: DecodedOffer }>({
@@ -26,7 +29,8 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       const res = await fetch('/api/decode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ offerId: offer.id }),
+        // Le texte part avec l'identifiant : une offre d'agrégateur n'est gardée qu'en mémoire, pas toujours là où tourne la traduction.
+        body: JSON.stringify({ offerId: offer.id, text: [offer.title, offer.company ?? '', offer.city ?? '', '', description].join('\n').slice(0, MAX_TEXT) }),
       });
       const data = (await res.json()) as { decoded?: DecodedOffer; error?: string };
       if (!res.ok || !data.decoded) throw new Error(data.error ?? 'La traduction a échoué.');

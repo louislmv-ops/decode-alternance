@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { currentAccount } from '@/lib/account/http';
-import { DecodeError, isDecodeConfigured } from '@/lib/decode/claude';
+import { DecodeError, isClaudeConfigured } from '@/lib/decode/claude';
 import { findOffer } from '@/lib/offers/repository';
 import { prepareInterview } from '@/lib/pro/interview';
 import { isPro } from '@/lib/pro/store';
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const account = await currentAccount();
   if (!account) return Response.json({ error: 'Connecte-toi d’abord.' }, { status: 401 });
   if (!(await isPro(account.id))) return Response.json({ error: 'La prépa entretien fait partie de Pro.', pro: true }, { status: 402 });
-  if (!isDecodeConfigured()) return Response.json({ error: 'L’IA n’est pas encore activée sur ce site.' }, { status: 503 });
+  if (!isClaudeConfigured()) return Response.json({ error: 'L’IA n’est pas encore activée sur ce site.' }, { status: 503 });
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: 'Offre manquante.' }, { status: 400 });
   if (!allow(`entretien:${account.id}`, 20, 86_400_000)) return Response.json({ error: '20 préparations par jour au plus. Reviens demain.' }, { status: 429 });

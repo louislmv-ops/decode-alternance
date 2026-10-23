@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { DecoderView } from '@/components/offer/DecoderView';
-import { isDecodeConfigured } from '@/lib/decode/claude';
+import { isDecodeConfigured } from '@/lib/decode/ai';
 import { DEMO_OFFERS } from '@/lib/offers/demo';
 
 export const metadata: Metadata = {
