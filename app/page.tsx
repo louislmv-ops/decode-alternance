@@ -41,9 +41,9 @@ function Peek({ where }: { where: 'd' | 'm' }) {
     <span className={`hero2__peek hero2__peek--${where}`} aria-hidden="true">
       <span className="hero2__peek-in">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/decode/accroche.webp" alt="" width={640} height={377} />
+        <img src="/decode/accroche-320.webp" alt="" width={320} height={188} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="hero2__peek-wink" src="/decode/accroche-clin.webp" alt="" width={640} height={377} loading="lazy" />
+        <img className="hero2__peek-wink" src="/decode/accroche-clin-320.webp" alt="" width={320} height={188} loading="lazy" />
       </span>
     </span>
   );
