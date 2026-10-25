@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Emoji } from '@/components/Emoji';
-import { Perso } from '@/components/Perso';
 import { useTracker } from '@/components/useTracker';
 import type { PayTier } from '@/lib/offers/pay-tier';
 import { CompanyLogo } from './CompanyLogo';
@@ -68,7 +67,6 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
   if (!card) {
     return (
       <div className="swipe swipe--end">
-        <Perso pose={kept > 0 ? 'youpi' : 'serein'} size={120} className="swipe__end-perso" />
         <p className="swipe__done">C’est tout pour cette série.</p>
         <p className="c-note">
           {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''} dans ton suivi.` : 'Aucune offre gardée.'}
@@ -105,8 +103,6 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
       </div>
 
       <div className="swipe__stack">
-        <Perso pose="coeur" size={88} className={`swipe__react swipe__react--keep${dx > 40 ? ' is-on' : ''}`} />
-        <Perso pose="serein" size={88} className={`swipe__react swipe__react--pass${dx < -40 ? ' is-on' : ''}`} />
         {cards[index + 1] && <div className="swipe__card swipe__card--under" aria-hidden="true" />}
         <article
           className="swipe__card"
@@ -139,12 +135,12 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <CompanyLogo key={card.id} src={card.logo} name={card.company} size={56} />
           <p className="orow__company">
             <span>{card.company}</span>
-            {card.pepite && <span className="orow__flag"><Perso pose="feu" size="1.6em" className="perso--inline" /> Pépite</span>}
+            {card.pepite && <span className="orow__flag"><Emoji name="feu" /> Pépite</span>}
           </p>
           <h1 className="swipe__title">{card.title}</h1>
           <p className="orow__meta">
             {card.facts}
-            {card.easyApply && <> · <Perso pose="eclair" size="1.6em" className="perso--inline" /> Candidature simplifiée</>}
+            {card.easyApply && <> · <Emoji name="eclair" /> Candidature simplifiée</>}
           </p>
           <div className="swipe__pay">
             <PayEuros tier={card.tier} size="large" hint={card.payHint} />
@@ -161,7 +157,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <Emoji name="croix" size="30px" />
         </button>
         <button type="button" className="swipe__btn swipe__btn--keep" onClick={() => decide('right')} aria-label="Je garde, dans mon suivi">
-          <Perso pose="coeur" size={52} />
+          <Emoji name="coeur" size="30px" />
         </button>
       </div>
       <p className="swipe__hint">Glisse à droite pour garder dans ton suivi, à gauche pour passer. Flèches du clavier aussi.</p>
