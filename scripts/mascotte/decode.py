@@ -4,7 +4,7 @@ argv = sys.argv[sys.argv.index('--')+1:]
 cfg = json.loads(argv[0])
 out = cfg['out']; res = cfg.get('res', 512); samples = cfg.get('samples', 48)
 acc = cfg.get('acc', [])            # 'cap','glasses','tie','bow'
-face = cfg.get('face', 'smile')     # smile, wink, surprised, neutral
+face = cfg.get('face', 'smile')     # smile, wink, surprised, neutral, happy, think
 rotz = math.radians(cfg.get('rotz', 0)); hair = cfg.get('hair', True)
 LIME = (0.42, 0.78, 0.035, 1)  # lineaire
 
@@ -67,6 +67,15 @@ if hair:
 
 # --- Visage.
 black = mat('noir', (0.005,0.005,0.006,1), 0.12)
+FS = cfg.get('facescale', 1.0)
+def grow(before):
+    # Agrandit le visage autour de son centre et l'avance un peu hors des poils.
+    for o in set(bpy.data.objects) - before:
+        o.location.x = o.location.x * FS
+        o.location.z = 0.05 + (o.location.z - 0.05) * FS
+        o.location.y -= 0.045 * (FS - 1)
+        o.scale = (o.scale[0]*FS, o.scale[1]*FS, o.scale[2]*FS)
+_face = set(bpy.data.objects)
 def eye(x, closed=False, big=1.0):
     if closed:
         bpy.ops.curve.primitive_bezier_circle_add(radius=0.09, location=(x, -1.02, 0.28))
@@ -74,10 +83,22 @@ def eye(x, closed=False, big=1.0):
         c.scale=(1,0.45,1); c.data.materials.append(black)
         # ne garder que l'arc haut
         return c
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09*big, location=(x, -1.12, 0.12))
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.09*big*cfg.get('eyescale',1), location=(x, -1.12-0.03*(cfg.get('eyescale',1)-1), 0.12))
     e = bpy.context.object; e.scale=(0.7,0.5,1.35); bpy.ops.object.shade_smooth(); e.data.materials.append(black)
     return e
-if face == 'wink':
+def arc_eye(x):
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.085, minor_radius=0.019, location=(x,-1.14,0.1), rotation=(math.radians(90),0,0))
+    a = bpy.context.object; a.scale=(1,1,0.8); a.data.materials.append(black)
+    bpy.ops.mesh.primitive_cube_add(size=0.3, location=(x,-1.14,-0.04)); cu = bpy.context.object
+    m = a.modifiers.new('cut','BOOLEAN'); m.object = cu; m.operation='DIFFERENCE'
+    bpy.context.view_layer.objects.active = a; bpy.ops.object.modifier_apply(modifier='cut'); bpy.data.objects.remove(cu)
+if face == 'happy':
+    arc_eye(-0.3); arc_eye(0.3)
+elif face == 'think':
+    for x in (-0.24, 0.36):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.08, location=(x, -1.11, 0.2))
+        e = bpy.context.object; e.scale=(0.7,0.5,1.3); bpy.ops.object.shade_smooth(); e.data.materials.append(black)
+elif face == 'wink':
     eye(-0.3); 
     bpy.ops.mesh.primitive_torus_add(major_radius=0.085, minor_radius=0.018, location=(0.3,-1.14,0.1), rotation=(math.radians(90),0,0))
     w = bpy.context.object; w.scale=(1,1,0.75); w.data.materials.append(black)
@@ -88,16 +109,26 @@ else:
     big = 1.25 if face=='surprised' else 1.0
     eye(-0.3, big=big); eye(0.3, big=big)
 if face == 'surprised':
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.05, minor_radius=0.014, location=(0,-1.14,-0.14), rotation=(math.radians(90),0,0))
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.075, minor_radius=0.02, location=(0,-1.14,-0.15), rotation=(math.radians(90),0,0))
+    bpy.context.object.data.materials.append(black)
+elif face == 'think':
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.014, depth=0.12, location=(0.08,-1.13,-0.12), rotation=(0,math.radians(80),0))
     bpy.context.object.data.materials.append(black)
 elif face != 'neutral':
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.09, minor_radius=0.016, location=(0,-1.13,-0.06), rotation=(math.radians(90),0,0))
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.09*cfg.get('eyescale',1), minor_radius=0.016*cfg.get('eyescale',1), location=(0,-1.13-0.03*(cfg.get('eyescale',1)-1),-0.06-0.04*(cfg.get('eyescale',1)-1)), rotation=(math.radians(90),0,0))
     m_ = bpy.context.object; m_.data.materials.append(black)
     # garder la moitié basse : on coupe avec un booléen
     bpy.ops.mesh.primitive_cube_add(size=0.4, location=(0,-1.13,0.14)); cut = bpy.context.object
     b = m_.modifiers.new('cut','BOOLEAN'); b.object = cut; b.operation='DIFFERENCE'
     bpy.context.view_layer.objects.active = m_; bpy.ops.object.modifier_apply(modifier='cut')
     bpy.data.objects.remove(cut)
+
+if cfg.get('blush'):
+    pink = mat('joues', (0.95,0.32,0.55,1), 0.6)
+    for x in (-0.36, 0.36):
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.07, location=(x,-1.1,-0.06))
+        o = bpy.context.object; o.scale=(1.2,0.35,0.7); bpy.ops.object.shade_smooth(); o.data.materials.append(pink)
+grow(_face)
 
 # --- Accessoires.
 if 'cap' in acc:
@@ -118,18 +149,20 @@ if 'cap' in acc:
     cord.data.bevel_depth=0.012; cord.data.materials.append(gold)
     bpy.ops.mesh.primitive_cone_add(radius1=0.06, radius2=0.015, depth=0.35, location=(0.85,-0.85,0.72)); bpy.context.object.data.materials.append(gold)
 if 'glasses' in acc:
+    _gl = set(bpy.data.objects)
     yel = mat('jaune', (0.85,0.6,0.02,1), 0.3)
     for x in (-0.3,0.3):
         bpy.ops.mesh.primitive_torus_add(major_radius=0.19, minor_radius=0.028, location=(x,-1.2,0.12), rotation=(math.radians(90),0,0))
         bpy.context.object.data.materials.append(yel)
     bpy.ops.mesh.primitive_cylinder_add(radius=0.02, depth=0.18, location=(0,-1.2,0.16), rotation=(0,math.radians(90),0)); bpy.context.object.data.materials.append(yel)
+    grow(_gl)
 if 'tie' in acc:
     red = mat('cravate', (0.42,0.008,0.01,1), 0.55)
     bm = bmesh.new()
     pts=[(-0.07,0,-0.20),(0.07,0,-0.20),(0.05,0,-0.30),(0.12,0,-0.75),(0,0,-0.88),(-0.12,0,-0.75),(-0.05,0,-0.30)]
     vs=[bm.verts.new(p) for p in pts]; bm.faces.new(vs)
     me=bpy.data.meshes.new('tie'); bm.to_mesh(me); t=bpy.data.objects.new('tie',me); sc.collection.objects.link(t)
-    t.location=(0,-1.18,-0.08); t.data.materials.append(red)
+    t.location=(0,-1.2,-0.2); t.data.materials.append(red)
     so=t.modifiers.new('so','SOLIDIFY'); so.thickness=0.04; bv=t.modifiers.new('bv','BEVEL'); bv.width=0.01; bv.segments=2
 if 'bow' in acc:
     pur = mat('noeud', (0.25,0.04,0.55,1), 0.6, sheen=0.3)
@@ -137,6 +170,19 @@ if 'bow' in acc:
         bpy.ops.mesh.primitive_cone_add(radius1=0.11, radius2=0.03, depth=0.2, location=(x,-1.08,-0.2), rotation=(0,math.radians(90 if x<0 else -90),0), vertices=24)
         o=bpy.context.object; o.scale=(1,0.6,1); bpy.ops.object.shade_smooth(); o.data.materials.append(pur)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.045, location=(0,-1.1,-0.2)); bpy.context.object.data.materials.append(pur)
+
+if 'loupe' in acc:
+    rim = mat('monture', (0.85,0.6,0.02,1), 0.3)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.3, minor_radius=0.045, location=(0.98,-1.05,-0.32), rotation=(math.radians(90),0,math.radians(-15)), major_segments=64)
+    bpy.context.object.data.materials.append(rim)
+    glass = bpy.data.materials.new('verre'); glass.use_nodes=True
+    gb = glass.node_tree.nodes['Principled BSDF']; gb.inputs['Base Color'].default_value=(0.85,0.92,1,1)
+    gb.inputs['Roughness'].default_value=0.02; gb.inputs['Transmission Weight'].default_value=1.0; gb.inputs['IOR'].default_value=1.2
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.29, depth=0.03, location=(0.98,-1.05,-0.32), rotation=(math.radians(90),0,math.radians(-15)), vertices=64)
+    bpy.context.object.data.materials.append(glass)
+    hdl = mat('manche', (0.03,0.02,0.06,1), 0.35)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.055, depth=0.5, location=(1.27,-1.0,-0.78), rotation=(0,math.radians(-33),0), vertices=32)
+    o=bpy.context.object; bpy.ops.object.shade_smooth(); o.data.materials.append(hdl)
 
 # Tout tourne ensemble.
 bpy.ops.object.empty_add(location=(0,0,0)); root = bpy.context.object
@@ -155,7 +201,7 @@ bpy.ops.object.camera_add(location=(0,-7.0,1.9), rotation=(math.radians(76),0,0)
 cam.data.lens = 60
 w = bpy.data.worlds.new('w'); sc.world=w; w.use_nodes=True; w.node_tree.nodes['Background'].inputs[0].default_value=(0.55,0.55,0.55,1); w.node_tree.nodes['Background'].inputs[1].default_value=0.6
 
-sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=samples; sc.cycles.use_denoising=False
+sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=samples; sc.cycles.use_denoising=False; sc.cycles.use_adaptive_sampling=True; sc.cycles.adaptive_threshold=0.004; sc.render.filter_size=1.2
 sc.render.film_transparent=True; sc.render.resolution_x=sc.render.resolution_y=res
 sc.view_settings.view_transform='AgX' if 'AgX' in [i.identifier for i in sc.view_settings.bl_rna.properties['view_transform'].enum_items] else 'Filmic'
 sc.render.image_settings.color_mode='RGBA'

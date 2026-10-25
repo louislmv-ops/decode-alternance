@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
+import { Mascotte, type MascottePose } from '@/components/Mascotte';
 import { MatchButton } from '@/components/Matcher';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
@@ -17,10 +18,10 @@ import type { OfferPage } from '@/lib/offers/types';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 
 /** Trois étapes, pas une de plus : c'est tout le site. */
-const STEPS = [
-  { title: 'Cherche', text: 'Les offres de partout, sans les fausses offres d’écoles.', href: '/offres', action: 'Voir les offres' },
-  { title: 'Comprends', text: 'Chaque offre traduite : ce que tu feras, combien tu toucheras.', href: '/decoder', action: 'Décoder une offre' },
-  { title: 'Démarque-toi', text: 'Qui contacter dans l’équipe, et le suivi de tes candidatures.', href: '/equipe', action: 'Trouver l’équipe' },
+const STEPS: { title: string; text: string; href: string; action: string; pose: MascottePose }[] = [
+  { pose: 'lunettes', title: 'Cherche', text: 'Les offres de partout, sans les fausses offres d’écoles.', href: '/offres', action: 'Voir les offres' },
+  { pose: 'loupe', title: 'Comprends', text: 'Chaque offre traduite : ce que tu feras, combien tu toucheras.', href: '/decoder', action: 'Décoder une offre' },
+  { pose: 'diplome', title: 'Démarque-toi', text: 'Qui contacter dans l’équipe, et le suivi de tes candidatures.', href: '/equipe', action: 'Trouver l’équipe' },
 ];
 
 async function latestOffers(departments: string[]): Promise<OfferPage | null> {
@@ -58,7 +59,9 @@ export default async function Home() {
               </span>{' '}
               <span className="hero2__w hero2__inline-mascotte" style={{ '--i': 2 } as React.CSSProperties} aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/decode/logo.webp" alt="" width={192} height={192} />
+                <img src="/decode/content.webp" alt="" width={768} height={768} />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="hero2__wink" src="/decode/clin-oeil.webp" alt="" width={768} height={768} loading="lazy" />
               </span>{' '}
               <span className="hero2__w" style={{ '--i': 3 } as React.CSSProperties}>
                 alternance.
@@ -135,8 +138,11 @@ export default async function Home() {
           </h2>
           <ol className="steps__list">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="step" data-reveal>
-                <span className="step__num num">{i + 1}</span>
+              <li key={step.title} className="step" data-reveal style={{ '--i': i } as React.CSSProperties}>
+                <span className="step__badge">
+                  <Mascotte pose={step.pose} size="100%" className="step__mascotte" />
+                  <span className="step__num num">{i + 1}</span>
+                </span>
                 <h3 className="step__title">{step.title}</h3>
                 <p className="step__text">{step.text}</p>
                 <Link href={step.href} className="link step__link">

@@ -5156,3 +5156,159 @@ a:hover .wordmark__mascotte,
 .hero2::after {
   opacity: 0.25;
 }
+
+/* ==========================================================================
+   Décode a plusieurs têtes : une pose par étape, un clin d'œil au survol du
+   titre, la loupe pendant qu'il lit une annonce.
+   ========================================================================== */
+
+.hero2__inline-mascotte {
+  position: relative;
+}
+
+.hero2__inline-mascotte .hero2__wink {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 120ms linear;
+}
+
+.hero2__title:hover .hero2__inline-mascotte .hero2__wink {
+  opacity: 1;
+}
+
+.step__badge {
+  position: relative;
+  display: block;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 4px;
+}
+
+.step__badge .step__num {
+  position: absolute;
+  right: -4px;
+  bottom: 2px;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  font-size: 14px;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  color: var(--ink);
+}
+
+.step__mascotte {
+  transform-origin: 50% 85%;
+  transition: transform 420ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .step:hover .step__mascotte {
+    transform: translateY(-4px) rotate(-6deg) scale(1.05);
+  }
+}
+
+@media (max-width: 760px) {
+  .step {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .step__badge {
+    grid-row: 1 / span 3;
+    width: 72px;
+    height: 72px;
+  }
+}
+
+.decode-wait {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 16px);
+  background: var(--mint);
+}
+
+.decode-wait__title {
+  font-weight: 700;
+}
+
+.decode-wait__sub {
+  color: var(--muted);
+  font-size: var(--step-small);
+}
+
+.decode-wait__bar {
+  display: block;
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand) 0 40%, rgb(124 58 237 / 0.18) 40% 100%);
+  background-size: 250% 100%;
+}
+
+@keyframes decode-scan {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+  25% {
+    transform: translate(6px, -3px) rotate(-5deg);
+  }
+  75% {
+    transform: translate(-5px, 2px) rotate(4deg);
+  }
+}
+
+@keyframes decode-bar {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .decode-wait {
+    animation: dc-rise 360ms var(--ease-out) backwards;
+  }
+  .decode-wait__mascotte {
+    animation: decode-scan 2.4s var(--ease-in-out) infinite;
+  }
+  .decode-wait__bar {
+    animation: decode-bar 1.6s linear infinite;
+  }
+  .step__badge {
+    animation: mascotte-pop 640ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 120ms + 200ms);
+    animation-play-state: paused;
+  }
+  .step.is-in .step__badge,
+  html:not(.js) .step__badge {
+    animation-play-state: running;
+  }
+}
+
+.lost {
+  text-align: center;
+}
+
+.lost__mascotte {
+  margin: 0 auto 8px;
+}
+
+.lost__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lost__mascotte {
+    animation: mascotte-flotte 4.5s var(--ease-in-out) infinite;
+  }
+}

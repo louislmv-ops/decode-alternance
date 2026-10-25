@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Mascotte } from '@/components/Mascotte';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { Emoji } from '@/components/Emoji';
 import { useProfile } from '@/components/useProfile';
@@ -21,10 +22,18 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
   });
 
   const [profile] = useProfile();
+  const started = useRef(false);
+  // L'IA se lance seule à l'ouverture, sauf pour les robots : en cas de refus (quota, panne), on revient au bouton sans bruit.
+  useEffect(() => {
+    if (started.current || /bot|crawl|spider|lighthouse/i.test(navigator.userAgent) || navigator.webdriver) return;
+    started.current = true;
+    void decode(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   if (state.status === 'done') return <DecodedView decoded={state.decoded} offer={offer} />;
   const minimum = minimumSalary({ contract: contractForOffer(offer.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
 
-  async function decode() {
+  async function decode(auto = false) {
     setState({ status: 'loading' });
     try {
       const res = await fetch('/api/decode', {
@@ -37,7 +46,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       if (!res.ok || !data.decoded) throw new Error(data.error ?? 'La traduction a échoué.');
       setState({ status: 'done', decoded: data.decoded });
     } catch (error) {
-      setState({ status: 'error', message: (error as Error).message });
+      setState(auto ? { status: 'idle' } : { status: 'error', message: (error as Error).message });
     }
   }
 
@@ -57,7 +66,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
             {offer.easyApply && <> · <Emoji name="eclair" /> Candidature simplifiée</>}</p>
         </div>
         <div className="title-row__actions">
-          <button type="button" className="ui-btn ui-btn--primary" onClick={decode} disabled={state.status === 'loading'}>
+          <button type="button" className="ui-btn ui-btn--primary" onClick={() => decode()} disabled={state.status === 'loading'}>
             {state.status === 'loading' ? 'Décodage en cours…' : 'Décoder cette offre'}
           </button>
         </div>
@@ -92,9 +101,14 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         </p>
       )}
       {state.status === 'loading' && (
-        <p className="notice" role="status">
-          Décode lit l’annonce. Compte une vingtaine de secondes.
-        </p>
+        <div className="decode-wait" role="status">
+          <Mascotte pose="loupe" size={72} className="decode-wait__mascotte" />
+          <div>
+            <p className="decode-wait__title">Décode lit l’annonce pour toi…</p>
+            <p className="decode-wait__sub">Missions en clair, pièges, salaire : une vingtaine de secondes.</p>
+            <span className="decode-wait__bar" aria-hidden="true" />
+          </div>
+        </div>
       )}
       <section className="panel" aria-labelledby="raw-title">
         <div className="panel__head">

@@ -55,7 +55,7 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
           <h1>Décoder une offre</h1>
           <p className="title-row__sub">Colle une offre trouvée n’importe où.</p>
         </div>
-        <Mascotte pose="lunettes" size={112} className={`decoder__mascotte${state.status === 'loading' ? ' mascotte--flotte' : ''}`} />
+        <Mascotte pose={state.status === 'loading' ? 'loupe' : 'lunettes'} size={112} className={`decoder__mascotte${state.status === 'loading' ? ' mascotte--flotte' : ''}`} />
       </div>
 
       <div className="decoder">
