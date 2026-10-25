@@ -1,11 +1,12 @@
 'use client';
 
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Wordmark } from '@/components/Wordmark';
 import { useProfile } from '@/components/useProfile';
 import { daysLeftWithoutEmployer } from '@/lib/profile';
-import { IconChat, IconDecode, IconStar, IconEuro, IconList, IconPeople, IconTrack, IconUser } from '@/components/app/Icons';
+import { IconCards, IconChat, IconDecode, IconStar, IconEuro, IconList, IconPeople, IconTrack, IconUser } from '@/components/app/Icons';
 
 /**
  * `needs: 'comptes'` : la page n'a de sens qu'avec la base et les e-mails branchés ; sans eux, le lien
@@ -86,20 +87,31 @@ export function TopBar() {
 /** Sur téléphone, les cinq outils restent sous le pouce. */
 export function TabBar() {
   const pathname = usePathname();
+  const swiping = isActive(pathname, '/offres/swipe');
   return (
     <nav aria-label="Outils" className="tabbar">
       {NAV.filter((n) => n.tab).map(({ href, short, icon: Icon, needs, tab }) => (
-        <Link
-          key={href}
-          href={href}
-          className="tabbar__item"
-          data-needs={needs}
-          data-only={tab === 'sans-comptes' ? 'sans-comptes' : undefined}
-          aria-current={isActive(pathname, href) ? 'page' : undefined}
-        >
-          <Icon />
-          <span>{short}</span>
-        </Link>
+        <Fragment key={href}>
+          <Link
+            href={href}
+            className="tabbar__item"
+            data-needs={needs}
+            data-only={tab === 'sans-comptes' ? 'sans-comptes' : undefined}
+            aria-current={isActive(pathname, href) && !(href === '/offres' && swiping) ? 'page' : undefined}
+          >
+            <Icon />
+            <span>{short}</span>
+          </Link>
+          {/* Le mode swipe a son propre onglet sur téléphone : c'est la façon la plus rapide de parcourir les offres. */}
+          {href === '/offres' && (
+            <Link href="/offres/swipe" className="tabbar__item tabbar__item--swipe" aria-current={swiping ? 'page' : undefined}>
+              <span className="tabbar__swipe-icon">
+                <IconCards />
+              </span>
+              <span>Swipe</span>
+            </Link>
+          )}
+        </Fragment>
       ))}
     </nav>
   );

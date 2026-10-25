@@ -88,3 +88,11 @@ export const IconStar = () => (
     <path d="M8 1.8l1.8 3.7 4 .6-2.9 2.8.7 4L8 11l-3.6 1.9.7-4-2.9-2.8 4-.6z" />
   </svg>
 );
+
+/** Deux cartes empilées, celle du dessus penchée : le mode swipe. */
+export const IconCards = () => (
+  <svg {...base}>
+    <rect x="2.5" y="4" width="7" height="9.5" rx="1.5" />
+    <path d="M8.2 2.6l4.6 1.2c.8.2 1.3 1 1.1 1.8l-1.9 7.2" />
+  </svg>
+);
