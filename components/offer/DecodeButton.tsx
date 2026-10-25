@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { DecodedOffer } from '@/lib/decode/schema';
+import { Perso } from '@/components/Perso';
 import { useProfile } from '@/components/useProfile';
 import { relativeDays } from '@/lib/format';
 import { contractForOffer, minimumSalary } from '@/lib/rules/salary';
@@ -50,10 +51,10 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
               offer.city,
               offer.sourceLabel,
               offer.publishedAt ? `publiée ${relativeDays(offer.publishedAt)}` : null,
-              offer.easyApply ? '⚡ Candidature simplifiée' : null,
             ]
               .filter(Boolean)
-              .join(' · ')}</p>
+              .join(' · ')}
+            {offer.easyApply && <> · <Perso pose="eclair" size="1.6em" className="perso--inline" /> Candidature simplifiée</>}</p>
         </div>
         <div className="title-row__actions">
           <button type="button" className="ui-btn ui-btn--primary" onClick={decode} disabled={state.status === 'loading'}>

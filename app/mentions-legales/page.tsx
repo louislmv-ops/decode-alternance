@@ -104,6 +104,7 @@ export default function LegalPage() {
           <li>Rémunération : articles D6222-26, L6325-8 et D6325-15 du Code du travail.</li>
           <li>Aides à l’employeur : décret n° 2026-168 du 6 mars 2026.</li>
           <li>Délai de 3 mois sans employeur : article L6222-12-1 du Code du travail.</li>
+          <li>Emoji 3D : Fluent Emoji de Microsoft, © Microsoft Corporation, licence MIT.</li>
         </ul>
       </main>
       <SiteFooter />

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRef } from 'react';
+import { Emoji } from '@/components/Emoji';
 import { SECTORS } from '@/lib/offers/sectors';
 import { COMPANY_SIZE_LABELS, type CompanySizeTag, type OfferFilters } from '@/lib/offers/types';
 
@@ -51,7 +52,7 @@ export function MoreFilters({ filters, count }: { filters: OfferFilters; count: 
         <fieldset className="sheet__group">
           <legend>Salaire</legend>
           <label className="sheet__opt">
-            <input type="checkbox" name="salaire" value="1" defaultChecked={filters.withSalary} /> 💸 Salaire affiché dans l’annonce
+            <input type="checkbox" name="salaire" value="1" defaultChecked={filters.withSalary} /> <Emoji name="billets" /> Salaire affiché dans l’annonce
           </label>
         </fieldset>
 
