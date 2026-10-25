@@ -5658,3 +5658,37 @@ a:hover .wordmark__mascotte,
     display: none;
   }
 }
+
+/* Décode passe la tête au-dessus du pied de page : le bas de l'image est coupé au ras du bord. */
+.site-footer {
+  position: relative;
+}
+
+.site-footer__peek {
+  position: absolute;
+  top: -54px;
+  left: max(var(--margin), calc((100% - var(--max)) / 2 + 24px));
+  width: 96px;
+  height: 54px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.site-footer__peek img {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  transform: translateY(18%);
+  transition: transform 520ms var(--ease-out);
+}
+
+.site-footer:hover .site-footer__peek img {
+  transform: translateY(6%) rotate(-6deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-footer__peek img {
+    transition: none;
+  }
+}
