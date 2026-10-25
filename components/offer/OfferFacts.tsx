@@ -1,6 +1,6 @@
 import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
-import { payTier } from '@/lib/offers/pay-tier';
+import { payDisplay } from '@/lib/offers/pay-display';
 import { PayEuros } from './PayTier';
 
 /** L'essentiel d'une offre en quatre cases : la paie, le lieu, le rythme, le contrat. */
@@ -25,21 +25,22 @@ export function OfferFacts({
   contract: string | null;
 }) {
   const e = payEstimate(payCents, minimumCents, community?.community ?? null, community?.legalGrid ?? false);
+  const shown = payDisplay(e, minimumCents);
   const mapQuery = [company, place].filter(Boolean).join(' ');
   return (
     <dl className="facts">
       <div className="facts__item facts__item--pay">
         <dt>Paie</dt>
         <dd>
-          <PayEuros tier={payTier(e.cents, minimumCents)} size="large" />
+          <PayEuros tier={shown.tier} size="large" hint={shown.hint} />
           <span className="facts__sub num">
             {e.source === 'annonce'
               ? `${formatPay(e.cents, payMaxCents)} brut / mois`
-              : e.source === 'alternants'
-                ? `≈ ${formatEuros(e.cents, 0)} · ${e.count} alternants`
-                : payMaxCents
-                  ? `Au moins ${formatEuros(e.cents, 0)}, jusqu’à ${formatEuros(payMaxCents, 0)} selon profil`
-                  : `Au moins ${formatEuros(e.cents, 0)} · minimum légal`}
+              : payMaxCents
+                ? `${shown.word}, jusqu’à ${formatEuros(payMaxCents, 0)} selon profil d’après l’annonce`
+                : e.source === 'alternants'
+                  ? `${shown.word} · tendance de ${e.count} alternants`
+                  : `${shown.word} · montant non précisé`}
           </span>
         </dd>
       </div>

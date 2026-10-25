@@ -17,7 +17,7 @@ export interface SwipeCard {
   title: string;
   facts: string;
   easyApply: boolean;
-  tier: PayTier;
+  tier: PayTier | null;
   /** D'où vient la note : annonce, alternants de l'entreprise ou minimum légal. */
   payHint: string;
   pepite: boolean;

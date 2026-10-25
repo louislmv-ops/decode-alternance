@@ -3,8 +3,7 @@ import { Emoji } from '@/components/Emoji';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
-import { payEstimateHint } from '@/lib/offers/pay-estimate';
-import { PAY_TIER_LABELS } from '@/lib/offers/pay-tier';
+import { payDisplay } from '@/lib/offers/pay-display';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/link';
 import type { Offer } from '@/lib/offers/types';
@@ -16,13 +15,11 @@ import { PayEuros } from './PayTier';
 /** Publiée depuis moins de 48 heures. */
 const isNew = (iso: string) => Date.now() - Date.parse(iso) < 2 * 86_400_000;
 
-/** Le mot sous les « € » : ce que la paie vaut, en un coup d'œil. */
-const PAY_WORDS = { 1: 'Au minimum', 2: 'Correct', 3: 'Bien payé' } as const;
-
 const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 'Contrat pro', alternance: 'Alternance' };
 
 /** Une offre, une ligne : l'entreprise, le poste en grand, une ligne d'infos, la paie. Rien d'autre. */
 export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
+  const pay = payDisplay(h.estimate, h.minimumCents);
   const place = offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null);
   return (
     <li className={`orow${h.pepite ? ' is-pepite' : ''}`}>
@@ -50,11 +47,11 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
       </div>
       <div className="orow__pay">
         <span className="orow__tier">
-          {h.tier === 3 && h.estimate.source === 'annonce' && <Emoji name="billets" />}
-          <PayEuros tier={h.tier} hint={payEstimateHint(h.estimate, PAY_TIER_LABELS[h.tier])} />
+          {pay.kind === 'annonce' && pay.tier === 3 && <Emoji name="billets" />}
+          <PayEuros tier={pay.tier} hint={pay.hint} />
         </span>
-        <span className={`orow__payword orow__payword--${h.tier}`} aria-hidden="true">
-          {PAY_WORDS[h.tier]}
+        <span className={`orow__payword orow__payword--${pay.tier ?? 'none'}`} aria-hidden="true">
+          {pay.word}
         </span>
       </div>
       <svg className="orow__arrow" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
