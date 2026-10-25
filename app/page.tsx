@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Fragment } from 'react';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
@@ -51,14 +50,20 @@ export default async function Home() {
         <section className="hero2" aria-labelledby="hero-title">
           <div className="hero2__content">
             <h1 id="hero-title" className="hero2__title">
-              {['Trouve', 'ton', 'alternance.'].map((w, i) => (
-                <Fragment key={w}>
-                  <span className="hero2__w" style={{ '--i': i } as React.CSSProperties}>
-                    {w}
-                  </span>{' '}
-                </Fragment>
-              ))}
-              <span className="hero2__w hero2__mark" style={{ '--i': 3 } as React.CSSProperties}>
+              <span className="hero2__w" style={{ '--i': 0 } as React.CSSProperties}>
+                Trouve
+              </span>{' '}
+              <span className="hero2__w" style={{ '--i': 1 } as React.CSSProperties}>
+                ton
+              </span>{' '}
+              <span className="hero2__w hero2__inline-mascotte" style={{ '--i': 2 } as React.CSSProperties} aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/decode/logo.webp" alt="" width={192} height={192} />
+              </span>{' '}
+              <span className="hero2__w" style={{ '--i': 3 } as React.CSSProperties}>
+                alternance.
+              </span>{' '}
+              <span className="hero2__w hero2__mark" style={{ '--i': 4 } as React.CSSProperties}>
                 En clair.
               </span>
             </h1>
@@ -99,24 +104,6 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="steps" aria-labelledby="steps-title">
-          <h2 id="steps-title" className="sr-only">
-            Comment ça marche
-          </h2>
-          <ol className="steps__list">
-            {STEPS.map((step, i) => (
-              <li key={step.title} className="step" data-reveal>
-                <span className="step__num num">{i + 1}</span>
-                <h3 className="step__title">{step.title}</h3>
-                <p className="step__text">{step.text}</p>
-                <Link href={step.href} className="link step__link">
-                  {step.action}
-                </Link>
-              </li>
-            ))}
-          </ol>
-        </section>
-
         {!placeCookie && <LocationPrompt />}
 
         <section className="home-latest" aria-labelledby="latest-title">
@@ -140,6 +127,24 @@ export default async function Home() {
               Les offres ne répondent pas pour l’instant. <Link href="/offres">Réessaie sur la page Offres</Link>.
             </p>
           )}
+        </section>
+
+        <section className="steps" aria-labelledby="steps-title">
+          <h2 id="steps-title" className="sr-only">
+            Comment ça marche
+          </h2>
+          <ol className="steps__list">
+            {STEPS.map((step, i) => (
+              <li key={step.title} className="step" data-reveal>
+                <span className="step__num num">{i + 1}</span>
+                <h3 className="step__title">{step.title}</h3>
+                <p className="step__text">{step.text}</p>
+                <Link href={step.href} className="link step__link">
+                  {step.action}
+                </Link>
+              </li>
+            ))}
+          </ol>
         </section>
 
         <Faq mode={page?.mode ?? 'exemples'} />
