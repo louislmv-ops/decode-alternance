@@ -5697,3 +5697,337 @@ a:hover .wordmark__mascotte,
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Couche Apple (skill ios-hig-design, transposé au web) : clarté, le contenu
+   d'abord, verre dépoli pour les barres, pilules et cibles de 44 px.
+   ========================================================================== */
+
+/* Le logo garde Archivo élargie : c'est la seule exception à la police du système. */
+.wordmark {
+  font-family: var(--font-brand);
+  font-stretch: 125%;
+  font-weight: 800;
+}
+
+/* Barre du haut : verre dépoli et filet fin, le contenu passe dessous. */
+.topbar {
+  background: rgb(255 255 255 / 0.72);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .topbar {
+    background: var(--bg);
+  }
+}
+
+/* Boutons : pilules, 44 px au minimum, graisse semi-grasse. */
+.btn,
+.ui-btn,
+.hero2__go,
+.osearch__go,
+.offers__swipe {
+  min-height: 44px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.btn:active,
+.ui-btn:active:not([disabled]),
+.hero2__go:active {
+  transform: scale(0.97);
+}
+
+.topbar__link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Titres : San Francisco, gras mais pas noir, approche serrée. */
+.hero2__title,
+.section-title,
+.step__title,
+.title-row h1 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Cartes : blanc sur gris très clair, ombre à peine visible, comme les listes groupées d'iOS. */
+.panel,
+.orow {
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+}
+
+@media (max-width: 760px) {
+  /* Barre d'onglets façon iOS : verre clair, icône et libellé violets quand l'onglet est actif. */
+  .tabbar {
+    padding-top: 4px;
+    background: rgb(250 250 252 / 0.82);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid rgb(0 0 0 / 0.1);
+  }
+  .tabbar__item {
+    min-height: 49px;
+    color: #6e6e73;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 0;
+  }
+  .tabbar__item[aria-current='page'] {
+    color: var(--brand);
+    background: transparent;
+  }
+  .tabbar__item svg {
+    width: 24px;
+    height: 24px;
+  }
+  .assistant {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Pied de page à la manière d'apple.com : gris clair, petit, discret. */
+.site-footer {
+  margin-top: var(--section-gap);
+  padding: 40px var(--margin) 24px;
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.site-footer__mark {
+  font-size: 2rem;
+}
+
+.site-footer__mark .wordmark__mascotte {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.site-footer__cols {
+  margin-top: 28px;
+}
+
+.site-footer__col {
+  font-size: 13px;
+}
+
+.site-footer__col a {
+  color: var(--ink);
+}
+
+.site-footer__label {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.site-footer__note,
+.site-footer__last {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.site-footer__last {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* ==========================================================================
+   Motion de Décode (skills motion-design et microinteractions).
+   Identité : l'interface suit la courbe d'Apple, sobre ; la mascotte est « joueuse »,
+   avec anticipation, écrasement-étirement et rebond. Tout s'arrête si le système le demande.
+   ========================================================================== */
+
+:root {
+  --ease-ui: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Le titre tient sur deux lignes : « Trouve ton alternance. » puis « En clair. » */
+.hero2__title {
+  max-width: none;
+}
+
+/* Décode s'accroche derrière « alternance » : une marge en haut du mot lui laisse la place. */
+.hero2__hang {
+  position: relative;
+  padding-top: 0.62em;
+}
+
+.hero2__peek {
+  position: absolute;
+  top: 0.04em;
+  left: 50%;
+  width: 1.3em;
+  height: 0.766em;
+  margin-left: -0.3em;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero2__peek-in {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+}
+
+.hero2__peek img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+.hero2__peek-wink {
+  opacity: 0;
+  transition: opacity 90ms linear;
+}
+
+.hero2__title:hover .hero2__peek-wink {
+  opacity: 1;
+}
+
+/* Sortie de cachette : anticipation (il plonge), étirement en montant, écrasement à l'arrivée. */
+@keyframes peek-out {
+  0% {
+    transform: translateY(105%);
+  }
+  55% {
+    transform: translateY(-8%) scale(0.95, 1.06);
+  }
+  75% {
+    transform: translateY(3%) scale(1.04, 0.96);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Toutes les huit secondes environ : il se cache un instant puis ressort, curieux. */
+@keyframes peek-idle {
+  0%,
+  84%,
+  100% {
+    transform: none;
+  }
+  88% {
+    transform: translateY(60%) scale(1.03, 0.97);
+  }
+  93% {
+    transform: translateY(-6%) scale(0.97, 1.04);
+  }
+  97% {
+    transform: translateY(2%);
+  }
+}
+
+/* Respiration : un souffle à peine visible, pour qu'il ait l'air vivant. */
+@keyframes mascotte-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.025, 0.975);
+  }
+}
+
+/* Petit saut d'attention, une seule fois. */
+@keyframes mascotte-hop {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateY(0) scale(1.08, 0.92);
+  }
+  50% {
+    transform: translateY(-28%) scale(0.94, 1.08);
+  }
+  80% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+}
+
+/* Atterrissage : tombe d'un peu plus haut, s'écrase, se remet d'aplomb. */
+@keyframes mascotte-land {
+  0% {
+    opacity: 0;
+    transform: translateY(-30%) scale(0.9, 1.1);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1.12, 0.88);
+  }
+  78% {
+    transform: translateY(-5%) scale(0.97, 1.03);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero2__peek-in {
+    animation:
+      peek-out 760ms var(--ease-bounce) 700ms backwards,
+      peek-idle 8s var(--ease-ui) 3s infinite;
+  }
+  .hero2__title:hover .hero2__peek-in {
+    animation-play-state: paused;
+  }
+
+  .step__badge {
+    animation: mascotte-land 640ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 110ms + 150ms);
+    animation-play-state: paused;
+    transform-origin: 50% 100%;
+  }
+
+  .assistant__launcher img {
+    transform-origin: 50% 100%;
+    animation:
+      mascotte-hop 620ms var(--ease-ui) 2.4s 1,
+      mascotte-breathe 3.6s ease-in-out 3.2s infinite;
+  }
+  .assistant__launcher:hover img {
+    animation: none;
+  }
+
+  /* Quand Décode répond dans le chat, son avatar fait un petit saut. */
+  .assistant__avatar {
+    transform-origin: 50% 100%;
+    animation: mascotte-hop 520ms var(--ease-ui);
+  }
+
+  .site-footer__peek img {
+    transform-origin: 50% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero2__peek-wink {
+    transition: none;
+  }
+}
+
+.site-footer__mark {
+  color: var(--ink);
+}
+
+/* Le bas du pied de page laisse la place à la bulle de l'assistant. */
+.site-footer {
+  padding-bottom: 96px;
+}

@@ -92,7 +92,7 @@ export function Assistant() {
         <section className="assistant__panel" role="dialog" aria-label="Assistant Décode">
           <header className="assistant__head">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/decode/logo.webp" alt="" width={256} height={256} className="assistant__avatar" />
+            <img key={messages.length} src="/decode/logo.webp" alt="" width={256} height={256} className="assistant__avatar" />
             <div>
               <p className="assistant__name">Décode</p>
               <p className="assistant__status">Ton assistant alternance</p>
