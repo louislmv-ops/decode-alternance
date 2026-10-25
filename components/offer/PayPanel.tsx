@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useProfile } from '@/components/useProfile';
 import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
+import { payDisplay } from '@/lib/offers/pay-display';
 import { SMIC } from '@/lib/rules/reference';
 import { apprenticeNetThresholdCents, comparePay, CONTRACT_NAMES, contractForOffer, minimumSalary } from '@/lib/rules/salary';
 import { conventionLink } from '@/lib/rules/conventions';
@@ -36,6 +37,7 @@ export function PayPanel({
   const fromOffer = offerContract === 'apprentissage' || offerContract === 'professionnalisation';
   const minimum = minimumSalary({ contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   const e = payEstimate(announcedCents, minimum.cents, context?.community ?? null, context?.legalGrid ?? false);
+  const shown = payDisplay(e, minimum.cents);
   const pay = announcedCents !== null ? comparePay(announcedCents, minimum.cents) : null;
   const years = ([1, 2, 3] as const).map((year) => minimumSalary({ contract: 'apprentissage', age: profile.age, year, hasBacPro: profile.hasBacPro }));
   const jobs = context?.jobs ?? [];
@@ -54,38 +56,30 @@ export function PayPanel({
       <div className="pay">
         <div>
           <p className="ui-label">
-            {e.source === 'annonce' ? (announcedMaxCents ? 'Fourchette annoncée' : 'Annoncé') : e.source === 'alternants' ? 'Estimé pour toi' : 'Au moins'}
+            {e.source === 'annonce' ? (announcedMaxCents ? 'Fourchette annoncée' : 'Dans l’annonce') : 'Sans chiffre garanti'}
           </p>
-          <p className="pay__figure num">
-            {e.source === 'alternants' && '≈ '}
-            {e.source === 'annonce' ? formatPay(e.cents, announcedMaxCents) : formatEuros(e.cents, 0)}
-          </p>
+          {e.source === 'annonce' ? (
+            <p className="pay__figure num">{formatPay(e.cents, announcedMaxCents)}</p>
+          ) : (
+            <p className={`pay__figure pay__figure--word pay__figure--${shown.tier ?? 'none'}`}>{shown.word}</p>
+          )}
           <p className="pay__src">
             {e.source === 'annonce'
               ? `brut par mois, dans l’annonce (${sourceLabel})`
               : announcedMaxCents
                 ? `l’annonce dit « jusqu’à ${formatEuros(announcedMaxCents, 0)} » sans montant garanti : compte sur ton minimum légal`
               : e.source === 'alternants'
-                ? `d’après ${e.count} alternants de cette entreprise`
+                ? `tendance d’après ${e.count} alternants de cette entreprise`
                 : e.legalGrid
                   ? 'l’annonce renvoie à la grille légale'
                   : 'pas de montant dans l’annonce : c’est ton minimum légal'}
           </p>
         </div>
-        {e.source !== 'minimum' && (
-          <div>
-            <p className="ui-label">Ton minimum légal ({CONTRACT_NAMES[contract]})</p>
-            <p className="pay__figure pay__figure--min num">{formatEuros(minimum.cents, 0)}</p>
-          </div>
-        )}
+        <div>
+          <p className="ui-label">Ton minimum légal ({CONTRACT_NAMES[contract]})</p>
+          <p className="pay__figure pay__figure--min num">{formatEuros(minimum.cents, 0)}</p>
+        </div>
       </div>
-
-      {e.lowCents !== null && e.highCents !== null && (
-        <p className="pay__range num">
-          Fourchette : <strong>{formatEuros(e.lowCents, 0)}</strong> à <strong>{formatEuros(e.highCents, 0)}</strong> brut par mois
-          <span> (la moitié des déclarations se trouve dans cet écart, ramené à ton âge et ton année)</span>
-        </p>
-      )}
 
       {announcedCents !== null && (
         <div className="bullet-bar" aria-hidden="true">
@@ -102,7 +96,7 @@ export function PayPanel({
               ? `${announcedMaxCents ? 'Au moins ' : ''}${formatEuros(pay.diffCents, 0)} de plus que ton minimum, soit +${pay.diffPercent} %.`
               : 'Payé au minimum légal.'
           : e.source === 'alternants'
-            ? `C’est une estimation : pose la question du salaire exact à l’entretien. Il ne peut pas être sous ${formatEuros(minimum.cents, 0)}.`
+            ? 'C’est une tendance, pas un montant : pose la question du salaire exact à l’entretien. Il ne peut pas être sous ton minimum légal.'
             : 'L’employeur ne peut pas payer moins. Pose la question du salaire exact à l’entretien.'}{' '}
         {contract === 'apprentissage' && `En apprentissage, sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
       </p>

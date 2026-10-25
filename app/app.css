@@ -1072,6 +1072,19 @@
   font-weight: 400;
 }
 
+.pay__figure--word {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.pay__figure--3 {
+  color: var(--brand);
+}
+
+.pay__figure--none {
+  color: var(--muted);
+}
+
 .pay__src {
   margin-top: 2px;
   color: var(--muted);
@@ -4500,6 +4513,11 @@ label {
 
 .orow__payword--3 {
   color: var(--brand);
+}
+
+.orow__payword--none {
+  color: var(--muted);
+  font-weight: 500;
 }
 
 .orow__payword--1 {
