@@ -8,7 +8,7 @@ export default function NotFound() {
     <>
       <SiteNav />
       <main className="prose-page lost">
-        <Mascotte pose="pense" size={160} className="lost__mascotte" eager />
+        <Mascotte pose="pense" size={160} className="lost__mascotte" />
         <h1>Cette page n’existe pas</h1>
         <p>L’offre a peut-être été retirée par l’entreprise, ou le lien est incomplet.</p>
         <p className="lost__links">

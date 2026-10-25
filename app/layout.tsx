@@ -11,11 +11,9 @@ import { Reveal } from '@/components/Reveal';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { SITE_URL } from '@/lib/site';
 
-// Archivo servie par Next : préchargée, avec une police de secours aux mêmes proportions,
-// pour que les titres ne bougent pas quand elle arrive.
+// Archivo ne sert plus qu'au mot « décode » du logo : la police est réduite à ces lettres (moins de 6 Ko).
 const archivo = localFont({
-  // Le sous-ensemble latin couvre le français (é, ç, œ, ’…).
-  src: './fonts/archivo-latin-wdth-normal.woff2',
+  src: './fonts/archivo-wordmark.woff2',
   weight: '100 900',
   display: 'swap',
   variable: '--font-archivo',

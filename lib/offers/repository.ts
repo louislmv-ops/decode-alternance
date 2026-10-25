@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 // Point d'entrée des pages : la vraie base si elle est configurée, sinon les offres d'exemple.
 
 import type { DecodedOffer } from '@/lib/decode/schema';
@@ -6,7 +7,7 @@ import { dedupe, filterOffers, matchesFilters } from './filter';
 import { sortOffers } from './rank';
 import { companyRatingOf } from '@/lib/companies/store';
 import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
-import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer } from './aggregators';
+import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer, rememberSeen } from './aggregators';
 import { isLiveConfigured, liveOffer, liveSearch } from './live';
 import type { Offer, OfferFilters, OfferPage } from './types';
 
@@ -48,7 +49,20 @@ async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   return null;
 }
 
+/**
+ * Les mêmes recherches reviennent sans cesse (l'accueil, les départements, les métiers courants) :
+ * le résultat est gardé cinq minutes dans le cache partagé du serveur, au lieu d'interroger
+ * France Travail et les agrégateurs à chaque visite.
+ */
+const cachedSearch = unstable_cache(async (key: string) => fetchOffers(JSON.parse(key) as OfferFilters), ['offres-v1'], { revalidate: 300 });
+
 export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
+  const page = await cachedSearch(JSON.stringify(filters));
+  rememberSeen(page.offers);
+  return page;
+}
+
+async function fetchOffers(filters: OfferFilters): Promise<OfferPage> {
   // La collecte de nuit range toute La bonne alternance en base : inutile de l'interroger en plus à chaque visite.
   const withLba = !(await hasStoredLba());
   const aggregators = isAggregatorsConfigured(withLba);

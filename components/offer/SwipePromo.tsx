@@ -23,7 +23,7 @@ export function SwipePromo({ href = '/offres/swipe' }: { href?: string }) {
         <span className="swipe-promo__go">Essayer</span>
       </span>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="swipe-promo__mascotte" src="/decode/clin-oeil.webp" alt="" width={768} height={768} loading="lazy" aria-hidden="true" />
+      <img className="swipe-promo__mascotte" src="/decode/clin-oeil-256.webp" alt="" width={256} height={256} loading="lazy" aria-hidden="true" />
     </Link>
   );
 }

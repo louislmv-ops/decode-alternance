@@ -182,9 +182,9 @@ export function Assistant() {
         <span className="assistant__launcher-label">Une question ?</span>
         <span className="assistant__mascot">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/decode/content.webp" alt="" width={768} height={768} />
+          <img src="/decode/content-256.webp" alt="" width={256} height={256} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="assistant__mascot-wink" src="/decode/clin-oeil.webp" alt="" width={768} height={768} loading="lazy" />
+          <img className="assistant__mascot-wink" src="/decode/clin-oeil-256.webp" alt="" width={256} height={256} loading="lazy" />
         </span>
       </button>
     </div>

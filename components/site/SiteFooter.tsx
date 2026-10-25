@@ -7,7 +7,7 @@ export function SiteFooter() {
       {/* Décode passe la tête au-dessus du pied de page, comme Freddie chez Mailchimp. */}
       <span className="site-footer__peek" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/decode/clin-oeil.webp" alt="" width={768} height={768} loading="lazy" />
+        <img src="/decode/clin-oeil-256.webp" alt="" width={256} height={256} loading="lazy" />
       </span>
       <p className="site-footer__mark" aria-hidden="true">
         <Wordmark />

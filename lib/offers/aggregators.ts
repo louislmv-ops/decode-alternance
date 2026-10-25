@@ -172,6 +172,13 @@ export async function aggregatorSearch(filters: OfferFilters, perSource: number,
 }
 
 /** La fiche d'une offre déjà montrée dans une liste. */
+/** Une liste servie depuis le cache partagé n'est pas passée par ce serveur : on retient ses offres pour pouvoir les rouvrir. */
+export function rememberSeen(offers: Offer[]) {
+  for (const o of offers) {
+    if (o.id.startsWith('adzuna:') || o.id.startsWith('jooble:') || o.id.startsWith('la-bonne-alternance:')) seen.set(o.id, o);
+  }
+}
+
 export async function recallAggregatorOffer(id: string): Promise<Offer | null> {
   const known = seen.get(id);
   if (known) return known;
