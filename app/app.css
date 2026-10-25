@@ -6246,3 +6246,30 @@ a:hover .wordmark__mascotte,
     animation: mascotte-hop 600ms var(--ease-ui) 1.8s 1;
   }
 }
+
+/* Une seule mascotte à la fois : derrière « alternance » sur ordinateur, au-dessus de « ton » sur téléphone. */
+.hero2__peek--m {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .hero2__title {
+    padding-top: 0.62em;
+    line-height: 1.05;
+  }
+  .hero2__hang {
+    padding-top: 0;
+  }
+  .hero2__peek--d {
+    display: none;
+  }
+  .hero2__ton {
+    position: relative;
+  }
+  .hero2__peek--m {
+    display: block;
+    top: -0.68em;
+    left: 50%;
+    margin-left: -0.65em;
+  }
+}
