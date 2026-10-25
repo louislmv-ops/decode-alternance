@@ -9,7 +9,7 @@ blender -b --factory-startup -P scripts/mascotte/decode.py -- \
 
 - `face` : `smile`, `happy` (yeux plissés), `wink`, `surprised`, `think`.
 - `acc` : `cap` (toque), `glasses` (lunettes), `tie` (nœud papillon), `loupe`, ou `[]`.
-- `arms` : `down`, `wave` (salut), `hold` (tient la loupe), `up` (les deux bras levés).
+- `arms` : `down`, `wave` (salut), `hold` (tient la loupe), `up` (les deux bras levés), `grip` (s'accroche à un bord, pour la pose `accroche` du titre).
 - `rotz` : orientation en degrés, pour varier les poses.
 - `low` / `high` : couleurs du bas et du haut (RVB linéaire). Par défaut, le violet du site vers le rose.
 - Rendu CPU (Cycles, sans débruitage) : 1 à 2 min par pose en 1200 px et 128 échantillons.

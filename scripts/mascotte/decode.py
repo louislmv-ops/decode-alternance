@@ -123,9 +123,11 @@ def capsule(start, angle_deg, length, radius, side):
     o.rotation_euler = (0, -a * side, 0); bpy.ops.object.shade_smooth(); o.data.materials.append(limb)
     return (start[0] + dx * length, start[1], start[2] + dz * length)
 
-ARM = {'down': (30, 30), 'wave': (30, 150), 'hold': (30, 75), 'up': (150, 150)}[arms]
-hand_r = capsule((-0.95, -0.05, -0.18), ARM[0], 0.42, 0.13, -1)
-hand_l = capsule((0.95, -0.05, -0.18), ARM[1], 0.42, 0.13, 1)
+ARM = {'down': (30, 30), 'wave': (30, 150), 'hold': (30, 75), 'up': (150, 150), 'grip': (84, 84)}[arms]
+SZ = -0.46 if arms == 'grip' else -0.18
+SX = 0.9 if arms == 'grip' else 0.95
+hand_r = capsule((-SX, -0.12, SZ), ARM[0], 0.36, 0.13, -1)
+hand_l = capsule((SX, -0.12, SZ), ARM[1], 0.36, 0.13, 1)
 for x in (-0.38, 0.38):
     bpy.ops.mesh.primitive_uv_sphere_add(radius=1, location=(x, -0.25, -0.86)); o = bpy.context.object
     o.scale = (0.2, 0.26, 0.12); bpy.ops.object.shade_smooth(); o.data.materials.append(limb)

@@ -2,15 +2,16 @@
 
 /* ==========================================================================
    Décode : tokens
-   Direction « plateforme claire » : un fond blanc, un violet électrique pour agir, un jaune
-   soleil pour surligner ce qui compte, et quatre aplats pastel pour ranger les domaines et les outils.
+   Direction Apple (Human Interface Guidelines, transposées au web) : clarté, le contenu d'abord,
+   la police du système, des gris neutres en couches, des angles continus, un seul violet pour agir
+   et le jaune réservé au surlignage.
    ========================================================================== */
 
 :root {
   --bg: #ffffff;
-  --surface: #f2f4f7;
-  --ink: #15131c;
-  --muted: #535d6b;
+  --surface: #f5f5f7;
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
   --brand: #7c3aed;
   --brand-dark: #6d28d9;
   --brand-ink: #ffffff;
@@ -41,21 +42,23 @@
   --tint-6: #fff4bf;
 
   /* L'appli : un fond gris très clair, neutre, et des cartes blanches. */
-  --ground: #f7f8fa;
+  --ground: #f5f5f7;
   --card: #ffffff;
-  --border: #e4e7ec;
-  --rule: #eef0f3;
-  --control: #cfd4dc;
-  --active: #f2f4f7;
+  --border: #e5e5ea;
+  --rule: #f2f2f7;
+  --control: #c7c7cc;
+  --active: #ebebf0;
 
-  /* Une seule famille, Archivo : normale pour lire, élargie et noire pour les titres. */
-  --font: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
-  --display-stretch: 125%;
+  /* La police du système (San Francisco sur Apple, Segoe ou Roboto ailleurs). Archivo élargie ne sert plus qu'au logo. */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
+  --font-brand: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --display-stretch: 100%;
 
-  /* Des angles nets : rien n'est en pilule. */
-  --r-card: 4px;
-  --r-control: 3px;
+  /* Des angles continus et doux, comme sur iOS ; les boutons d'action sont en pilule. */
+  --r-card: 18px;
+  --r-control: 12px;
+  --r-pill: 980px;
 
   /* Cinq tailles sur les pages. */
   --step-small: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
@@ -69,7 +72,7 @@
   --gutter: 16px;
   --section-gap: clamp(88px, 10vw, 160px);
 
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
   --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
   --t-press: 140ms;
@@ -106,9 +109,9 @@ h4 {
   margin: 0;
   font-family: var(--font-display);
   font-stretch: var(--display-stretch);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.08;
   text-wrap: balance;
 }
 

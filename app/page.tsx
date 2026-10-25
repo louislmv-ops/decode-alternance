@@ -57,16 +57,20 @@ export default async function Home() {
               <span className="hero2__w" style={{ '--i': 1 } as React.CSSProperties}>
                 ton
               </span>{' '}
-              <span className="hero2__w hero2__inline-mascotte" style={{ '--i': 2 } as React.CSSProperties} aria-hidden="true">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/decode/content.webp" alt="" width={768} height={768} />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="hero2__wink" src="/decode/clin-oeil.webp" alt="" width={768} height={768} loading="lazy" />
-              </span>{' '}
-              <span className="hero2__w" style={{ '--i': 3 } as React.CSSProperties}>
+              <span className="hero2__w hero2__hang" style={{ '--i': 2 } as React.CSSProperties}>
+                {/* Décode s'accroche derrière le mot : la tête dépasse, les mains tiennent le bord. */}
+                <span className="hero2__peek" aria-hidden="true">
+                  <span className="hero2__peek-in">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/decode/accroche.webp" alt="" width={640} height={377} />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="hero2__peek-wink" src="/decode/accroche-clin.webp" alt="" width={640} height={377} loading="lazy" />
+                  </span>
+                </span>
                 alternance.
-              </span>{' '}
-              <span className="hero2__w hero2__mark" style={{ '--i': 4 } as React.CSSProperties}>
+              </span>
+              <br />
+              <span className="hero2__w hero2__mark" style={{ '--i': 3 } as React.CSSProperties}>
                 En clair.
               </span>
             </h1>
