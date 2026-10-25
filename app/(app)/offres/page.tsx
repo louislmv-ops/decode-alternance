@@ -18,6 +18,7 @@ import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
 import { listOffers } from '@/lib/offers/repository';
 import type { OfferFilters } from '@/lib/offers/types';
+import { Mascotte } from '@/components/Mascotte';
 
 /** Les sources à citer sous la liste, comme leurs conditions le demandent. */
 const VIA = [
@@ -149,6 +150,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
 
         {rows.length === 0 ? (
           <div className="empty">
+            <Mascotte pose="surpris" size={128} className="empty__mascotte" />
             <p>
               Aucune offre ne correspond. Retire un filtre ou ajoute un département. <Link href="/offres">Réinitialiser les filtres</Link>
             </p>

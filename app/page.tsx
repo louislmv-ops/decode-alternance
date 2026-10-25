@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
+import { Mascotte } from '@/components/Mascotte';
 import { MatchButton } from '@/components/Matcher';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
@@ -88,15 +88,8 @@ export default async function Home() {
               ))}
             </ul>
           </div>
-          <div className="hero2__photo">
-            <Image
-              src="/accueil-etudiants.jpg"
-              alt="Deux étudiants assis dans un parc regardent des offres sur un ordinateur portable"
-              fill
-              priority
-              quality={85}
-              sizes="(min-width: 960px) 42vw, 100vw"
-            />
+          <div className="hero2__photo hero2__mascotte">
+            <Mascotte pose="diplome" size="min(400px, 70vw)" className="mascotte--flotte" eager />
           </div>
         </section>
 
