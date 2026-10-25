@@ -1,9 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
 import { MatchButton } from '@/components/Matcher';
+import { Perso, type Pose } from '@/components/Perso';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { DEPARTMENT_NAMES, DEPARTMENT_OPTIONS } from '@/lib/departments';
@@ -18,10 +18,10 @@ import type { OfferPage } from '@/lib/offers/types';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 
 /** Trois étapes, pas une de plus : c'est tout le site. */
-const STEPS = [
-  { title: 'Cherche', text: 'Les offres de partout, sans les fausses offres d’écoles.', href: '/offres', action: 'Voir les offres' },
-  { title: 'Comprends', text: 'Chaque offre traduite : ce que tu feras, combien tu toucheras.', href: '/decoder', action: 'Décoder une offre' },
-  { title: 'Démarque-toi', text: 'Qui contacter dans l’équipe, et le suivi de tes candidatures.', href: '/equipe', action: 'Trouver l’équipe' },
+const STEPS: { title: string; text: string; href: string; action: string; pose: Pose }[] = [
+  { title: 'Cherche', text: 'Les offres de partout, sans les fausses offres d’écoles.', href: '/offres', action: 'Voir les offres', pose: 'reflechit' },
+  { title: 'Comprends', text: 'Chaque offre traduite : ce que tu feras, combien tu toucheras.', href: '/decoder', action: 'Décoder une offre', pose: 'cool' },
+  { title: 'Démarque-toi', text: 'Qui contacter dans l’équipe, et le suivi de tes candidatures.', href: '/equipe', action: 'Trouver l’équipe', pose: 'clin-oeil' },
 ];
 
 async function latestOffers(departments: string[]): Promise<OfferPage | null> {
@@ -88,15 +88,9 @@ export default async function Home() {
               ))}
             </ul>
           </div>
-          <div className="hero2__photo">
-            <Image
-              src="/accueil-etudiants.jpg"
-              alt="Deux étudiants assis dans un parc regardent des offres sur un ordinateur portable"
-              fill
-              priority
-              quality={85}
-              sizes="(min-width: 960px) 42vw, 100vw"
-            />
+          <div className="hero2__photo hero2__perso">
+            <Perso pose="salut" size="min(280px, 62vw)" className="hero2__perso-main" />
+            <Perso pose="feu" size={96} className="hero2__perso-side" />
           </div>
         </section>
 
@@ -107,7 +101,10 @@ export default async function Home() {
           <ol className="steps__list">
             {STEPS.map((step, i) => (
               <li key={step.title} className="step" data-reveal>
-                <span className="step__num num">{i + 1}</span>
+                <span className="step__num num">
+                  <Perso pose={step.pose} size={72} className="step__perso" />
+                  <span className="step__digit">{i + 1}</span>
+                </span>
                 <h3 className="step__title">{step.title}</h3>
                 <p className="step__text">{step.text}</p>
                 <Link href={step.href} className="link step__link">

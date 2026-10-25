@@ -1,5 +1,5 @@
 /** Emoji 3D (Fluent Emoji de Microsoft, licence MIT) : le même rendu sur tous les téléphones. Décoratif, le texte voisin porte le sens. */
-const EMOJI = { feu: 'feu', eclair: 'eclair', billets: 'billets', coeur: 'coeur', croix: 'croix' } as const;
+const EMOJI = { billets: 'billets', croix: 'croix' } as const;
 
 export type EmojiName = keyof typeof EMOJI;
 

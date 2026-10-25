@@ -4443,3 +4443,160 @@ label {
   white-space: nowrap;
 }
 
+
+/* ==========================================================================
+   Décode, le personnage : il se pose sur les offres et réagit à ce que tu fais.
+   Toujours décoratif, jamais devant un texte à lire.
+   ========================================================================== */
+
+.perso {
+  display: inline-block;
+  flex: none;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.perso--inline {
+  margin: -0.35em 0.05em -0.3em -0.15em;
+  vertical-align: middle;
+}
+
+/* Sur une pépite, il est perché sur le bord de la ligne et sautille quand on la survole. */
+.orow__perso {
+  position: absolute;
+  top: -30px;
+  right: 120px;
+  z-index: 1;
+  transform-origin: 50% 100%;
+  transition: transform var(--t-ui) var(--ease-out);
+}
+
+.orow:hover .orow__perso,
+.orow:focus-within .orow__perso {
+  transform: translateY(-6px) rotate(-6deg);
+}
+
+@media (max-width: 760px) {
+  .orow__perso {
+    top: -22px;
+    right: 12px;
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* Mode swipe : il apparaît du côté où tu glisses. */
+.swipe__react {
+  position: absolute;
+  top: -48px;
+  z-index: 3;
+  opacity: 0;
+  transform: translateY(16px) scale(0.8);
+  transition:
+    opacity 160ms ease,
+    transform 220ms var(--ease-out);
+}
+
+.swipe__react--keep {
+  right: 4px;
+}
+
+.swipe__react--pass {
+  left: 4px;
+}
+
+.swipe__react.is-on {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.swipe__end-perso {
+  margin: 0 auto 8px;
+}
+
+.empty__perso {
+  display: block;
+  margin: 0 auto 8px;
+}
+
+.empty:has(.empty__perso) {
+  text-align: center;
+}
+
+/* Accueil : il remplace la photo et salue. */
+.hero2__perso {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 58%, var(--tint-6) 0 38%, var(--brand-dark) 38.5%);
+}
+
+.hero2__perso-main {
+  animation: perso-salut 2.8s var(--ease-in-out) 0.6s 2;
+  transform-origin: 50% 100%;
+}
+
+.hero2__perso-side {
+  position: absolute;
+  right: 12%;
+  bottom: 14%;
+  rotate: 8deg;
+}
+
+@keyframes perso-salut {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-4deg) translateY(-6px);
+  }
+  40% {
+    transform: rotate(3deg);
+  }
+  60% {
+    transform: rotate(-2deg) translateY(-3px);
+  }
+}
+
+/* Les trois étapes : le personnage prend la place du rond numéroté. */
+.step__num:has(.step__perso) {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  background: none;
+}
+
+.step__digit {
+  position: absolute;
+  right: -6px;
+  bottom: 2px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.step:hover .step__perso {
+  transform: translateY(-4px) rotate(-4deg);
+}
+
+.step__perso {
+  transition: transform var(--t-ui) var(--ease-out);
+}
+
+.step:has(.step__perso) {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .perso,
+  .hero2__perso-main {
+    animation: none !important;
+    transition: none !important;
+  }
+}
