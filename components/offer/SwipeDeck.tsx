@@ -1,5 +1,7 @@
 'use client';
 
+import { useLikes } from '@/components/useLikes';
+import { scoreOffer, type TasteItem } from '@/lib/taste';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Emoji } from '@/components/Emoji';
@@ -21,6 +23,8 @@ export interface SwipeCard {
   /** D'où vient la note : annonce, alternants de l'entreprise ou minimum légal. */
   payHint: string;
   pepite: boolean;
+  /** Le résumé gardé pour apprendre les goûts (like à droite, offre passée à gauche). */
+  taste: Omit<TasteItem, 'at'>;
 }
 
 /** Au-delà de ce déplacement (en px), le geste vaut décision. */
@@ -34,7 +38,16 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
   const [leaving, setLeaving] = useState<'left' | 'right' | null>(null);
   const start = useRef<number | null>(null);
   const [dragging, setDragging] = useState(false);
-  const card = cards[index];
+  const { likes, like, pass, taste } = useLikes();
+  // Au début de la série, les offres qui ressemblent le plus aux likes passent en premier.
+  const [deck, setDeck] = useState(cards);
+  useEffect(() => {
+    if (likes.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDeck([...cards].sort((a, b) => scoreOffer(b.taste, taste).score - scoreOffer(a.taste, taste).score));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cards]);
+  const card = deck[index];
 
   const decide = useCallback(
     (dir: 'left' | 'right') => {
@@ -45,6 +58,9 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           add({ company: card.company, title: card.title, url, channel: 'offre', status: 'a-envoyer', sentAt: null, followedUpAt: null, notes: '' });
         }
         setKept((k) => k + 1);
+        like(card.taste);
+      } else {
+        pass(card.taste);
       }
       setLeaving(dir);
       window.setTimeout(() => {
@@ -53,7 +69,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
         setIndex((i) => i + 1);
       }, 220);
     },
-    [card, leaving, apps, add],
+    [card, leaving, apps, add, like, pass],
   );
 
   useEffect(() => {
@@ -71,12 +87,12 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
         <Mascotte pose={kept > 0 ? 'clin-oeil' : 'surpris'} size={144} className="swipe__mascotte" />
         <p className="swipe__done">C’est tout pour cette série.</p>
         <p className="c-note">
-          {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''} dans ton suivi.` : 'Aucune offre gardée.'}
+          {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''} dans ton suivi et tes likes. Décode s’en sert pour te proposer des offres qui te ressemblent.` : 'Aucune offre gardée.'}
         </p>
         <div className="swipe__end-actions">
           {kept > 0 && (
-            <Link href="/suivi" className="btn">
-              Mon suivi
+            <Link href="/likes" className="btn">
+              Mes likes
             </Link>
           )}
           {nextHref && (

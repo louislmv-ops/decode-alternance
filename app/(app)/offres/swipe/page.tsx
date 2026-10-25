@@ -8,6 +8,8 @@ import { PLACE_COOKIE } from '@/lib/place';
 import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
 import { payDisplay } from '@/lib/offers/pay-display';
+import { extractPerks } from '@/lib/offers/perks';
+import { tasteOf } from '@/lib/taste';
 import { listOffers } from '@/lib/offers/repository';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/link';
@@ -38,10 +40,11 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt)]
         .filter((x): x is string => Boolean(x))
         .join(' · '),
-      tier: payDisplay(h.estimate, h.minimumCents).tier,
-      payHint: payDisplay(h.estimate, h.minimumCents).hint,
+      tier: payDisplay(h.estimate, h.minimumCents, h.lean).tier,
+      payHint: payDisplay(h.estimate, h.minimumCents, h.lean).hint,
       pepite: h.pepite,
       easyApply: Boolean(offer.easyApply),
+      taste: tasteOf(offer, offerHref(offer), extractPerks(offer.description)),
     }));
   const next = new URLSearchParams(Object.entries(params).flatMap(([k, v]) => (typeof v === 'string' && k !== 'page' ? [[k, v]] : [])));
   const page = result?.page ?? 1;

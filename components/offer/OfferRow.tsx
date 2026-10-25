@@ -4,6 +4,7 @@ import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
 import { payDisplay } from '@/lib/offers/pay-display';
+import { extractPerks } from '@/lib/offers/perks';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/link';
 import type { Offer } from '@/lib/offers/types';
@@ -11,6 +12,8 @@ import { logoSrc } from '@/lib/offers/logo';
 import { CompanyLogo } from './CompanyLogo';
 import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
+import { LikeButton } from './LikeButton';
+import { tasteOf } from '@/lib/taste';
 
 /** Publiée depuis moins de 48 heures. */
 const isNew = (iso: string) => Date.now() - Date.parse(iso) < 2 * 86_400_000;
@@ -19,7 +22,8 @@ const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 
 
 /** Une offre, une ligne : l'entreprise, le poste en grand, une ligne d'infos, la paie. Rien d'autre. */
 export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
-  const pay = payDisplay(h.estimate, h.minimumCents);
+  const pay = payDisplay(h.estimate, h.minimumCents, h.lean);
+  const perks = extractPerks(offer.description);
   const place = offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null);
   return (
     <li className={`orow${h.pepite ? ' is-pepite' : ''}`}>
@@ -38,6 +42,14 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
           {[place, CONTRACT_LABELS[offer.contract], offer.direct ? 'Direct entreprise' : null, relativeDays(offer.publishedAt)].filter(Boolean).join(' · ')}
           {offer.easyApply && <span className="orow__easy"> · <Emoji name="eclair" /> Candidature simplifiée</span>}
         </p>
+        {perks.length > 0 && (
+          <ul className="orow__perks" aria-label="Avantages cités dans l’annonce">
+            {perks.slice(0, 3).map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+            {perks.length > 3 && <li className="orow__perks-more">+{perks.length - 3}</li>}
+          </ul>
+        )}
         {(h.schoolBait || h.pay?.verdict === 'sous-le-minimum') && (
           <p className="orow__alerts">
             {h.schoolBait && <span className="pill pill--alert">Offre d’école ?</span>}
@@ -54,6 +66,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
           {pay.word}
         </span>
       </div>
+      <LikeButton className="orow__like" item={tasteOf(offer, offerHref(offer), perks)} />
       <svg className="orow__arrow" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <path d="M4 10h11M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

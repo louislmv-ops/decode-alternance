@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { SwipePromo } from '@/components/offer/SwipePromo';
+import { ForYouLikes } from '@/components/offer/ForYouLikes';
+import { extractPerks } from '@/lib/offers/perks';
+import { tasteOf } from '@/lib/taste';
+import { offerHref } from '@/lib/offers/link';
 import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
 import { Emoji } from '@/components/Emoji';
 import { AutoSubmit } from '@/components/offer/AutoSubmit';
@@ -136,6 +140,8 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
 
       {(filters.page ?? 1) <= 1 && <CampaignStrip />}
 
+      <ForYouLikes candidates={rows.map(({ offer }) => tasteOf(offer, offerHref(offer), extractPerks(offer.description)))} />
+
       <section className="results" aria-labelledby="offers-list-title">
         <div className="offers__bar">
           <h2 id="offers-list-title">Les offres</h2>
@@ -146,8 +152,8 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           <Link href={`/offres/swipe${pageHref(filters, 1).replace('/offres', '')}`} className="offers__swipe">
             Mode swipe
           </Link>
-          <Link href="/decoder" className="link">
-            Coller une offre
+          <Link href="/likes" className="link">
+            Mes likes
           </Link>
         </div>
 

@@ -1,3 +1,7 @@
+import { paySignals } from '@/lib/offers/pay-signals';
+import { extractPerks } from '@/lib/offers/perks';
+import { tasteOf } from '@/lib/taste';
+import { offerHref } from '@/lib/offers/link';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -49,6 +53,9 @@ export default async function OfferPage({ params, searchParams }: Props) {
     department: offer.department,
     diplomaLevel: offer.diplomaLevel,
     pay,
+    lean: paySignals(offer),
+    perks: extractPerks(offer.description, offer.salaryText),
+    taste: tasteOf(offer, offerHref(offer), extractPerks(offer.description, offer.salaryText)),
     publishedAt: offer.publishedAt,
     contractKind: offer.contract,
     easyApply: offer.easyApply ?? false,

@@ -5,6 +5,7 @@ import { useProfile } from '@/components/useProfile';
 import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
 import { payDisplay } from '@/lib/offers/pay-display';
+import type { PayLean } from '@/lib/offers/pay-signals';
 import { SMIC } from '@/lib/rules/reference';
 import { apprenticeNetThresholdCents, comparePay, CONTRACT_NAMES, contractForOffer, minimumSalary } from '@/lib/rules/salary';
 import { conventionLink } from '@/lib/rules/conventions';
@@ -21,6 +22,7 @@ export function PayPanel({
   sourceLabel,
   perks = [],
   offerContract = null,
+  lean = null,
 }: {
   announcedCents: number | null;
   /** Haut de la fourchette annoncée, ou plafond d'un « jusqu'à » : jamais présenté comme le salaire. */
@@ -31,13 +33,15 @@ export function PayPanel({
   perks?: string[];
   /** Le contrat de l'offre quand elle le précise : c'est lui qui fixe le minimum légal. */
   offerContract?: 'apprentissage' | 'professionnalisation' | 'alternance' | null;
+  /** Tendance tirée d'indices quand l'annonce ne chiffre rien. */
+  lean?: PayLean | null;
 }) {
   const [profile] = useProfile();
   const contract = contractForOffer(offerContract, profile.contract);
   const fromOffer = offerContract === 'apprentissage' || offerContract === 'professionnalisation';
   const minimum = minimumSalary({ contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   const e = payEstimate(announcedCents, minimum.cents, context?.community ?? null, context?.legalGrid ?? false);
-  const shown = payDisplay(e, minimum.cents);
+  const shown = payDisplay(e, minimum.cents, lean);
   const pay = announcedCents !== null ? comparePay(announcedCents, minimum.cents) : null;
   const years = ([1, 2, 3] as const).map((year) => minimumSalary({ contract: 'apprentissage', age: profile.age, year, hasBacPro: profile.hasBacPro }));
   const jobs = context?.jobs ?? [];
@@ -72,7 +76,9 @@ export function PayPanel({
                 ? `tendance d’après ${e.count} alternants de cette entreprise`
                 : e.legalGrid
                   ? 'l’annonce renvoie à la grille légale'
-                  : 'pas de montant dans l’annonce : c’est ton minimum légal'}
+                  : lean
+                    ? `pas de montant dans l’annonce ; tendance d’après : ${lean.reasons.join(', ')}`
+                    : 'pas de montant dans l’annonce : c’est ton minimum légal'}
           </p>
         </div>
         <div>
