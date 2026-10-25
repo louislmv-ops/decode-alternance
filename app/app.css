@@ -4918,3 +4918,135 @@ label {
   border-color: var(--accent);
   color: var(--accent-ink);
 }
+
+/* ==========================================================================
+   Arrivée sur l'accueil : le titre se pose mot à mot, « En clair. » se
+   surligne en jaune, puis la recherche arrive. Deux halos de couleur en fond.
+   Une seule fois, moins d'une seconde et demie, rien qui boucle.
+   ========================================================================== */
+
+.hero2 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(64px, 11vw, 136px) var(--margin) clamp(56px, 8vw, 96px);
+  text-align: center;
+}
+
+.hero2__content,
+.hero2 .hero2__content {
+  align-items: center;
+  padding: 0;
+}
+
+.hero2 .hero2__content .hero2__domains {
+  justify-content: center;
+}
+
+.hero2__title {
+  max-width: 16ch;
+}
+
+.hero2__lead {
+  margin-inline: auto;
+}
+
+/* Les deux halos : violet à gauche, jaune à droite, très flous. */
+.hero2::before,
+.hero2::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: min(520px, 70vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.hero2::before {
+  top: -18%;
+  left: -8%;
+  background: var(--brand);
+}
+
+.hero2::after {
+  right: -10%;
+  bottom: -30%;
+  background: var(--accent);
+  opacity: 0.45;
+}
+
+.hero2__w {
+  display: inline-block;
+}
+
+.hero2__mark {
+  padding: 0 0.12em;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 100% 0.42em;
+}
+
+@keyframes hero-word {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em) rotate(2deg);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes hero-mark {
+  from {
+    background-size: 0% 0.42em;
+  }
+  to {
+    background-size: 100% 0.42em;
+  }
+}
+
+@keyframes hero-glow {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero2__title {
+    animation: none;
+  }
+  .hero2__w {
+    animation: hero-word 620ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i) * 90ms + 80ms);
+  }
+  .hero2__mark {
+    animation:
+      hero-word 620ms var(--ease-out) backwards 350ms,
+      hero-mark 520ms var(--ease-out) backwards 820ms;
+  }
+  .hero2__lead {
+    animation-delay: 520ms;
+  }
+  .hero2__search {
+    animation-delay: 640ms;
+  }
+  .hero2__alt,
+  .hero2__domains {
+    animation-delay: 760ms;
+  }
+  .hero2::before,
+  .hero2::after {
+    animation: hero-glow 1400ms var(--ease-out) backwards;
+  }
+}

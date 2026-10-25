@@ -1,8 +1,8 @@
 import Link from 'next/link';
+import { Fragment } from 'react';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
-import { Mascotte } from '@/components/Mascotte';
 import { MatchButton } from '@/components/Matcher';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
@@ -51,7 +51,16 @@ export default async function Home() {
         <section className="hero2" aria-labelledby="hero-title">
           <div className="hero2__content">
             <h1 id="hero-title" className="hero2__title">
-              Trouve ton alternance. En clair.
+              {['Trouve', 'ton', 'alternance.'].map((w, i) => (
+                <Fragment key={w}>
+                  <span className="hero2__w" style={{ '--i': i } as React.CSSProperties}>
+                    {w}
+                  </span>{' '}
+                </Fragment>
+              ))}
+              <span className="hero2__w hero2__mark" style={{ '--i': 3 } as React.CSSProperties}>
+                En clair.
+              </span>
             </h1>
             <p className="hero2__lead">Les offres traduites, ton salaire calculé, les pièges écartés. Gratuit.</p>
 
@@ -87,9 +96,6 @@ export default async function Home() {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="hero2__photo hero2__mascotte">
-            <Mascotte pose="diplome" size="min(400px, 70vw)" className="mascotte--flotte" eager />
           </div>
         </section>
 
