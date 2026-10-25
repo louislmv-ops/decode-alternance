@@ -4671,3 +4671,132 @@ label {
   border-color: var(--brand);
   box-shadow: 0 0 0 3px rgb(11 107 75 / 0.18);
 }
+
+/* ==========================================================================
+   Un peu de mouvement, au bon endroit : l'accueil qui s'installe, les offres
+   qui arrivent l'une après l'autre, les « € » qui se remplissent, la pépite
+   qui brille une fois. Rien qui boucle, tout coupé si le système le demande.
+   ========================================================================== */
+
+@keyframes dc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dc-fill {
+  from {
+    opacity: 0.15;
+    transform: translateY(4px) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dc-shine {
+  from {
+    background-position: 160% 0;
+  }
+  to {
+    background-position: -60% 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Accueil : le titre, puis le texte, puis la recherche. */
+  .hero2__title,
+  .hero2__lead,
+  .hero2__search,
+  .hero2__alt,
+  .hero2__domains,
+  .hero2__photo {
+    animation: dc-rise 640ms var(--ease-out) backwards;
+  }
+  .hero2__lead {
+    animation-delay: 90ms;
+  }
+  .hero2__search {
+    animation-delay: 180ms;
+  }
+  .hero2__alt,
+  .hero2__domains {
+    animation-delay: 260ms;
+  }
+  .hero2__photo {
+    animation-delay: 120ms;
+    animation-duration: 900ms;
+  }
+
+  /* Les offres arrivent l'une après l'autre (les huit premières). */
+  .orows > .orow {
+    animation: dc-rise 520ms var(--ease-out) backwards;
+  }
+  .orows > .orow:nth-child(2) { animation-delay: 50ms; }
+  .orows > .orow:nth-child(3) { animation-delay: 100ms; }
+  .orows > .orow:nth-child(4) { animation-delay: 150ms; }
+  .orows > .orow:nth-child(5) { animation-delay: 200ms; }
+  .orows > .orow:nth-child(6) { animation-delay: 250ms; }
+  .orows > .orow:nth-child(7) { animation-delay: 300ms; }
+  .orows > .orow:nth-child(n + 8) { animation-delay: 350ms; }
+
+  /* Les « € » se remplissent un par un : on lit la paie avant le titre. */
+  .orow__pay .euros__on {
+    display: inline-block;
+    animation: dc-fill 360ms var(--ease-out) backwards;
+    animation-delay: 380ms;
+  }
+  .orow__pay .euros__on + .euros__on {
+    animation-delay: 460ms;
+  }
+  .orow__pay .euros__on + .euros__on + .euros__on {
+    animation-delay: 540ms;
+  }
+
+  /* L'étiquette Pépite brille une fois à l'arrivée, puis au survol. */
+  .orow__flag {
+    background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.75) 50%, transparent 65%);
+    background-size: 220% 100%;
+    background-repeat: no-repeat;
+    background-position: 160% 0;
+    animation: dc-shine 1100ms ease-in-out 700ms backwards;
+  }
+  .orow:hover .orow__flag {
+    animation: dc-shine 900ms ease-in-out backwards;
+  }
+
+  /* Les boutons d'action répondent au clic. */
+  .hero2__go,
+  .osearch__go,
+  .offers__swipe,
+  .locate .btn {
+    transition:
+      transform var(--t-press) var(--ease-out),
+      background-color var(--t-hover) ease,
+      border-color var(--t-hover) ease,
+      color var(--t-hover) ease;
+  }
+  .hero2__go:active,
+  .osearch__go:active,
+  .offers__swipe:active,
+  .locate .btn:active {
+    transform: scale(0.96);
+  }
+
+  /* Les pastilles de domaine se soulèvent un peu. */
+  .hero2__domains a {
+    transition:
+      transform var(--t-hover) var(--ease-out),
+      border-color var(--t-hover) ease,
+      color var(--t-hover) ease;
+  }
+  .hero2__domains a:hover {
+    transform: translateY(-2px);
+  }
+}
