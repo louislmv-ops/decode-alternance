@@ -5295,6 +5295,11 @@ a:hover .wordmark__mascotte,
   text-align: center;
 }
 
+.prose-page.lost > * {
+  grid-column: 1 / -1;
+  margin-inline: auto;
+}
+
 .lost__mascotte {
   margin: 0 auto 8px;
 }
@@ -5666,10 +5671,10 @@ a:hover .wordmark__mascotte,
 
 .site-footer__peek {
   position: absolute;
-  top: -54px;
-  left: max(var(--margin), calc((100% - var(--max)) / 2 + 24px));
+  top: -64px;
+  right: max(var(--margin), calc((100% - var(--max)) / 2 + 48px));
   width: 96px;
-  height: 54px;
+  height: 64px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -5679,12 +5684,12 @@ a:hover .wordmark__mascotte,
   width: 96px;
   height: 96px;
   object-fit: contain;
-  transform: translateY(18%);
+  transform: translateY(4%);
   transition: transform 520ms var(--ease-out);
 }
 
 .site-footer:hover .site-footer__peek img {
-  transform: translateY(6%) rotate(-6deg);
+  transform: translateY(-4%) rotate(-6deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
