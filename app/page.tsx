@@ -89,7 +89,7 @@ export default async function Home() {
             </ul>
           </div>
           <div className="hero2__photo hero2__perso">
-            <Perso pose="salut-grand" size="min(340px, 66vw)" className="hero2__perso-main" eager />
+            <Perso pose="salut" size="min(280px, 62vw)" className="hero2__perso-main" />
             <Perso pose="feu" size={96} className="hero2__perso-side" />
           </div>
         </section>
