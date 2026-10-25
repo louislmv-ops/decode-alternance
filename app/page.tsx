@@ -35,6 +35,20 @@ async function latestOffers(departments: string[]): Promise<OfferPage | null> {
   }
 }
 
+/** Décode s'accroche derrière un mot : la tête dépasse, les mains tiennent le bord. */
+function Peek({ where }: { where: 'd' | 'm' }) {
+  return (
+    <span className={`hero2__peek hero2__peek--${where}`} aria-hidden="true">
+      <span className="hero2__peek-in">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/decode/accroche.webp" alt="" width={640} height={377} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="hero2__peek-wink" src="/decode/accroche-clin.webp" alt="" width={640} height={377} loading="lazy" />
+      </span>
+    </span>
+  );
+}
+
 export default async function Home() {
   const jar = await cookies();
   const placeCookie = jar.get(PLACE_COOKIE)?.value;
@@ -55,19 +69,13 @@ export default async function Home() {
               <span className="hero2__w" style={{ '--i': 0 } as React.CSSProperties}>
                 Trouve
               </span>{' '}
-              <span className="hero2__w" style={{ '--i': 1 } as React.CSSProperties}>
+              <span className="hero2__w hero2__ton" style={{ '--i': 1 } as React.CSSProperties}>
+                {/* Sur téléphone, le titre passe sur trois lignes : Décode s'accroche à la première, au-dessus de « ton ». */}
+                <Peek where="m" />
                 ton
               </span>{' '}
               <span className="hero2__w hero2__hang" style={{ '--i': 2 } as React.CSSProperties}>
-                {/* Décode s'accroche derrière le mot : la tête dépasse, les mains tiennent le bord. */}
-                <span className="hero2__peek" aria-hidden="true">
-                  <span className="hero2__peek-in">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/decode/accroche.webp" alt="" width={640} height={377} />
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="hero2__peek-wink" src="/decode/accroche-clin.webp" alt="" width={640} height={377} loading="lazy" />
-                  </span>
-                </span>
+                <Peek where="d" />
                 alternance.
               </span>
               <br />
