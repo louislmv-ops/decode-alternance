@@ -6739,3 +6739,230 @@ a:hover .wordmark__mascotte,
   gap: 8px;
   background: linear-gradient(135deg, #f5f0ff 0%, #fff 70%);
 }
+
+/* ==========================================================================
+   Verre liquide (iOS 26) et dégradés très doux.
+   Le fond porte un dégradé maillé presque invisible ; les éléments qui flottent
+   (barres, recherche, chat, pastilles) sont en verre : flou, saturation, reflet
+   sur l'arête et ombre douce. Les cartes restent légèrement translucides, sans
+   flou, pour ne pas ralentir les téléphones.
+   ========================================================================== */
+
+:root {
+  --glass-bg: rgb(255 255 255 / 0.58);
+  --glass-bg-strong: rgb(255 255 255 / 0.74);
+  --glass-edge: rgb(255 255 255 / 0.7);
+  --glass-line: rgb(60 40 120 / 0.1);
+  --glass-blur: blur(22px) saturate(185%);
+  --glass-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.25),
+    0 0 0 0.5px var(--glass-line),
+    0 10px 30px -12px rgb(46 16 101 / 0.22);
+  --glass-sheen: linear-gradient(135deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 42%, rgb(255 255 255 / 0) 70%, rgb(255 255 255 / 0.22) 100%);
+}
+
+/* Le fond : trois lueurs très pâles, fixes, derrière tout le site. */
+body {
+  background: var(--bg);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 0% 0%, rgb(167 139 250 / 0.16) 0%, transparent 70%),
+    radial-gradient(50% 45% at 100% 10%, rgb(251 207 232 / 0.22) 0%, transparent 70%),
+    radial-gradient(60% 50% at 80% 100%, rgb(186 230 253 / 0.2) 0%, transparent 70%),
+    linear-gradient(180deg, #fbfaff 0%, #f7f6fb 100%);
+}
+
+/* Les zones grises laissent voir le fond. */
+.app {
+  background: transparent;
+}
+
+/* Les cartes : blanc légèrement translucide, arête claire, ombre à peine là. */
+.panel,
+.orow,
+.foryou-likes__item,
+.likes-list__item {
+  background: rgb(255 255 255 / 0.82);
+  border-color: rgb(255 255 255 / 0.9);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 0 0 0.5px var(--glass-line),
+    0 6px 20px -14px rgb(46 16 101 / 0.18);
+}
+
+/* L'élément de verre, partagé. */
+.topbar,
+.hero2__search,
+.assistant__panel,
+.assistant__launcher-label,
+.decode-wait,
+.chip,
+.hero2__domains a,
+.like--big {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+.topbar {
+  background: rgb(255 255 255 / 0.55);
+  border-bottom: 0;
+  box-shadow:
+    inset 0 -0.5px 0 var(--glass-line),
+    0 8px 24px -20px rgb(46 16 101 / 0.25);
+}
+
+.hero2__search {
+  position: relative;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  border-radius: 22px;
+  box-shadow: var(--glass-shadow);
+}
+
+.hero2__search::before,
+.assistant__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-sheen);
+  pointer-events: none;
+}
+
+.hero2__search > * {
+  position: relative;
+}
+
+.chip,
+.hero2__domains a {
+  background: var(--glass-bg);
+  border-color: var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 0 0 0.5px var(--glass-line),
+    0 4px 12px -8px rgb(46 16 101 / 0.2);
+}
+
+.chip.is-on {
+  background: rgb(124 58 237 / 0.12);
+}
+
+.assistant__panel {
+  position: relative;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  border-radius: 26px;
+  box-shadow: var(--glass-shadow), 0 30px 70px -28px rgb(46 16 101 / 0.4);
+}
+
+.assistant__panel > * {
+  position: relative;
+}
+
+.assistant__head {
+  background: linear-gradient(135deg, rgb(124 58 237 / 0.92), rgb(147 51 234 / 0.88));
+}
+
+.assistant__list {
+  background: transparent;
+}
+
+.assistant__msg--bot {
+  background: rgb(255 255 255 / 0.75);
+  box-shadow: 0 0 0 0.5px var(--glass-line);
+}
+
+.assistant__launcher-label {
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+
+.decode-wait {
+  background: var(--glass-bg);
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+
+.like--big {
+  background: var(--glass-bg);
+  border-color: var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Boutons secondaires : verre clair ; le principal garde son violet, avec un léger dégradé. */
+.ui-btn:not(.ui-btn--primary) {
+  background: var(--glass-bg-strong);
+  border-color: rgb(255 255 255 / 0.9);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 0 0 0.5px var(--glass-line),
+    0 4px 12px -8px rgb(46 16 101 / 0.25);
+}
+
+.btn:not(.btn--accent),
+.ui-btn--primary,
+.hero2__go {
+  background: linear-gradient(180deg, #8b4cf6 0%, #7c3aed 55%, #6d28d9 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    0 6px 16px -8px rgb(109 40 217 / 0.6);
+}
+
+.btn:not(.btn--accent):hover,
+.ui-btn--primary:hover,
+.hero2__go:hover {
+  background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+/* Barre d'onglets façon iOS 26 : une capsule de verre qui flotte au-dessus du contenu. */
+@media (max-width: 760px) {
+  .tabbar {
+    left: 10px;
+    right: 10px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    padding: 6px;
+    border-radius: 30px;
+    background: rgb(255 255 255 / 0.62);
+    border: 1px solid var(--glass-edge);
+    border-top: 1px solid var(--glass-edge);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow), 0 16px 40px -16px rgb(46 16 101 / 0.35);
+  }
+  .tabbar__item {
+    min-height: 50px;
+    border-radius: 24px;
+    transition:
+      background-color 200ms var(--ease-ui),
+      transform var(--t-press) var(--ease-out);
+  }
+  .tabbar__item[aria-current='page'] {
+    background: rgb(124 58 237 / 0.12);
+  }
+  .tabbar__item--swipe[aria-current='page'] {
+    background: transparent;
+  }
+  .app {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+  .assistant {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .tabbar,
+  .assistant__panel,
+  .hero2__search {
+    background: rgb(255 255 255 / 0.96);
+  }
+}
