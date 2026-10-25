@@ -4600,3 +4600,87 @@ label {
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   Les offres en cartes : chaque offre se détache, la paie se lit d'un coup d'œil,
+   la pépite se voit de loin.
+   ========================================================================== */
+
+.orows {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.orow {
+  padding: 22px 22px 22px 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: 0 1px 0 rgb(15 31 26 / 4%);
+  transition:
+    transform var(--t-hover) var(--ease-out),
+    box-shadow var(--t-hover) ease,
+    border-color var(--t-hover) ease;
+}
+
+.orow.is-pepite {
+  border-color: var(--tint-4);
+  background: linear-gradient(100deg, var(--tint-6) 0%, var(--card) 55%);
+  box-shadow: inset 5px 0 0 var(--accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .orow:hover {
+    background: var(--card);
+    border-color: var(--control);
+    box-shadow: 0 10px 28px -14px rgb(15 31 26 / 30%);
+    transform: translateY(-2px);
+  }
+  .orow.is-pepite:hover {
+    background: linear-gradient(100deg, var(--tint-6) 0%, var(--card) 55%);
+    box-shadow:
+      inset 5px 0 0 var(--accent),
+      0 10px 28px -14px rgb(15 31 26 / 30%);
+  }
+}
+
+.orow__pay .euros--small {
+  font-size: 22px;
+}
+
+.orow__payword {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.orow__payword--3 {
+  color: var(--brand);
+}
+
+.orow__payword--1 {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .orows {
+    gap: 12px;
+  }
+  .orow {
+    padding: 16px 14px;
+  }
+  .orow__pay .euros--small {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orow {
+    transition: none;
+  }
+  .orow:hover {
+    transform: none;
+  }
+}
