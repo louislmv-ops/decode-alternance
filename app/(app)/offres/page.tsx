@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import { SwipePromo } from '@/components/offer/SwipePromo';
 import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
 import { Emoji } from '@/components/Emoji';
 import { AutoSubmit } from '@/components/offer/AutoSubmit';
@@ -128,6 +129,8 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
         </div>
       </form>
       <AutoSubmit formId="osearch" />
+
+      <SwipePromo href={`/offres/swipe${pageHref(filters, 1).replace('/offres', '')}`} />
 
       {askPlace ? <LocationPrompt /> : <ForYou />}
 

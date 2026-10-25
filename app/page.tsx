@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
+import { SwipePromo } from '@/components/offer/SwipePromo';
 import { Mascotte, type MascottePose } from '@/components/Mascotte';
 import { MatchButton } from '@/components/Matcher';
 import { SiteFooter } from '@/components/site/SiteFooter';
@@ -110,6 +111,10 @@ export default async function Home() {
             </ul>
           </div>
         </section>
+
+        <div className="home__swipe">
+          <SwipePromo />
+        </div>
 
         {!placeCookie && <LocationPrompt />}
 
