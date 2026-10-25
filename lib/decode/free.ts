@@ -57,36 +57,50 @@ export function extractJson(text: string): unknown {
 }
 
 /** Un appel ; un modèle retiré (404) ou saturé (500, 503) passe la main au suivant de la liste. */
-async function complete(p: Target, messages: { role: string; content: string }[]): Promise<{ text: string; model: string }> {
+async function complete(p: Target, messages: { role: string; content: string }[], json = true): Promise<{ text: string; model: string }> {
   for (const [i, model] of p.models.entries()) {
     const last = i === p.models.length - 1;
     const res = await fetch(p.url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.AI_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, messages, temperature: 0.2, response_format: { type: 'json_object' }, ...p.extra }),
+      body: JSON.stringify({ model, messages, temperature: json ? 0.2 : 0.4, ...(json ? { response_format: { type: 'json_object' } } : {}), ...p.extra }),
       signal: AbortSignal.timeout(60_000),
     }).catch(() => null);
     if (!res) {
-      if (last) throw new DecodeError('Le service de traduction ne répond pas. Réessaie plus tard.', 502);
+      if (last) throw new DecodeError('L’IA ne répond pas pour le moment. Réessaie plus tard.', 502);
       continue;
     }
     if (res.status === 429) throw new DecodeError('Le quota gratuit de l’IA est atteint pour le moment. Réessaie plus tard.', 429);
     if (res.status === 401 || res.status === 403) throw new DecodeError('La clé d’API n’est pas valide.', 500);
     if ((res.status === 404 || res.status >= 500) && !last) continue;
-    if (!res.ok) throw new DecodeError('Le service de traduction ne répond pas. Réessaie plus tard.', 502);
+    if (!res.ok) throw new DecodeError('L’IA ne répond pas pour le moment. Réessaie plus tard.', 502);
     const data = (await res.json().catch(() => null)) as { choices?: { message?: { content?: string } }[] } | null;
     return { text: data?.choices?.[0]?.message?.content ?? '', model };
   }
-  throw new DecodeError('Le service de traduction ne répond pas. Réessaie plus tard.', 502);
+  throw new DecodeError('L’IA ne répond pas pour le moment. Réessaie plus tard.', 502);
+}
+
+/** Compte un appel dans le quota du jour, partagé entre traductions et assistant. */
+function takeDailySlot(message: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (day.date !== today) day = { date: today, calls: 0 };
+  if (day.calls >= DAILY) throw new DecodeError(message, 429);
+  day.calls += 1;
+}
+
+/** Une réponse en texte libre, pour l'assistant du site. */
+export async function chatWithFreeAi(system: string, messages: { role: 'user' | 'assistant'; content: string }[]): Promise<string> {
+  const p = provider();
+  if (!p) throw new DecodeError('L’assistant n’est pas encore activé sur ce site.', 503);
+  takeDailySlot('L’assistant a beaucoup travaillé aujourd’hui : son quota gratuit est atteint. Reviens demain.');
+  const { text } = await complete(p, [{ role: 'system', content: system }, ...messages], false);
+  return text;
 }
 
 export async function decodeWithFreeAi(offerText: string): Promise<{ decoded: DecodedOffer; model: string }> {
   const p = provider();
   if (!p) throw new DecodeError('La traduction par l’IA n’est pas encore activée sur ce site.', 503);
-  const today = new Date().toISOString().slice(0, 10);
-  if (day.date !== today) day = { date: today, calls: 0 };
-  if (day.calls >= DAILY) throw new DecodeError('Le quota gratuit de traductions du jour est atteint. Réessaie demain.', 429);
-  day.calls += 1;
+  takeDailySlot('Le quota gratuit de traductions du jour est atteint. Réessaie demain.');
 
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT + JSON_RULES },

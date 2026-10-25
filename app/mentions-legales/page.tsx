@@ -61,6 +61,7 @@ export default function LegalPage() {
           être traité, puis Décode ne conserve pas le texte que tu as collé. Avec une offre gratuite, ce fournisseur peut se servir du
           texte pour améliorer ses modèles : n’y colle jamais tes coordonnées. Ton CV n’est jamais envoyé à une IA gratuite.
         </p>
+        <p>Quand tu poses une question à l’assistant, la conversation est envoyée au même fournisseur d’IA pour obtenir la réponse. Décode ne la conserve pas sur ses serveurs : elle reste dans ton navigateur le temps de ta visite.</p>
         <p>Décode ne lit aucune donnée sur LinkedIn et ne contacte personne à ta place.</p>
 
         <h2 id="communaute">La commu</h2>

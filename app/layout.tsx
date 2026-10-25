@@ -4,6 +4,8 @@ import './globals.css';
 import './site.css';
 import './app.css';
 import { AccountSync } from '@/components/account/AccountSync';
+import { Assistant } from '@/components/Assistant';
+import { isChatConfigured } from '@/lib/assistant/chat';
 import { Matcher } from '@/components/Matcher';
 import { Reveal } from '@/components/Reveal';
 import { isAccountsConfigured } from '@/lib/account/store';
@@ -49,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Matcher />
         <AccountSync />
         <Reveal />
+        {isChatConfigured() && <Assistant />}
       </body>
     </html>
   );
