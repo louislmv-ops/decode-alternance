@@ -4800,3 +4800,72 @@ label {
     transform: translateY(-2px);
   }
 }
+
+/* ==========================================================================
+   Décode, la mascotte : en grand, à quatre endroits seulement (accueil,
+   décodeur, recherche vide, fin du mode swipe). Jamais à côté d'un texte à lire.
+   ========================================================================== */
+
+.mascotte {
+  display: block;
+  flex: none;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero2__mascotte {
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+}
+
+@media (max-width: 959px) {
+  .hero2__mascotte {
+    height: auto;
+    padding: 24px 0 8px;
+  }
+  .hero2__mascotte .mascotte {
+    width: min(240px, 60vw) !important;
+    height: min(240px, 60vw) !important;
+  }
+}
+
+.decoder__mascotte {
+  margin: -8px 0 -12px auto;
+}
+
+.empty__mascotte,
+.swipe__mascotte {
+  margin: 0 auto 8px;
+}
+
+.empty:has(.empty__mascotte) {
+  text-align: center;
+}
+
+@keyframes mascotte-flotte {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-1.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mascotte--flotte {
+    animation: mascotte-flotte 4.5s var(--ease-in-out) infinite;
+  }
+  .empty__mascotte,
+  .swipe__mascotte {
+    animation: dc-rise 520ms var(--ease-out) backwards;
+  }
+}
+
+@media (max-width: 640px) {
+  .decoder__mascotte {
+    display: none;
+  }
+}

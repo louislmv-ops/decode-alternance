@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { DecodedView } from './DecodedView';
+import { Mascotte } from '@/components/Mascotte';
 
 const MIN = 120;
 const MAX = 12_000;
@@ -54,6 +55,7 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
           <h1>Décoder une offre</h1>
           <p className="title-row__sub">Colle une offre trouvée n’importe où.</p>
         </div>
+        <Mascotte pose="lunettes" size={112} className={`decoder__mascotte${state.status === 'loading' ? ' mascotte--flotte' : ''}`} />
       </div>
 
       <div className="decoder">

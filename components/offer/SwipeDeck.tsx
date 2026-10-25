@@ -7,6 +7,7 @@ import { useTracker } from '@/components/useTracker';
 import type { PayTier } from '@/lib/offers/pay-tier';
 import { CompanyLogo } from './CompanyLogo';
 import { PayEuros } from './PayTier';
+import { Mascotte } from '@/components/Mascotte';
 
 export interface SwipeCard {
   id: string;
@@ -67,6 +68,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
   if (!card) {
     return (
       <div className="swipe swipe--end">
+        <Mascotte pose={kept > 0 ? 'clin-oeil' : 'surpris'} size={144} className="swipe__mascotte" />
         <p className="swipe__done">C’est tout pour cette série.</p>
         <p className="c-note">
           {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''} dans ton suivi.` : 'Aucune offre gardée.'}
