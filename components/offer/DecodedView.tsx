@@ -1,5 +1,11 @@
 'use client';
 
+import type { PayLean } from '@/lib/offers/pay-signals';
+import { mergePerks } from '@/lib/offers/perks';
+import { PerksPanel } from './Perks';
+import { ApplyKit } from './ApplyKit';
+import { LikeButton } from './LikeButton';
+import type { TasteItem } from '@/lib/taste';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Emoji } from '@/components/Emoji';
@@ -39,6 +45,12 @@ export interface OfferMeta {
   easyApply?: boolean;
   /** Salaires déclarés, avis et convention collective de l'entreprise, rassemblés côté serveur. */
   pay?: PayContext | null;
+  /** Tendance de salaire tirée d'indices (région, taille, siège, métier), quand l'annonce ne chiffre rien. */
+  lean?: PayLean | null;
+  /** Avantages repérés dans le texte de l'annonce. */
+  perks?: string[];
+  /** Le résumé gardé quand on like l'offre. */
+  taste?: Omit<TasteItem, 'at'>;
 }
 
 const CERTITUDE: Record<Certitude, string> = { dit: 'Dit', deduit: 'Déduit', inconnu: 'Inconnu' };
@@ -116,6 +128,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
           </p>
         </div>
         <div className="title-row__actions">
+          {offer?.taste && <LikeButton item={offer.taste} className="like--big" />}
           <button
             type="button"
             className="ui-btn"
@@ -153,10 +166,13 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         community={offer?.pay ?? null}
         company={company || null}
         place={[decoded.lieu.ville ?? offer?.city, decoded.lieu.precision].filter(Boolean).join(', ') || null}
+        lean={offer?.lean ?? null}
         rhythm={decoded.contrat.rythme}
         contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
       />
       {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
+      <PerksPanel perks={mergePerks(decoded.salaire.avantages, offer?.perks ?? [])} />
+      {offer && !offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
 
       <div className="detail">
         <div className="detail__main">
@@ -316,8 +332,8 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             context={offer?.pay ?? null}
             company={company || null}
             sourceLabel={offer?.sourceLabel ?? 'l’annonce'}
-            perks={decoded.salaire.avantages}
             offerContract={offer?.contractKind ?? null}
+            lean={offer?.lean ?? null}
           />
 
           <details className="panel fold" aria-labelledby="contract-title">

@@ -18,7 +18,7 @@ const CvSchema = z.object({
 let client: Anthropic | null = null;
 
 /** Lit le CV avec l'IA. Rien n'est gardé : le texte sert à remplir le questionnaire, puis disparaît. */
-export async function readCvWithClaude(text: string): Promise<CvGuess> {
+export async function readCvWithClaude(input: string | { mediaType: 'image/jpeg' | 'image/png' | 'image/webp'; data: Uint8Array }): Promise<CvGuess> {
   client ??= new Anthropic();
   const response = await client.beta.messages.parse({
     model: DECODE_MODEL,
@@ -27,7 +27,18 @@ export async function readCvWithClaude(text: string): Promise<CvGuess> {
     fallbacks: 'default',
     output_config: { effort: 'low', format: betaZodOutputFormat(CvSchema) },
     system: `Tu lis le CV d'un ou d'une jeune qui cherche une alternance en France. Tu en tires seulement ce qui est écrit ou se déduit sans doute possible. Si une information manque, mets null. Domaines courants : ${DOMAINS.map((d) => d.label).join(', ')}.`,
-    messages: [{ role: 'user', content: text.slice(0, 15_000) }],
+    messages: [
+      {
+        role: 'user',
+        content:
+          typeof input === 'string'
+            ? input.slice(0, 15_000)
+            : [
+                { type: 'image', source: { type: 'base64', media_type: input.mediaType, data: Buffer.from(input.data).toString('base64') } },
+                { type: 'text', text: 'Voici la photo du CV.' },
+              ],
+      },
+    ],
   });
   const cv = response.parsed_output;
   if (!cv) throw new Error('CV illisible');

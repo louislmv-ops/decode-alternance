@@ -1,6 +1,7 @@
 import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
 import { payDisplay } from '@/lib/offers/pay-display';
+import type { PayLean } from '@/lib/offers/pay-signals';
 import { PayEuros } from './PayTier';
 
 /** L'essentiel d'une offre en quatre cases : la paie, le lieu, le rythme, le contrat. */
@@ -13,6 +14,7 @@ export function OfferFacts({
   place,
   rhythm,
   contract,
+  lean = null,
 }: {
   payCents: number | null;
   /** Haut de la fourchette, ou plafond d'un « jusqu'à » quand l'annonce ne garantit pas de montant. */
@@ -23,9 +25,10 @@ export function OfferFacts({
   place: string | null;
   rhythm: string | null;
   contract: string | null;
+  lean?: PayLean | null;
 }) {
   const e = payEstimate(payCents, minimumCents, community?.community ?? null, community?.legalGrid ?? false);
-  const shown = payDisplay(e, minimumCents);
+  const shown = payDisplay(e, minimumCents, lean);
   const mapQuery = [company, place].filter(Boolean).join(' ');
   return (
     <dl className="facts">
@@ -40,7 +43,9 @@ export function OfferFacts({
                 ? `${shown.word}, jusqu’à ${formatEuros(payMaxCents, 0)} selon profil d’après l’annonce`
                 : e.source === 'alternants'
                   ? `${shown.word} · tendance de ${e.count} alternants`
-                  : `${shown.word} · montant non précisé`}
+                  : shown.kind === 'estime'
+                    ? `${shown.word} · ${lean?.reasons.join(', ')}`
+                    : `${shown.word} · montant non précisé`}
           </span>
         </dd>
       </div>

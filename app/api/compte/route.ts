@@ -1,7 +1,7 @@
 import { z } from 'zod/v4';
 import { isPro } from '@/lib/pro/store';
 import { clearSessionCookies, currentAccount, notConfigured, publicAccount } from '@/lib/account/http';
-import { deleteAccount, isAccountsConfigured, SavedSearch, updateAccount } from '@/lib/account/store';
+import { Candidate, cvMeta, deleteAccount, isAccountsConfigured, SavedSearch, updateAccount } from '@/lib/account/store';
 
 const Patch = z.object({
   alertEmail: z.boolean().optional(),
@@ -11,13 +11,15 @@ const Patch = z.object({
   // Le profil et le suivi sont relus et nettoyés par la page avant usage ; on borne seulement leur taille.
   profile: z.record(z.string(), z.unknown()).optional(),
   tracker: z.array(z.record(z.string(), z.unknown())).max(500).optional(),
+  likes: z.object({ likes: z.array(z.record(z.string(), z.unknown())).max(500), passes: z.array(z.record(z.string(), z.unknown())).max(200) }).optional(),
+  candidate: Candidate.optional(),
 });
 
 export async function GET() {
   if (!isAccountsConfigured()) return notConfigured();
   const account = await currentAccount();
   if (!account) return Response.json({ error: 'Pas connecté.' }, { status: 401 });
-  return Response.json({ account: publicAccount(account) });
+  return Response.json({ account: publicAccount(account), cv: await cvMeta(account.id).catch(() => null) });
 }
 
 export async function PATCH(request: Request) {

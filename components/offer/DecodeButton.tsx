@@ -11,6 +11,9 @@ import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
 import { PayPanel } from './PayPanel';
+import { PerksPanel } from './Perks';
+import { ApplyKit } from './ApplyKit';
+import { LikeButton } from './LikeButton';
 
 /** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
 const MAX_TEXT = 12_000;
@@ -66,6 +69,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
             {offer.easyApply && <> · <Emoji name="eclair" /> Candidature simplifiée</>}</p>
         </div>
         <div className="title-row__actions">
+          {offer.taste && <LikeButton item={offer.taste} className="like--big" />}
           <button type="button" className="ui-btn ui-btn--primary" onClick={() => decode()} disabled={state.status === 'loading'}>
             {state.status === 'loading' ? 'Décodage en cours…' : 'Décoder cette offre'}
           </button>
@@ -80,8 +84,11 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         place={offer.city}
         rhythm={null}
         contract={offer.contract}
+        lean={offer.lean ?? null}
       />
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
+      <PerksPanel perks={offer.perks ?? []} />
+      {!offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
       <PayPanel
         announcedCents={offer.salaryCents}
         announcedMaxCents={offer.salaryMaxCents ?? null}
@@ -89,6 +96,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         company={offer.company}
         sourceLabel={offer.sourceLabel}
         offerContract={offer.contractKind ?? null}
+        lean={offer.lean ?? null}
       />
       {state.status === 'idle' && (
         <div className="decode-pitch">

@@ -8,6 +8,7 @@ import type { PublicAccount } from '@/lib/account/http';
 import { maskPhone } from '@/lib/account/phone';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { SIGNED_IN_EVENT } from './AccountSync';
+import { CandidateFile } from './CandidateFile';
 
 const LEVEL_SHORT: Record<number, string> = { 3: 'CAP', 4: 'Bac', 5: 'Bac+2', 6: 'Bac+3', 7: 'Bac+5' };
 
@@ -197,6 +198,8 @@ function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boo
     <div className="acct-box">
       <h1 className="acct-title">Ton compte</h1>
       <p className="acct-sub">{account.email}</p>
+
+      <CandidateFile account={account} onChange={onChange} />
 
       <section className="acct-group" aria-labelledby="alerts-title">
         <h2 id="alerts-title">Alertes nouvelles offres</h2>

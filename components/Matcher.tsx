@@ -7,6 +7,7 @@ import type { CvGuess } from '@/lib/cv/extract';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { savePlace } from '@/lib/place';
 import { DOMAINS } from '@/lib/domains';
+import { CV_ACCEPT } from '@/lib/cv/accept';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 
 const OPEN_EVENT = 'decode:match';
@@ -121,13 +122,13 @@ export function Matcher() {
               <label className={`matcher__choice matcher__choice--cv${cv.status === 'reading' ? ' is-busy' : ''}`}>
                 <input
                   type="file"
-                  accept="application/pdf,.pdf"
+                  accept={CV_ACCEPT}
                   className="sr-only"
                   disabled={cv.status === 'reading'}
                   onChange={(e) => e.target.files?.[0] && readCv(e.target.files[0])}
                 />
                 <span className="matcher__choice-title">{cv.status === 'reading' ? 'Lecture du CV…' : 'Importer mon CV'}</span>
-                <span className="matcher__choice-sub">PDF, 5 Mo max. Lu puis oublié.</span>
+                <span className="matcher__choice-sub">PDF, Word, photo… 5 Mo max. Lu puis oublié.</span>
               </label>
               <button type="button" className="matcher__choice" onClick={() => setStep('job')} autoFocus>
                 <span className="matcher__choice-title">4 questions</span>
