@@ -4527,3 +4527,147 @@ label {
     transform: none;
   }
 }
+
+/* ==========================================================================
+   Sobre : fond clair, une seule couleur pour agir (le vert sapin), le citron
+   réservé au logo et aux pépites. Plus d'aplats sombres au milieu des pages.
+   ========================================================================== */
+
+.hero2 {
+  background: var(--bg);
+  color: var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+
+.hero2__lead,
+.hero2__alt {
+  color: var(--muted);
+}
+
+.hero2__search {
+  border: 1px solid var(--control);
+  box-shadow: 0 12px 32px -20px rgb(15 31 26 / 0.35);
+}
+
+.hero2__search:focus-within {
+  border-color: var(--brand);
+  box-shadow:
+    0 0 0 3px rgb(11 107 75 / 0.18),
+    0 12px 32px -20px rgb(15 31 26 / 0.35);
+}
+
+.hero2__go {
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 700;
+}
+
+.hero2__go:hover {
+  background: var(--brand-dark);
+}
+
+.hero2__match {
+  color: var(--brand);
+}
+
+.hero2__domains a {
+  border-color: var(--control);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.hero2__domains a:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+@media (min-width: 960px) {
+  .hero2__photo {
+    min-height: 0;
+    margin: 40px max(var(--margin), calc((100vw - var(--max)) / 2)) 40px 0;
+    border-radius: 16px;
+  }
+}
+
+/* « Tu cherches où ? » : une carte claire, plus un bandeau noir. */
+.locate {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.locate__text {
+  color: var(--muted);
+}
+
+.locate .btn {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.locate .link {
+  color: var(--ink);
+}
+
+.locate__select select {
+  border-color: var(--control);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.offers__swipe {
+  border: 1px solid var(--control);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.offers__swipe:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+/* La pépite reste repérable sans tout repeindre : un liseré et son étiquette. */
+.orow.is-pepite,
+.orow.is-pepite:hover {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .orow.is-pepite:hover {
+    border-color: var(--control);
+    box-shadow:
+      inset 4px 0 0 var(--accent),
+      0 10px 28px -14px rgb(15 31 26 / 30%);
+  }
+}
+
+.step__num {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.home > .locate {
+  margin: 16px max(var(--margin), calc((100% - var(--max)) / 2));
+}
+
+.osearch__go {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.osearch__go:hover {
+  background: var(--brand-dark);
+}
+
+.osearch__bar {
+  border: 1px solid var(--control);
+  box-shadow: 0 12px 32px -22px rgb(15 31 26 / 0.35);
+}
+
+.osearch__bar:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgb(11 107 75 / 0.18);
+}
