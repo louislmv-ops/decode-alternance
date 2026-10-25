@@ -2,26 +2,26 @@
 
 /* ==========================================================================
    Décode : tokens
-   Direction « plateforme claire » : un fond blanc, un vert sapin pour agir, un vert citron
-   pour surligner ce qui compte, et quatre aplats pastel pour ranger les domaines et les outils.
+   Direction « plateforme claire » : un fond blanc, un violet électrique pour agir, un jaune
+   soleil pour surligner ce qui compte, et quatre aplats pastel pour ranger les domaines et les outils.
    ========================================================================== */
 
 :root {
   --bg: #ffffff;
   --surface: #f2f4f7;
-  --ink: #0f1f1a;
+  --ink: #15131c;
   --muted: #535d6b;
-  --brand: #0b6b4b;
-  --brand-dark: #07513a;
+  --brand: #7c3aed;
+  --brand-dark: #6d28d9;
   --brand-ink: #ffffff;
-  --accent: #d4f35a;
-  --accent-ink: #0f1f1a;
-  --field-2: #0b6b4b;
+  --accent: #ffd60a;
+  --accent-ink: #15131c;
+  --field-2: #7c3aed;
   --field-2-ink: #ffffff;
 
   /* Aplats pastel : un par domaine ou par outil, jamais pour le texte courant. */
-  --mint: #dff2e7;
-  --sky: #e1ecfd;
+  --mint: #ede9fe;
+  --sky: #dcf3ff;
   --peach: #fde2e8;
   --butter: #fff2bf;
 
@@ -33,12 +33,12 @@
   --notice-ink: #7a4b00;
   --positive: #1f7a4d;
 
-  --tint-1: #07513a;
-  --tint-2: #0b6b4b;
-  --tint-3: #3f8f6c;
-  --tint-4: #b7e04a;
-  --tint-5: #d4f35a;
-  --tint-6: #ebfab0;
+  --tint-1: #5b21b6;
+  --tint-2: #7c3aed;
+  --tint-3: #a78bfa;
+  --tint-4: #f5c400;
+  --tint-5: #ffd60a;
+  --tint-6: #fff4bf;
 
   /* L'appli : un fond gris très clair, neutre, et des cartes blanches. */
   --ground: #f7f8fa;
