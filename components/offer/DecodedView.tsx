@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Perso } from '@/components/Perso';
+import { Emoji } from '@/components/Emoji';
 import { useProfile } from '@/components/useProfile';
 import { useTracker } from '@/components/useTracker';
 import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
@@ -112,7 +112,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
           <h1>{decoded.intitule}</h1>
           <p className="title-row__sub">
             {meta}
-            {offer?.easyApply && <> · <Perso pose="eclair" size="1.6em" className="perso--inline" /> Candidature simplifiée</>}
+            {offer?.easyApply && <> · <Emoji name="eclair" /> Candidature simplifiée</>}
           </p>
         </div>
         <div className="title-row__actions">
