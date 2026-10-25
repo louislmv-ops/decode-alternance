@@ -3783,6 +3783,11 @@ label {
   color: var(--brand);
 }
 
+.emoji {
+  display: inline-block;
+  vertical-align: -0.22em;
+}
+
 .orow__flag {
   padding: 1px 8px;
   border-radius: 999px;

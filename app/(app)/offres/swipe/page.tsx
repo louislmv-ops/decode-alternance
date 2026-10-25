@@ -36,12 +36,13 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       logo: logoSrc(offer),
       company: offer.company ?? 'Entreprise non nommée',
       title: cleanTitle(offer.title),
-      facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt), offer.easyApply ? '⚡ Candidature simplifiée' : null]
+      facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt)]
         .filter((x): x is string => Boolean(x))
         .join(' · '),
       tier: h.tier,
       payHint: payEstimateHint(h.estimate, PAY_TIER_LABELS[h.tier]),
       pepite: h.pepite,
+      easyApply: Boolean(offer.easyApply),
     }));
   const next = new URLSearchParams(Object.entries(params).flatMap(([k, v]) => (typeof v === 'string' && k !== 'page' ? [[k, v]] : [])));
   const page = result?.page ?? 1;

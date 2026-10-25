@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Emoji } from '@/components/Emoji';
 import { useTracker } from '@/components/useTracker';
 import type { PayTier } from '@/lib/offers/pay-tier';
 import { CompanyLogo } from './CompanyLogo';
@@ -14,6 +15,7 @@ export interface SwipeCard {
   company: string;
   title: string;
   facts: string;
+  easyApply: boolean;
   tier: PayTier;
   /** D'où vient la note : annonce, alternants de l'entreprise ou minimum légal. */
   payHint: string;
@@ -133,10 +135,13 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <CompanyLogo key={card.id} src={card.logo} name={card.company} size={56} />
           <p className="orow__company">
             <span>{card.company}</span>
-            {card.pepite && <span className="orow__flag">🔥 Pépite</span>}
+            {card.pepite && <span className="orow__flag"><Emoji name="feu" /> Pépite</span>}
           </p>
           <h1 className="swipe__title">{card.title}</h1>
-          <p className="orow__meta">{card.facts}</p>
+          <p className="orow__meta">
+            {card.facts}
+            {card.easyApply && <> · <Emoji name="eclair" /> Candidature simplifiée</>}
+          </p>
           <div className="swipe__pay">
             <PayEuros tier={card.tier} size="large" hint={card.payHint} />
             <span className="orow__sub">{card.payHint}</span>
@@ -149,10 +154,10 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
 
       <div className="swipe__actions">
         <button type="button" className="swipe__btn swipe__btn--pass" onClick={() => decide('left')} aria-label="Je passe">
-          ✕
+          <Emoji name="croix" size="30px" />
         </button>
         <button type="button" className="swipe__btn swipe__btn--keep" onClick={() => decide('right')} aria-label="Je garde, dans mon suivi">
-          ♥
+          <Emoji name="coeur" size="30px" />
         </button>
       </div>
       <p className="swipe__hint">Glisse à droite pour garder dans ton suivi, à gauche pour passer. Flèches du clavier aussi.</p>

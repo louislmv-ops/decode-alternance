@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Emoji } from '@/components/Emoji';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
@@ -26,7 +27,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
       <div className="orow__body">
         <p className="orow__company">
           <span>{offer.company ?? 'Entreprise non nommée'}</span>
-          {h.pepite && <span className="orow__flag">🔥 Pépite</span>}
+          {h.pepite && <span className="orow__flag"><Emoji name="feu" /> Pépite</span>}
           <MatchBadge offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
         </p>
         <Link href={offerHref(offer)} className="orow__title">
@@ -35,7 +36,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
         <p className="orow__meta">
           {isNew(offer.publishedAt) && <span className="orow__new">Nouveau</span>}
           {[place, CONTRACT_LABELS[offer.contract], offer.direct ? 'Direct entreprise' : null, relativeDays(offer.publishedAt)].filter(Boolean).join(' · ')}
-          {offer.easyApply && <span className="orow__easy"> · ⚡ Candidature simplifiée</span>}
+          {offer.easyApply && <span className="orow__easy"> · <Emoji name="eclair" /> Candidature simplifiée</span>}
         </p>
         {(h.schoolBait || h.pay?.verdict === 'sous-le-minimum') && (
           <p className="orow__alerts">
@@ -46,7 +47,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
       </div>
       <div className="orow__pay">
         <span className="orow__tier">
-          {h.tier === 3 && h.estimate.source === 'annonce' && <span aria-hidden="true">💸</span>}
+          {h.tier === 3 && h.estimate.source === 'annonce' && <Emoji name="billets" />}
           <PayEuros tier={h.tier} hint={payEstimateHint(h.estimate, PAY_TIER_LABELS[h.tier])} />
         </span>
       </div>

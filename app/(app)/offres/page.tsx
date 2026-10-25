@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
+import { Emoji } from '@/components/Emoji';
 import { AutoSubmit } from '@/components/offer/AutoSubmit';
 import { ForYou } from '@/components/offer/ForYou';
 import { LocationPrompt } from '@/components/offer/LocationPrompt';
@@ -115,7 +116,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           </label>
           <label className="chip chip--check">
             <input type="checkbox" name="simple" value="1" defaultChecked={filters.easyApply} />
-            <span>⚡ Candidature simplifiée</span>
+            <span><Emoji name="eclair" /> Candidature simplifiée</span>
           </label>
           <MoreFilters filters={filters} count={more} />
           {anyFilter && (
