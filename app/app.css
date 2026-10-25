@@ -4552,7 +4552,7 @@ label {
 .hero2__search:focus-within {
   border-color: var(--brand);
   box-shadow:
-    0 0 0 3px rgb(11 107 75 / 0.18),
+    0 0 0 3px rgb(124 58 237 / 0.22),
     0 12px 32px -20px rgb(15 31 26 / 0.35);
 }
 
@@ -4669,7 +4669,7 @@ label {
 
 .osearch__bar:focus-within {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgb(11 107 75 / 0.18);
+  box-shadow: 0 0 0 3px rgb(124 58 237 / 0.22);
 }
 
 /* ==========================================================================
@@ -4868,4 +4868,53 @@ label {
   .decoder__mascotte {
     display: none;
   }
+}
+
+/* ==========================================================================
+   Violet électrique pour agir (boutons pleins, texte blanc), jaune soleil pour
+   le logo et les pépites. Deux couleurs, pas plus ; le fond reste clair.
+   ========================================================================== */
+
+.btn,
+.hero2__go,
+.osearch__go,
+.locate .btn,
+.ui-btn--primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+
+.btn:hover,
+.hero2__go:hover,
+.osearch__go:hover,
+.locate .btn:hover,
+.ui-btn--primary:hover {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+
+.site-footer {
+  background: var(--ink);
+}
+
+.site-footer__note,
+.site-footer__last {
+  color: rgb(255 255 255 / 0.78);
+}
+
+.orow__new {
+  background: var(--mint);
+  color: var(--tint-1);
+}
+
+.orow.is-pepite,
+.orow.is-pepite:hover {
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.btn.btn--accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
