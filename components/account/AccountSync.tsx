@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { replaceApplications, useTracker } from '@/components/useTracker';
+import { mergeLikes, useLikesStore } from '@/components/useLikes';
 import { saveProfile, useProfile } from '@/components/useProfile';
 import type { PublicAccount } from '@/lib/account/http';
 import { sanitizeProfile } from '@/lib/profile';
@@ -22,6 +23,7 @@ function signedIn(): boolean {
 export function pullAccount(account: PublicAccount) {
   const remoteProfile = account.profile ? sanitizeProfile(account.profile) : null;
   if (remoteProfile?.filled) saveProfile(remoteProfile);
+  if (account.likes) mergeLikes(account.likes);
   const remote = sanitizeApplications(account.tracker ?? []);
   if (remote.length > 0) {
     let local: unknown = [];
@@ -40,6 +42,7 @@ export function pullAccount(account: PublicAccount) {
 export function AccountSync() {
   const [profile] = useProfile();
   const { apps } = useTracker();
+  const likes = useLikesStore();
   // On n'envoie rien tant que le compte n'a pas été relu : sinon l'appareil écraserait le compte.
   const [pulled, setPulled] = useState(false);
   const timer = useRef<number | null>(null);
@@ -67,13 +70,13 @@ export function AccountSync() {
       fetch('/api/compte', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile.filled ? { profile, tracker: apps } : { tracker: apps }),
+        body: JSON.stringify(profile.filled ? { profile, tracker: apps, likes } : { tracker: apps, likes }),
       }).catch(() => {});
     }, 1500);
     return () => {
       if (timer.current) window.clearTimeout(timer.current);
     };
-  }, [pulled, profile, apps]);
+  }, [pulled, profile, apps, likes]);
 
   return null;
 }

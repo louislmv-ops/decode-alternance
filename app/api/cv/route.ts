@@ -1,39 +1,39 @@
-import { extractText, getDocumentProxy } from 'unpdf';
 import { isClaudeConfigured } from '@/lib/decode/claude';
 import { readCvWithClaude } from '@/lib/cv/claude';
 import { guessFromCv } from '@/lib/cv/extract';
+import { readCv } from '@/lib/cv/read';
 import { allow, clientKey } from '@/lib/rate-limit';
 
 export const maxDuration = 60;
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
-/** Lit un CV (PDF ou texte) et renvoie le métier, le lieu, le niveau et l'âge devinés. Le fichier n'est pas gardé. */
+/** Lit un CV (PDF, Word, OpenDocument, RTF, texte ou photo) et renvoie le métier, le lieu, le niveau et l'âge devinés. Le fichier n'est pas gardé. */
 export async function POST(request: Request) {
   if (!allow(clientKey(request), 20, 3_600_000)) {
     return Response.json({ error: 'Trop de CV envoyés cette heure-ci. Réessaie plus tard.' }, { status: 429 });
   }
   const form = await request.formData().catch(() => null);
   const file = form?.get('cv');
-  if (!(file instanceof File)) return Response.json({ error: 'Ajoute ton CV en PDF.' }, { status: 400 });
+  if (!(file instanceof File)) return Response.json({ error: 'Ajoute ton CV.' }, { status: 400 });
   if (file.size > MAX_BYTES) return Response.json({ error: 'Ton CV dépasse 5 Mo.' }, { status: 413 });
 
-  let text = '';
-  try {
-    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-      const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
-      text = (await extractText(pdf, { mergePages: true })).text;
-    } else if (file.type.startsWith('text/')) {
-      text = await file.text();
-    } else {
-      return Response.json({ error: 'Envoie ton CV en PDF.' }, { status: 415 });
+  const content = await readCv(file);
+  if (content.kind === 'error') return Response.json({ error: content.message }, { status: 415 });
+  if (content.kind === 'image') {
+    // Une photo se lit seulement avec Claude, qui ne s'entraîne pas sur les données : jamais avec une IA gratuite.
+    if (!isClaudeConfigured()) return Response.json({ error: 'Les photos de CV ne sont pas encore lues ici. Envoie-le en PDF ou en Word.' }, { status: 415 });
+    try {
+      return Response.json({ guess: await readCvWithClaude(content), by: 'ia' });
+    } catch (error) {
+      console.error(error);
+      return Response.json({ error: 'Impossible de lire cette photo. Envoie ton CV en PDF ou en Word.' }, { status: 422 });
     }
-  } catch {
-    return Response.json({ error: 'Impossible de lire ce PDF. Réponds plutôt aux questions.' }, { status: 422 });
   }
+  const text = content.text;
 
   if (text.trim().length < 80) {
-    return Response.json({ error: 'Ce PDF ne contient pas de texte lisible (CV en image ?). Réponds plutôt aux questions.' }, { status: 422 });
+    return Response.json({ error: 'Ce fichier ne contient pas de texte lisible (CV en image ?). Envoie-le en PDF ou en Word, ou réponds aux questions.' }, { status: 422 });
   }
 
   // Un CV contient des données personnelles : seulement avec Claude, jamais avec un palier gratuit.

@@ -58,6 +58,22 @@ function subscribe(listener: () => void) {
   };
 }
 
+/** Les likes du compte, réunis avec ceux de l'appareil (sans doublon). */
+export function mergeLikes(remote: unknown) {
+  const r = remote && typeof remote === 'object' ? (remote as Partial<Store>) : {};
+  const s = read();
+  const ids = new Set(s.likes.map((l) => l.id));
+  const passIds = new Set(s.passes.map((p) => p.id));
+  const likes = [...s.likes, ...(Array.isArray(r.likes) ? r.likes : []).filter((l) => l && typeof l.id === 'string' && !ids.has(l.id))];
+  const passes = [...s.passes, ...(Array.isArray(r.passes) ? r.passes : []).filter((p) => p && typeof p.id === 'string' && !passIds.has(p.id))].slice(0, MAX_PASSES);
+  write({ likes, passes });
+}
+
+/** Les likes et offres passées, tels qu'on les recopie sur le compte. */
+export function useLikesStore(): Store {
+  return useSyncExternalStore(subscribe, read, () => EMPTY);
+}
+
 export function useLikes() {
   const store = useSyncExternalStore(subscribe, read, () => EMPTY);
   const isLiked = useCallback((id: string) => store.likes.some((l) => l.id === id), [store]);

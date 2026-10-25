@@ -12,6 +12,7 @@ import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
 import { PayPanel } from './PayPanel';
 import { PerksPanel } from './Perks';
+import { ApplyKit } from './ApplyKit';
 import { LikeButton } from './LikeButton';
 
 /** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
@@ -87,6 +88,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       />
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
       <PerksPanel perks={offer.perks ?? []} />
+      {!offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
       <PayPanel
         announcedCents={offer.salaryCents}
         announcedMaxCents={offer.salaryMaxCents ?? null}

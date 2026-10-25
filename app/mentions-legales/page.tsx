@@ -53,8 +53,15 @@ export default function LegalPage() {
 
         <h2 id="donnees">Données personnelles</h2>
         <p>
-          Ton profil et ton suivi de candidatures sont enregistrés dans ton navigateur (stockage local) et ne sont pas envoyés à
-          Décode. Un cookie technique garde ton âge, ton année et ton type de contrat pour afficher les salaires comparés à ton minimum.
+          Sans compte, ton profil, ton suivi de candidatures et tes likes sont enregistrés dans ton navigateur (stockage local) et ne
+          sont pas envoyés à Décode. Un cookie technique garde ton âge, ton année et ton type de contrat pour afficher les salaires
+          comparés à ton minimum.
+        </p>
+        <p>
+          Avec un compte, Décode garde sur ses serveurs ton adresse e-mail, ton profil, ton suivi, tes likes et, si tu les ajoutes,
+          ton dossier de candidature (coordonnées, pitch) et ton CV, pour les retrouver sur tous tes appareils et préparer tes
+          candidatures. Ils ne sont ni vendus ni transmis à des recruteurs : c’est toi qui postules, sur le site de l’offre. Tu peux
+          supprimer ton CV ou tout ton compte à tout moment depuis la page Mon compte : tout est effacé.
         </p>
         <p>
           Quand tu fais traduire une offre, son texte est envoyé à notre fournisseur d’intelligence artificielle ({aiProvider()}) pour

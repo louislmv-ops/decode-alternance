@@ -36,6 +36,8 @@ export function publicAccount(a: Account) {
     savedSearch: a.savedSearch,
     profile: a.profile,
     tracker: a.tracker,
+    candidate: a.candidate,
+    likes: a.likes,
   };
 }
 

@@ -6630,3 +6630,112 @@ a:hover .wordmark__mascotte,
     grid-row: 2;
   }
 }
+
+/* ---------- Dossier de candidature et kit « Postule en 2 clics » ---------- */
+.acct-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cand__cv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cand__file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+.cand__file span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cand__upload {
+  cursor: pointer;
+}
+
+.cand__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.cand__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cand__field--wide,
+.cand__actions {
+  grid-column: 1 / -1;
+}
+
+.cand__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .cand__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.apply-kit__steps {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.apply-kit__steps > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.apply-kit__n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-top: 8px;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.apply-kit__msg > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.apply-kit__msg textarea {
+  width: 100%;
+  font-size: 14px;
+}
+
+.apply-kit--pitch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: linear-gradient(135deg, #f5f0ff 0%, #fff 70%);
+}

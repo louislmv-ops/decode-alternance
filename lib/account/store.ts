@@ -3,8 +3,8 @@ import { z } from 'zod/v4';
 import { db, isDatabaseConfigured } from '@/lib/offers/store';
 import { isEmailConfigured } from './senders';
 
-// Les comptes : une adresse e-mail, des préférences d'alerte, et une copie du profil et du suivi
-// pour les retrouver sur un autre appareil. Connexion par code à 6 chiffres, sans mot de passe.
+// Les comptes : une adresse e-mail, des préférences d'alerte, une copie du profil, du suivi et des likes
+// pour les retrouver sur un autre appareil, et le dossier de candidature (coordonnées, pitch, CV) pour postuler vite. Connexion par code à 6 chiffres, sans mot de passe.
 
 export const SESSION_COOKIE = 'decode_session';
 /** Cookie lisible par la page, seulement pour savoir qu'on est connecté. */
@@ -38,6 +38,19 @@ export function ensureSchema(): Promise<void> {
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     )`;
+    // Ajouts : le dossier de candidature et les likes.
+    await s`alter table accounts add column if not exists candidate jsonb`;
+    await s`alter table accounts add column if not exists likes jsonb`;
+    // Le CV à part : un fichier de quelques Mo n'a rien à faire dans chaque lecture du compte.
+    await s`create table if not exists account_cvs (
+      account_id uuid primary key references accounts(id) on delete cascade,
+      name text not null,
+      type text not null,
+      size int not null,
+      data bytea not null,
+      text text,
+      updated_at timestamptz not null default now()
+    )`;
     await s`create table if not exists login_codes (
       target text primary key,
       code_hash text not null,
@@ -67,6 +80,54 @@ export const SavedSearch = z.object({
 });
 export type SavedSearch = z.infer<typeof SavedSearch>;
 
+/** Le dossier de candidature : ce qu'on recopie à chaque candidature. Tout est facultatif. */
+export const Candidate = z.object({
+  firstName: z.string().trim().max(60).optional(),
+  lastName: z.string().trim().max(60).optional(),
+  phone: z.string().trim().max(30).optional(),
+  city: z.string().trim().max(80).optional(),
+  school: z.string().trim().max(120).optional(),
+  linkedin: z.string().trim().max(200).optional(),
+  portfolio: z.string().trim().max(200).optional(),
+  available: z.string().trim().max(80).optional(),
+  pitch: z.string().trim().max(600).optional(),
+});
+export type Candidate = z.infer<typeof Candidate>;
+
+export interface CvMeta {
+  name: string;
+  type: string;
+  size: number;
+  updatedAt: string;
+}
+
+export async function saveCv(accountId: string, cv: { name: string; type: string; data: Uint8Array; text: string | null }): Promise<CvMeta> {
+  await ensureSchema();
+  const [row] = await db()<{ updated_at: Date }[]>`insert into account_cvs (account_id, name, type, size, data, text)
+    values (${accountId}, ${cv.name}, ${cv.type}, ${cv.data.byteLength}, ${Buffer.from(cv.data)}, ${cv.text})
+    on conflict (account_id) do update set name = excluded.name, type = excluded.type, size = excluded.size,
+      data = excluded.data, text = excluded.text, updated_at = now()
+    returning updated_at`;
+  return { name: cv.name, type: cv.type, size: cv.data.byteLength, updatedAt: row!.updated_at.toISOString() };
+}
+
+export async function cvMeta(accountId: string): Promise<CvMeta | null> {
+  await ensureSchema();
+  const [row] = await db()<{ name: string; type: string; size: number; updated_at: Date }[]>`select name, type, size, updated_at from account_cvs where account_id = ${accountId}`;
+  return row ? { name: row.name, type: row.type, size: row.size, updatedAt: row.updated_at.toISOString() } : null;
+}
+
+export async function cvFile(accountId: string): Promise<{ name: string; type: string; data: Buffer } | null> {
+  await ensureSchema();
+  const [row] = await db()<{ name: string; type: string; data: Buffer }[]>`select name, type, data from account_cvs where account_id = ${accountId}`;
+  return row ?? null;
+}
+
+export async function deleteCv(accountId: string): Promise<void> {
+  await ensureSchema();
+  await db()`delete from account_cvs where account_id = ${accountId}`;
+}
+
 export interface Account {
   id: string;
   email: string;
@@ -78,6 +139,8 @@ export interface Account {
   savedSearch: SavedSearch;
   profile: unknown;
   tracker: unknown;
+  candidate: Candidate;
+  likes: unknown;
 }
 
 interface AccountRow {
@@ -91,6 +154,8 @@ interface AccountRow {
   saved_search: SavedSearch;
   profile: unknown;
   tracker: unknown;
+  candidate: Candidate | null;
+  likes: unknown;
   last_alert_at: Date | null;
 }
 
@@ -106,6 +171,8 @@ function toAccount(r: AccountRow): Account {
     savedSearch: r.saved_search ?? {},
     profile: r.profile,
     tracker: r.tracker,
+    candidate: Candidate.catch({}).parse(r.candidate ?? {}),
+    likes: r.likes,
   };
 }
 
@@ -168,6 +235,8 @@ export interface AccountPatch {
   savedSearch?: SavedSearch;
   profile?: unknown;
   tracker?: unknown;
+  candidate?: Candidate;
+  likes?: unknown;
 }
 
 export async function updateAccount(id: string, patch: AccountPatch): Promise<Account> {
@@ -179,6 +248,8 @@ export async function updateAccount(id: string, patch: AccountPatch): Promise<Ac
       saved_search = coalesce(${patch.savedSearch ? s.json(patch.savedSearch) : null}, saved_search),
       profile = coalesce(${patch.profile !== undefined ? s.json(patch.profile as never) : null}, profile),
       tracker = coalesce(${patch.tracker !== undefined ? s.json(patch.tracker as never) : null}, tracker),
+      candidate = coalesce(${patch.candidate !== undefined ? s.json(patch.candidate as never) : null}, candidate),
+      likes = coalesce(${patch.likes !== undefined ? s.json(patch.likes as never) : null}, likes),
       updated_at = now()
     where id = ${id} returning *`;
   return toAccount(row!);

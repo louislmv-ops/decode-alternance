@@ -3,6 +3,7 @@
 import type { PayLean } from '@/lib/offers/pay-signals';
 import { mergePerks } from '@/lib/offers/perks';
 import { PerksPanel } from './Perks';
+import { ApplyKit } from './ApplyKit';
 import { LikeButton } from './LikeButton';
 import type { TasteItem } from '@/lib/taste';
 import Link from 'next/link';
@@ -171,6 +172,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
       />
       {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
       <PerksPanel perks={mergePerks(decoded.salaire.avantages, offer?.perks ?? [])} />
+      {offer && !offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
 
       <div className="detail">
         <div className="detail__main">
