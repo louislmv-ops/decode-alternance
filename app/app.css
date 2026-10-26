@@ -7361,3 +7361,281 @@ a:hover .wordmark__o,
 .nudge__close:hover {
   background: rgb(0 0 0 / 0.05);
 }
+
+/* ==========================================================================
+   Décode assis sur le titre : entier, posé sur les lettres, sans coupure.
+   ========================================================================== */
+
+.hero2__peek {
+  top: auto;
+  bottom: calc(100% - 0.86em);
+  left: auto;
+  right: 1.15em;
+  width: 0.8em;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  z-index: 1;
+}
+
+.hero2__peek-in {
+  height: auto;
+  aspect-ratio: 320 / 268;
+  transform-origin: 50% 100%;
+}
+
+.hero2__peek img {
+  object-position: bottom center;
+  filter: drop-shadow(0 0.04em 0.03em rgb(46 16 101 / 0.18));
+}
+
+/* Sur téléphone : assis sur « ton ». */
+@media (max-width: 760px) {
+  .hero2__peek--m {
+    top: auto;
+    bottom: calc(100% - 0.34em);
+    left: auto;
+    right: 0.12em;
+    margin: 0;
+    width: 0.74em;
+  }
+}
+
+/* Il se pose : descend de quelques pixels en apparaissant, s'écrase à peine au contact. */
+@keyframes peek-sit {
+  0% {
+    opacity: 0;
+    transform: translateY(-28%) scale(0.96, 1.04);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05, 0.95);
+  }
+  80% {
+    transform: translateY(-3%) scale(0.98, 1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes peek-breathe {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: scale(1.025, 0.975);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero2__peek-in {
+    animation:
+      peek-sit 900ms var(--ease-out) 450ms backwards,
+      peek-breathe 4.2s ease-in-out 1.6s infinite;
+  }
+}
+
+.raw-text__src {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+/* Puces à emoji : courtes, une idée par ligne. Les emojis sont du texte : Apple sur iPhone et Mac. */
+.ebullets {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ebullets li {
+  display: grid;
+  grid-template-columns: 1.6em minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.ebullets__e {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  font-size: 1.15em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.panel--lead .ebullets li {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+/* ==========================================================================
+   Verre liquide (skill liquid-glass, transposé de SwiftUI au web).
+   Règles : le verre est réservé aux commandes et à la navigation, jamais au contenu ;
+   formes en capsule ; arrondis concentriques (bouton intérieur = conteneur moins le retrait) ;
+   le verre réagit au toucher (léger enfoncement, reflet qui s'allume).
+   ========================================================================== */
+
+:root {
+  --lg-edge: rgb(255 255 255 / 0.78);
+  --lg-fill: rgb(255 255 255 / 0.58);
+  --lg-blur: blur(18px) saturate(185%);
+  --lg-spec: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -1px 0 rgb(46 16 101 / 0.05);
+  --lg-lift: 0 1px 2px rgb(46 16 101 / 0.06), 0 10px 24px -14px rgb(46 16 101 / 0.32);
+  --lg-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Le contenu reste du contenu : cartes pleines, sans flou. */
+.panel,
+.orow,
+.foryou-likes__item,
+.likes-list__item {
+  background: var(--card);
+}
+
+/* Bouton en verre (équivalent de .buttonStyle(.glass)). */
+.ui-btn:not(.ui-btn--primary):not(.ui-btn--ghost) {
+  background: var(--lg-fill);
+  border: 1px solid var(--lg-edge);
+  border-radius: 999px;
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  box-shadow: var(--lg-spec), var(--lg-lift);
+}
+
+/* Bouton en verre teinté (équivalent de .buttonStyle(.glassProminent)) : la teinte violette,
+   un reflet en haut, une ombre colorée dessous. */
+.btn:not(.btn--accent):not(.btn--light),
+.ui-btn--primary,
+.hero2__go,
+.osearch__go {
+  position: relative;
+  border: 0;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.3) 0%, rgb(255 255 255 / 0.06) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #8f55f7 0%, #7c3aed 60%, #6d28d9 100%);
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 8px rgb(46 16 101 / 0.25),
+    0 1px 2px rgb(46 16 101 / 0.2),
+    0 12px 26px -12px rgb(124 58 237 / 0.7);
+}
+
+.btn:not(.btn--accent):not(.btn--light):hover,
+.ui-btn--primary:hover,
+.hero2__go:hover,
+.osearch__go:hover {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.36) 0%, rgb(255 255 255 / 0.08) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #9a66f8 0%, #8143ef 60%, #7130dc 100%);
+}
+
+/* Le toucher : le verre s'enfonce un peu puis rebondit, le reflet s'allume. */
+.btn,
+.ui-btn,
+.hero2__go,
+.osearch__go,
+.chip,
+.like,
+.swipe__btn {
+  transition:
+    transform 260ms var(--lg-spring),
+    box-shadow 200ms var(--ease-out),
+    background 200ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active,
+.ui-btn:active:not([disabled]),
+.hero2__go:active,
+.osearch__go:active,
+.chip:active,
+.swipe__btn:active {
+  transform: scale(0.95);
+  transition-duration: 90ms;
+}
+
+.ui-btn:not(.ui-btn--primary):not(.ui-btn--ghost):active:not([disabled]) {
+  background: rgb(255 255 255 / 0.8);
+}
+
+/* Barres de recherche : une capsule, le bouton dedans avec le même arrondi, en retrait égal. */
+.osearch__bar {
+  padding: 5px;
+  border-radius: 999px;
+  align-items: center;
+  overflow: visible;
+  background: rgb(255 255 255 / 0.72);
+  border: 1px solid var(--lg-edge);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  box-shadow: var(--lg-spec), 0 0 0 0.5px rgb(46 16 101 / 0.12), var(--lg-lift);
+}
+
+.osearch__field {
+  height: 44px;
+  padding-left: 14px;
+}
+
+.osearch__go {
+  align-self: stretch;
+  height: auto;
+  min-height: 44px;
+  padding: 0 22px;
+}
+
+@media (min-width: 761px) {
+  .hero2__search {
+    padding: 6px;
+    border-radius: 999px;
+    align-items: stretch;
+  }
+  .hero2__field {
+    padding: 8px 22px;
+  }
+  .hero2__go {
+    border-radius: 999px;
+    padding: 0 30px;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero2__search {
+    padding: 6px;
+    border-radius: 26px;
+  }
+  .hero2__go {
+    border-radius: 20px;
+    min-height: 50px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ui-btn:not(.ui-btn--primary):not(.ui-btn--ghost),
+  .osearch__bar,
+  .hero2__search,
+  .tabbar,
+  .topbar {
+    background: var(--card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .ui-btn:active:not([disabled]),
+  .hero2__go:active,
+  .osearch__go:active,
+  .chip:active,
+  .swipe__btn:active {
+    transform: none;
+  }
+}

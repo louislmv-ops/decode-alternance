@@ -189,6 +189,17 @@ export async function saveDecode(offerId: string, decoded: DecodedOffer, model: 
     on conflict (offer_id) do update set decoded = excluded.decoded, model = excluded.model, created_at = now()`;
 }
 
+/** Les offres récentes à annoncer dans le sitemap : identifiant et date, sans les offres d'écoles. */
+export async function sitemapOffers(limit = 5000): Promise<{ id: string; publishedAt: Date }[]> {
+  const s = db();
+  const rows = await s<{ id: string; published_at: Date }[]>`
+    select id, published_at from offers_unique
+    where cardinality(school_flags) = 0 and source in ('france-travail', 'la-bonne-alternance', 'site-carriere')
+      and published_at > now() - interval '60 days'
+    order by published_at desc limit ${limit}`;
+  return rows.map((r) => ({ id: r.id, publishedAt: r.published_at }));
+}
+
 /** Combien d'offres la collecte a mises en base ; échoue si la table n'existe pas encore. */
 export async function countStoredOffers(source?: OfferSource): Promise<number> {
   const s = db();

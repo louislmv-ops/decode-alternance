@@ -1,4 +1,6 @@
 import type { OfferPage } from '@/lib/offers/types';
+import { JsonLd } from '@/components/JsonLd';
+import { faqJsonLd } from '@/lib/seo';
 
 const SOURCES: Record<OfferPage['mode'], string> = {
   exemples:
@@ -33,6 +35,7 @@ const CARDS = [
 export function Faq({ mode }: { mode: OfferPage['mode'] }) {
   return (
     <section className="faq band" aria-labelledby="faq-title">
+      <JsonLd data={faqJsonLd(CARDS.map((c) => ({ q: c.q, a: c.tab === 'Offres' ? SOURCES[mode] : c.a })))} />
       <h2 id="faq-title" className="section-title" data-reveal>
         Tes questions
       </h2>

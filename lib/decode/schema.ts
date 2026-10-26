@@ -21,7 +21,8 @@ export const DecodedOfferSchema = z.object({
     .array(
       z.object({
         jargon: z.string().nullable().describe('La formule exacte de l’annonce, recopiée, ou null'),
-        enClair: z.string().describe('Ce que ça veut dire concrètement, en une phrase'),
+        enClair: z.string().describe('Ce que ça veut dire concrètement, en une phrase courte'),
+        emoji: z.string().max(16).optional().describe('Un seul emoji qui illustre la mission (ex. 📊, 🤝, 💻)'),
         certitude: Certitude,
       }),
     )
@@ -47,8 +48,8 @@ export const DecodedOfferSchema = z.object({
     maxBrutEuros: z.number().nullable().optional().describe('Borne haute mensuelle brute d’une fourchette ou d’un « jusqu’à », sinon null'),
     avantages: z.array(z.string()),
   }),
-  pointsForts: z.array(z.string()),
-  limites: z.array(z.string()),
+  pointsForts: z.array(z.string()).describe('Chaque point commence par un emoji, puis huit mots au plus'),
+  limites: z.array(z.string()).describe('Chaque point commence par un emoji, puis huit mots au plus'),
   nonPrecise: z.array(z.string()).describe('Informations importantes absentes de l’annonce'),
   questionsAPoser: z.array(z.string()).describe('Trois à cinq questions précises à poser au recruteur'),
   alertes: z
