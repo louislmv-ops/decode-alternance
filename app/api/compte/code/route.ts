@@ -20,7 +20,12 @@ export async function POST(request: Request) {
     await sendEmail(email, `${code} est ton code Décode`, `Ton code de connexion : ${code}\n\nIl est valable 10 minutes. Si tu n'as rien demandé, ignore cet e-mail.`);
   } catch (error) {
     console.error(error);
-    return Response.json({ error: 'L’e-mail n’est pas parti. Réessaie dans un instant.' }, { status: 502 });
+    // 403 : le domaine d'envoi n'est pas encore validé chez Resend.
+    const notReady = /HTTP 403/.test((error as Error).message);
+    return Response.json(
+      { error: notReady ? 'Les comptes ouvrent très bientôt : l’envoi des e-mails est en cours de réglage.' : 'L’e-mail n’est pas parti. Réessaie dans un instant.' },
+      { status: notReady ? 503 : 502 },
+    );
   }
   return Response.json({ ok: true });
 }

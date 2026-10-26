@@ -6,6 +6,7 @@ import { CopyButton } from '@/components/offer/CopyButton';
 import { useProfile } from '@/components/useProfile';
 import { useTracker } from '@/components/useTracker';
 import { TrackerCharts } from './TrackerCharts';
+import { AccountNudge } from '@/components/account/AccountNudge';
 import { formatDate } from '@/lib/format';
 import { followUpMessage } from '@/lib/linkedin';
 import { CHANNELS, daysSince, followUpDate, isFollowUpDue, stats, STATUSES, todayIso, type Application, type Channel, type Status } from '@/lib/tracker';
@@ -40,6 +41,8 @@ export function TrackerView() {
           </p>
         </div>
       </div>
+
+      <AccountNudge />
 
       <div className="tracker">
         <section className="panel tracker__due" aria-labelledby="due-title">
