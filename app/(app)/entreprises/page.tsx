@@ -41,7 +41,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Pr
           </section>
         )}
         <p className="c-note">
-          Ton alternance, ton salaire : cherche ta boîte et partage. Il faut 3 réponses pour qu’une moyenne s’affiche, jamais un chiffre seul.
+          Cherche ta boîte et partage ton salaire. Moyenne affichée dès 3 réponses.
         </p>
       </div>
     </div>

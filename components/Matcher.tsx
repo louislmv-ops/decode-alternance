@@ -151,7 +151,7 @@ export function Matcher() {
             {step === 'job' && (
               <>
                 <h2 id="matcher-title" className="matcher__title">
-                  Tu cherches quoi ?
+                  Tu cherches quoi ?
                 </h2>
                 <input
                   className="matcher__input"
@@ -174,7 +174,7 @@ export function Matcher() {
             {step === 'place' && (
               <>
                 <h2 id="matcher-title" className="matcher__title">
-                  Où ?
+                  Où ?
                 </h2>
                 {cv.status === 'done' && cv.city && <p className="matcher__note">Ton CV dit {cv.city}.</p>}
                 <select className="matcher__input" value={department ?? ''} onChange={(e) => setDepartment(e.target.value || null)}>
@@ -207,7 +207,7 @@ export function Matcher() {
             {step === 'level' && (
               <>
                 <h2 id="matcher-title" className="matcher__title">
-                  Tu prépares quel niveau ?
+                  Tu prépares quel niveau ?
                 </h2>
                 <div className="matcher__chips matcher__chips--big">
                   {LEVELS.map((l) => (
@@ -222,7 +222,7 @@ export function Matcher() {
             {step === 'age' && (
               <>
                 <h2 id="matcher-title" className="matcher__title">
-                  Ton âge ?
+                  Ton âge ?
                 </h2>
                 <p className="matcher__note">Ton salaire minimum en dépend : on le calcule pour chaque offre.</p>
                 <div className="matcher__age">

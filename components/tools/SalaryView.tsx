@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AgeInput } from '@/components/AgeInput';
 import { CopyButton } from '@/components/offer/CopyButton';
 import { useProfile } from '@/components/useProfile';
 import { formatEuros } from '@/lib/format';
@@ -85,17 +86,9 @@ export function SalaryView() {
             </div>
             <div className="ui-field">
               <label className="ui-label" htmlFor="age-input">
-                Ton âge {input.contract === 'apprentissage' ? 'au début du contrat' : 'à la signature'}
+                Ton âge
               </label>
-              <input
-                id="age-input"
-                className="ui-input ui-input--short num"
-                type="number"
-                min={15}
-                max={60}
-                value={input.age}
-                onChange={(e) => set({ age: Math.max(15, Math.min(60, Number(e.target.value) || 15)) })}
-              />
+              <AgeInput id="age-input" value={input.age} onChange={(age) => set({ age })} />
             </div>
             {input.contract === 'apprentissage' ? (
               <div className="ui-field">
@@ -138,7 +131,7 @@ export function SalaryView() {
         <details className="panel fold salary__grid" aria-labelledby="grid-title">
           <summary className="panel__head fold__head">
             <h2 id="grid-title">{input.contract === 'apprentissage' ? 'La grille de l’apprentissage' : 'La grille du contrat pro'}</h2>
-            <span className="panel__meta">en % du SMIC</span>
+            <span className="panel__meta panel__meta--long">en % du SMIC</span>
           </summary>
           {input.contract === 'apprentissage' ? (
             <table className="table">
@@ -229,7 +222,7 @@ export function SalaryView() {
       <details className="panel fold" aria-labelledby="employer-title">
         <summary className="panel__head fold__head">
           <h2 id="employer-title">Ce que tu coûtes à une entreprise</h2>
-          <span className="panel__meta">la 1re année · contrats conclus en 2026</span>
+          <span className="panel__meta panel__meta--long">la 1re année · contrats conclus en 2026</span>
         </summary>
         <p className="panel__lead">L’argument qui fait mouche en candidature spontanée.</p>
         <div className="employer">

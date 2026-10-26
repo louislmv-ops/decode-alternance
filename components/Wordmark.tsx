@@ -1,10 +1,11 @@
-/** La marque : Décode, la mascotte, suivie du mot « décode ». */
+/** La marque : le mot « décode », dont le « o » est Décode, la mascotte. */
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`wordmark ${className}`}>
+    <span className={`wordmark ${className}`} role="img" aria-label="décode">
+      <span aria-hidden="true">déc</span>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="wordmark__mascotte" src="/decode/logo.webp" alt="" aria-hidden="true" width={192} height={192} />
-      décode
+      <img className="wordmark__o" src="/decode/logo-o.webp" alt="" aria-hidden="true" width={256} height={210} />
+      <span aria-hidden="true">de</span>
     </span>
   );
 }

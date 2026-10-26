@@ -7,11 +7,18 @@ const Patch = z.object({
   alertEmail: z.boolean().optional(),
   alertSms: z.boolean().optional(),
   alertFrequency: z.enum(['quotidien', 'hebdo']).optional(),
+  alertMatch: z.boolean().optional(),
   savedSearch: SavedSearch.optional(),
   // Le profil et le suivi sont relus et nettoyés par la page avant usage ; on borne seulement leur taille.
   profile: z.record(z.string(), z.unknown()).optional(),
   tracker: z.array(z.record(z.string(), z.unknown())).max(500).optional(),
-  likes: z.object({ likes: z.array(z.record(z.string(), z.unknown())).max(500), passes: z.array(z.record(z.string(), z.unknown())).max(200) }).optional(),
+  likes: z
+    .object({
+      likes: z.array(z.record(z.string(), z.unknown())).max(500),
+      passes: z.array(z.record(z.string(), z.unknown())).max(200),
+      decoded: z.array(z.record(z.string(), z.unknown())).max(200).optional(),
+    })
+    .optional(),
   candidate: Candidate.optional(),
 });
 

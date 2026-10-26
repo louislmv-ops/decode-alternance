@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { CopyButton } from '@/components/offer/CopyButton';
 import { useProfile } from '@/components/useProfile';
 import { useTracker } from '@/components/useTracker';
+import { TrackerCharts } from './TrackerCharts';
 import { formatDate } from '@/lib/format';
 import { followUpMessage } from '@/lib/linkedin';
 import { CHANNELS, daysSince, followUpDate, isFollowUpDue, stats, STATUSES, todayIso, type Application, type Channel, type Status } from '@/lib/tracker';
@@ -96,30 +97,10 @@ export function TrackerView() {
               <p className="kpi num">{s.answerRate === null ? '–' : `${s.answerRate} %`}</p>
             </div>
           </div>
-          <table className="table table--compact">
-            <thead>
-              <tr>
-                <th scope="col">Canal</th>
-                <th scope="col" className="num">
-                  Envoyées
-                </th>
-                <th scope="col" className="num">
-                  Réponses
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {s.byChannel.map((c) => (
-                <tr key={c.channel}>
-                  <th scope="row">{channelLabel(c.channel)}</th>
-                  <td className="num">{c.sent}</td>
-                  <td className="num">{c.sent === 0 ? '–' : `${c.answered} (${Math.round((c.answered / c.sent) * 100)} %)`}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </section>
       </div>
+
+      <TrackerCharts apps={apps} today={today} />
 
       <section className="panel" aria-labelledby="all-title">
         <div className="panel__head">

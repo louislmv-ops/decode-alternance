@@ -10,22 +10,22 @@ const SOURCES: Record<OfferPage['mode'], string> = {
 const CARDS = [
   {
     tab: 'Garantie',
-    q: 'Décode me trouve-t-il un contrat ?',
+    q: 'Décode me trouve-t-il un contrat ?',
     a: 'Non. Personne ne peut le garantir. Décode t’aide à viser juste.',
   },
   {
     tab: 'Offres',
-    q: 'D’où viennent les offres ?',
+    q: 'D’où viennent les offres ?',
     a: '',
   },
   {
     tab: 'Données',
-    q: 'Qu’est-ce que vous gardez sur moi ?',
+    q: 'Qu’est-ce que vous gardez sur moi ?',
     a: 'Le strict minimum. Ton profil reste sur ton téléphone, sauf si tu crées un compte.',
   },
   {
     tab: 'Prix',
-    q: 'C’est vraiment gratuit ?',
+    q: 'C’est vraiment gratuit ?',
     a: 'Oui. Offres, décodage et alertes. Un Pass optionnel pourra ajouter des extras plus tard.',
   },
 ];

@@ -124,7 +124,7 @@ export function ModerationView() {
                 type="button"
                 className="ui-btn ui-btn--small"
                 onClick={async () => {
-                  if (!window.confirm('Masquer cette campagne ?')) return;
+                  if (!window.confirm('Masquer cette campagne ?')) return;
                   await call(`/api/campagnes/${c.id}`, 'DELETE');
                   setCampaigns((all) => all.filter((x) => x.id !== c.id));
                 }}

@@ -214,6 +214,8 @@ function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boo
             <Link href="/offres">Remplis d’abord tes critères</Link>.
           </p>
         )}
+        <Toggle label="Offres pour toi" checked={account.alertMatch} onChange={(v) => patch({ alertMatch: v })} />
+        <p className="acct-note">Choisies d’après ton profil, tes likes et les offres que tu décodes.</p>
         <Toggle label="Par e-mail" checked={account.alertEmail} onChange={(v) => patch({ alertEmail: v })} />
         {pro?.pro ? (
           <>
@@ -275,7 +277,7 @@ function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boo
           type="button"
           className="acct-link acct-link--danger"
           onClick={async () => {
-            if (!window.confirm('Supprimer ton compte et tout ce qu’il contient ?')) return;
+            if (!window.confirm('Supprimer ton compte et tout ce qu’il contient ?')) return;
             await call('/api/compte', 'DELETE');
             onChange(null);
           }}

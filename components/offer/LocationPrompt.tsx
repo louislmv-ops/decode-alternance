@@ -29,9 +29,9 @@ export function LocationPrompt() {
   return (
     <section className="locate" aria-labelledby="locate-title">
       <p id="locate-title" className="locate__title">
-        Tu cherches où ?
+        Tu cherches où ?
       </p>
-      <p className="locate__text">On te montre d’abord les offres près de chez toi. Tu pourras ajouter d’autres départements.</p>
+      <p className="locate__text">Les offres près de chez toi d’abord.</p>
       <div className="locate__actions">
         <button type="button" className="btn btn--small" onClick={locate} disabled={status.busy}>
           {status.busy ? (

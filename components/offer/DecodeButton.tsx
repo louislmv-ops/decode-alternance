@@ -100,7 +100,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       />
       {state.status === 'idle' && (
         <div className="decode-pitch">
-          <p>Un clic : l’offre résumée en clair, les points forts, les pièges et comment sortir du lot.</p>
+          <p>L’offre en clair, les pièges, comment sortir du lot.</p>
         </div>
       )}
       {state.status === 'error' && (

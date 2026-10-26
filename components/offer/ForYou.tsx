@@ -16,7 +16,7 @@ export function ForYou() {
     return (
       <div className="for-you">
         <p className="for-you__text">
-          <strong>Pas envie de filtrer ?</strong> Ton CV ou 4 questions.
+          <strong>Pas envie de filtrer ?</strong> Ton CV ou 4 questions.
         </p>
         <MatchButton className="btn btn--small">Mes offres</MatchButton>
       </div>

@@ -47,7 +47,7 @@ export function OfferCard({ offer, h, reveal }: { offer: Offer; h: Highlights; r
           <span className="tag">{CONTRACT_LABELS[offer.contract]}</span>
           {offer.direct && <span className="tag">Direct entreprise</span>}
           {h.bigCompany && !h.schoolBait && <span className="pepite">Grande entreprise</span>}
-          {h.schoolBait && <span className="pill pill--alert">Offre d’école ?</span>}
+          {h.schoolBait && <span className="pill pill--alert">Offre d’école ?</span>}
           {h.pay?.verdict === 'sous-le-minimum' && <span className="pill pill--alert">Sous le minimum légal</span>}
         </div>
       </div>

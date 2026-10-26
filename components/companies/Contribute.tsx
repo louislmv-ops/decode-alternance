@@ -40,7 +40,7 @@ export function Contribute({ siren, name }: { siren: string; name: string }) {
   if (!mine) return null;
   return (
     <section className="e-block e-give" aria-labelledby="partager">
-      <h2 id="partager">Tu y es ou tu y as été ?</h2>
+      <h2 id="partager">Tu y es ou tu y as été ?</h2>
       {!mine.signedIn ? (
         <p className="c-cta">
           <span>Partage ton salaire ou ton avis, anonymement.</span>
@@ -135,7 +135,7 @@ function SalaryForm({ siren, done, onDone }: { siren: string; done: number[]; on
         {text('startYear', 'Année de début', { type: 'number', min: year - 3, max: year + 1, inputMode: 'numeric' })}
         {text('department', 'Département', { maxLength: 3, placeholder: '69' })}
       </div>
-      <p className="c-note">Le brut figure en haut de ta fiche de paie. On le compare au minimum légal pour ton âge et ton année.</p>
+      <p className="c-note">Le brut, en haut de ta fiche de paie.</p>
       {msg && <p className="c-note c-note--error" role="alert">{msg.text}</p>}
       <button type="submit" className="btn">
         Envoyer

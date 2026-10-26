@@ -36,7 +36,7 @@ export function CampaignsPanel() {
           }}
         />
       )}
-      {mine?.length === 0 && !form && <p className="c-note">Une campagne regroupe plusieurs postes en alternance avec une date limite. Elle apparaît sur la page Campagnes.</p>}
+      {mine?.length === 0 && !form && <p className="c-note">Plusieurs postes, une date limite. Visible sur la page Campagnes.</p>}
       <ul className="r-campaigns" role="list">
         {mine?.map((c) => (
           <li key={c.id}>

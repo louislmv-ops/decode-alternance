@@ -88,7 +88,7 @@ export function CommunityApp({ open }: { open: boolean }) {
           </div>
 
           {me?.member ? (
-            <Composer placeholder="Une question, un retour d’expérience ?" onPosted={() => load()} />
+            <Composer placeholder="Une question, un retour d’expérience ?" onPosted={() => load()} />
           ) : me?.signedIn ? (
             <JoinForm onJoined={(m) => setMe({ ...me, member: m })} />
           ) : me ? (

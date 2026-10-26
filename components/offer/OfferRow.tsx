@@ -52,7 +52,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
         )}
         {(h.schoolBait || h.pay?.verdict === 'sous-le-minimum') && (
           <p className="orow__alerts">
-            {h.schoolBait && <span className="pill pill--alert">Offre d’école ?</span>}
+            {h.schoolBait && <span className="pill pill--alert">Offre d’école ?</span>}
             {h.pay?.verdict === 'sous-le-minimum' && <span className="pill pill--alert">Sous le minimum légal</span>}
           </p>
         )}

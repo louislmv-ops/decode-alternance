@@ -11,49 +11,49 @@ const AIDES = [
   {
     for: 'Alternance',
     title: 'Mobili-Jeune : une partie de ton loyer',
-    text: 'De 10 à 100 € par mois, si tu as moins de 30 ans et que ton entreprise est du secteur privé non agricole. Fais la demande tôt : il y a un délai à respecter autour du début du contrat.',
+    text: '10 à 100 € par mois si tu as moins de 30 ans. Demande-la tôt : il y a un délai.',
     href: 'https://www.actionlogement.fr',
     source: 'Action Logement',
   },
   {
     for: 'Tous',
     title: 'APL : l’aide au logement de la CAF',
-    text: 'Elle dépend de ton loyer et de tes revenus. Fais la simulation, ça prend cinq minutes.',
+    text: 'Selon ton loyer et tes revenus. Simulation en 5 minutes.',
     href: 'https://www.caf.fr',
     source: 'CAF',
   },
   {
     for: 'Tous',
     title: 'Prime d’activité',
-    text: 'Selon ton salaire, tu peux y avoir droit même en alternance. Simulation sur le site de la CAF.',
+    text: 'Possible même en alternance, selon ton salaire.',
     href: 'https://www.caf.fr',
     source: 'CAF',
   },
   {
     for: 'Apprentissage seulement',
     title: 'Pas d’impôt sur ton salaire',
-    text: 'Ton salaire d’apprenti n’est pas imposable jusqu’au montant annuel du SMIC. Tu le déclares quand même.',
+    text: 'Pas imposable jusqu’au SMIC annuel. À déclarer quand même.',
     href: 'https://www.impots.gouv.fr',
     source: 'impots.gouv.fr',
   },
   {
     for: 'Apprentissage seulement',
     title: 'Permis de conduire',
-    text: 'L’aide nationale de 500 € pour les apprentis a été supprimée par la loi de finances 2026. Restent le permis à 1 € par jour et les aides de ta région.',
+    text: 'L’aide de 500 € n’existe plus en 2026. Reste le permis à 1 € par jour et les aides régionales.',
     href: 'https://www.service-public.fr',
     source: 'Service-public.fr',
   },
   {
     for: 'Apprentissage seulement',
     title: 'Carte d’étudiant des métiers',
-    text: 'En apprentissage, ton CFA te la remet : elle donne accès aux réductions étudiantes (transports, cinéma, restaurants universitaires…).',
+    text: 'Donnée par ton CFA : réductions étudiantes (transports, ciné, resto U).',
     href: 'https://www.service-public.fr',
     source: 'Service-public.fr',
   },
   {
     for: 'Alternance',
     title: 'Les aides de ta région',
-    text: 'Transport, hébergement, premier équipement : chaque région a les siennes. Regarde sur le site de ta région, rubriques alternance et apprentissage.',
+    text: 'Transport, logement, équipement : chaque région a les siennes.',
     href: 'https://www.1jeune1solution.gouv.fr/mes-aides',
     source: '1jeune1solution',
   },
@@ -64,10 +64,7 @@ export default function AidesPage() {
     <div className="screen c-screen">
       <div className="c-main">
         <h1 className="c-charte__title">Tes aides</h1>
-        <p className="c-profile__bio">
-          Ce à quoi tu peux avoir droit en alternance, en plus de ton salaire. L’alternance regroupe deux contrats : l’apprentissage et le contrat de
-          professionnalisation. Certaines aides ne concernent que l’apprentissage.
-        </p>
+        <p className="c-profile__bio">En plus de ton salaire.</p>
         <ol className="c-charte">
           {AIDES.map((a) => (
             <li key={a.title}>
@@ -76,16 +73,15 @@ export default function AidesPage() {
               </strong>
               <span>{a.text}</span>
               <a className="link aides__src" href={a.href} target="_blank" rel="noopener noreferrer">
-                Vérifier sur {a.source}
+                {a.source}
               </a>
             </li>
           ))}
         </ol>
         <p className="c-note">
-          Le simulateur officiel <a href="https://www.1jeune1solution.gouv.fr/mes-aides" target="_blank" rel="noopener noreferrer" className="link">1jeune1solution</a> fait le
-          tour de tes droits en quelques questions. Ton salaire minimum, lui, se calcule <Link href="/salaire">ici</Link>.
+          Tout vérifier d’un coup : <a href="https://www.1jeune1solution.gouv.fr/mes-aides" target="_blank" rel="noopener noreferrer" className="link">1jeune1solution</a>. Ton salaire : <Link href="/salaire">ici</Link>.
         </p>
-        <p className="c-note">Vérifié en octobre 2026. Les montants et les conditions changent : la source officielle fait foi.</p>
+        <p className="c-note">Vérifié en octobre 2026. La source officielle fait foi.</p>
       </div>
     </div>
   );

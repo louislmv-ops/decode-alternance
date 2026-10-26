@@ -17,8 +17,8 @@ export default function RecruitPage() {
   return (
     <div className="screen c-screen">
       <div className="c-main">
-        <h1 className="c-charte__title">Tu cherches un alternant ?</h1>
-        <p className="c-profile__bio">Des profils qui cherchent vraiment, avec formation, rythme et date de début. Pas d’école, pas d’intermédiaire.</p>
+        <h1 className="c-charte__title">Tu cherches un alternant ?</h1>
+        <p className="c-profile__bio">Des alternants qui cherchent vraiment. Sans école ni intermédiaire.</p>
         <ol className="c-charte">
           {STEPS.map(([title, text]) => (
             <li key={title}>
@@ -33,7 +33,7 @@ export default function RecruitPage() {
           </Link>
         </p>
         <p className="c-note">
-          Gratuit pendant le lancement. 20 messages par jour au plus, un seul par alternant et par semaine. Les écoles et organismes de formation qui cherchent des inscrits ne sont pas acceptés.
+          Gratuit au lancement. 20 messages par jour, un par alternant et par semaine. Pas d’écoles qui recrutent des inscrits.
         </p>
       </div>
     </div>
