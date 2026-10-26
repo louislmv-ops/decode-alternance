@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Mascotte } from '@/components/Mascotte';
 import { useLikes } from '@/components/useLikes';
 import { LikeButton } from './LikeButton';
+import { AccountNudge } from '@/components/account/AccountNudge';
 
 /** Les offres likées puis les dernières décodées. Gardées dans ce navigateur et sur le compte. */
 export function LikesList() {
@@ -19,6 +20,7 @@ export function LikesList() {
           </p>
         </div>
       </div>
+      <AccountNudge what="tes likes et tes offres décodées" />
       {likes.length === 0 ? (
         <div className="empty">
           <Mascotte pose="pense" size={128} className="empty__mascotte" />
