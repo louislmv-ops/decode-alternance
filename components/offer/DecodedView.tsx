@@ -12,6 +12,7 @@ import { Emoji } from '@/components/Emoji';
 import { useProfile } from '@/components/useProfile';
 import { useTracker } from '@/components/useTracker';
 import { recordDecoded } from '@/components/useLikes';
+import { guessEmoji, isEmoji, splitEmoji } from '@/lib/decode/emoji';
 import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
 import { formatEuros, relativeDays } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
@@ -52,6 +53,10 @@ export interface OfferMeta {
   perks?: string[];
   /** Le résumé gardé quand on like l'offre. */
   taste?: Omit<TasteItem, 'at'>;
+  /** Le texte de l'annonce tel que la source le donne, mot pour mot. */
+  description?: string;
+  /** La source ne donne qu'un extrait (Adzuna, Jooble) : le texte complet est sur son site. */
+  excerpt?: boolean;
 }
 
 const CERTITUDE: Record<Certitude, string> = { dit: 'Dit', deduit: 'Déduit', inconnu: 'Inconnu' };
@@ -186,9 +191,12 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               En bref
             </h2>
             <p className="lead-text">{decoded.enClair}</p>
-            <ul className="brief" role="list">
+            <ul className="ebullets" role="list">
               {decoded.missions.slice(0, 3).map((m, i) => (
-                <li key={i}>{m.enClair}</li>
+                <li key={i}>
+                  <span className="ebullets__e" aria-hidden="true">{isEmoji(m.emoji) ? m.emoji : guessEmoji(m.enClair, '👉')}</span>
+                  <span>{m.enClair}</span>
+                </li>
               ))}
             </ul>
             {(big || pay?.verdict === 'bien-paye' || schoolBait) && (
@@ -214,20 +222,32 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 {decoded.pointsForts.length > 0 && (
                   <div>
                     <p className="ui-label">Les +</p>
-                    <ul className="bullets">
-                      {decoded.pointsForts.slice(0, 3).map((x, i) => (
-                        <li key={i}>{x}</li>
-                      ))}
+                    <ul className="ebullets" role="list">
+                      {decoded.pointsForts.slice(0, 3).map((x, i) => {
+                        const [e, t] = splitEmoji(x, '✅');
+                        return (
+                          <li key={i}>
+                            <span className="ebullets__e" aria-hidden="true">{e}</span>
+                            <span>{t}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 )}
                 {decoded.limites.length > 0 && (
                   <div>
                     <p className="ui-label">À savoir</p>
-                    <ul className="bullets bullets--ink limits">
-                      {decoded.limites.slice(0, 3).map((x, i) => (
-                        <li key={i}>{x}</li>
-                      ))}
+                    <ul className="ebullets limits" role="list">
+                      {decoded.limites.slice(0, 3).map((x, i) => {
+                        const [e, t] = splitEmoji(x, '⚠️');
+                        return (
+                          <li key={i}>
+                            <span className="ebullets__e" aria-hidden="true">{e}</span>
+                            <span>{t}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 )}
@@ -244,14 +264,16 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               {decoded.missions.map((m, i) => (
                 <li key={i}>
                   {m.jargon && <s className="ui-jargon">{m.jargon}</s>}
-                  <span className="ui-plain">{m.enClair}</span>
+                  <span className="ui-plain">
+                    <span className="ebullets__e" aria-hidden="true">{isEmoji(m.emoji) ? m.emoji : guessEmoji(m.enClair, '👉')}</span> {m.enClair}
+                  </span>
                   <Chip c={m.certitude} />
                 </li>
               ))}
             </ul>
             {decoded.apprentissages.length > 0 && (
               <p className="panel__note">
-                <strong>Tu vas apprendre :</strong> {decoded.apprentissages.join(' · ')}
+                <strong>🎓 Tu vas apprendre :</strong> {decoded.apprentissages.join(' · ')}
               </p>
             )}
           </details>
@@ -294,10 +316,16 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 <h2 id="team-title">Sors du lot</h2>
               </div>
               {decoded.aMettreEnAvant.length > 0 && (
-                <ul className="bullets">
-                  {decoded.aMettreEnAvant.slice(0, 3).map((x, i) => (
-                    <li key={i}>{x}</li>
-                  ))}
+                <ul className="ebullets" role="list">
+                  {decoded.aMettreEnAvant.slice(0, 3).map((x, i) => {
+                    const [e, t] = splitEmoji(x, '⭐');
+                    return (
+                      <li key={i}>
+                        <span className="ebullets__e" aria-hidden="true">{e}</span>
+                        <span>{t}</span>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
               <p className="panel__note">
@@ -375,6 +403,21 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             </dl>
             <p className={`ui-status ui-status--${rhythm.tone}`}>{rhythm.text}</p>
           </details>
+
+          {offer?.description && (
+            <details className="panel fold" aria-labelledby="raw-title">
+              <summary className="panel__head fold__head">
+                <h2 id="raw-title">L’annonce d’origine</h2>
+              </summary>
+              {offer.excerpt && <p className="panel__note">Extrait donné par {offer.sourceLabel} : le texte complet est sur leur site.</p>}
+              <p className="raw-text">{offer.description}</p>
+              {realSource && (
+                <a className="link raw-text__src" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer">
+                  Voir sur {offer.sourceLabel}
+                </a>
+              )}
+            </details>
+          )}
 
         </aside>
       </div>

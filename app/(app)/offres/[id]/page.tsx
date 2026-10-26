@@ -1,3 +1,6 @@
+import { JsonLd } from '@/components/JsonLd';
+import { jobPostingJsonLd } from '@/lib/seo';
+import { SITE_URL } from '@/lib/site';
 import { paySignals } from '@/lib/offers/pay-signals';
 import { extractPerks } from '@/lib/offers/perks';
 import { tasteOf } from '@/lib/taste';
@@ -25,6 +28,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: offer.title,
     description: `Alternance ${offer.title}${where ? ` chez ${where}` : ''} : missions en clair, salaire comparé à ton minimum et qui contacter.`,
     robots: offer.source === 'exemple' ? { index: false } : undefined,
+    // Le lien de secours (?u=…) ne doit pas créer de doublons dans Google.
+    alternates: { canonical: `/offres/${encodeURIComponent(offer.id)}` },
   };
 }
 
@@ -57,13 +62,18 @@ export default async function OfferPage({ params, searchParams }: Props) {
     perks: extractPerks(offer.description, offer.salaryText),
     taste: tasteOf(offer, offerHref(offer), extractPerks(offer.description, offer.salaryText)),
     publishedAt: offer.publishedAt,
+    description: offer.description,
+    excerpt: offer.source === 'adzuna' || offer.source === 'jooble',
     contractKind: offer.contract,
     easyApply: offer.easyApply ?? false,
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };
 
+  const posting = offer.source === 'exemple' ? null : jobPostingJsonLd(offer, `${SITE_URL}/offres/${encodeURIComponent(offer.id)}`);
+
   return (
     <>
+      {posting && <JsonLd data={posting} />}
       <div className="back-row">
         <BackLink fallback="/offres" label="Offres" />
         {offer.company && offer.source !== 'exemple' && (

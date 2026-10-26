@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { OfferRow } from '@/components/offer/OfferRow';
@@ -35,15 +36,17 @@ async function latestOffers(departments: string[]): Promise<OfferPage | null> {
   }
 }
 
-/** Décode s'accroche derrière un mot : la tête dépasse, les mains tiennent le bord. */
+export const metadata: Metadata = { alternates: { canonical: '/' } };
+
+/** Décode s'assoit sur un mot du titre : il se pose en douceur, puis respire et cligne de l'œil. */
 function Peek({ where }: { where: 'd' | 'm' }) {
   return (
     <span className={`hero2__peek hero2__peek--${where}`} aria-hidden="true">
       <span className="hero2__peek-in">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/decode/accroche-320.webp" alt="" width={320} height={188} />
+        <img src="/decode/assis-320.webp" alt="" width={320} height={268} fetchPriority="high" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="hero2__peek-wink" src="/decode/accroche-clin-320.webp" alt="" width={320} height={188} loading="lazy" />
+        <img className="hero2__peek-wink" src="/decode/assis-clin-320.webp" alt="" width={320} height={268} loading="lazy" />
       </span>
     </span>
   );
