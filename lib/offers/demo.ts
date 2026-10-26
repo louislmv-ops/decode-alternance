@@ -20,7 +20,7 @@ function demo(input: DemoInput): Offer {
   };
 }
 
-const ORVANE_DESCRIPTION = `Rejoignez le Groupe Orvane, acteur international de la beauté présent dans 40 pays !
+const ORVANE_DESCRIPTION = `Rejoignez le Groupe Orvane, acteur international de la beauté présent dans 40 pays !
 
 Au sein de la Direction Marketing Insights, vous serez rattaché(e) à la Responsable Études et interviendrez sur des sujets transverses à forte visibilité.
 
@@ -111,7 +111,7 @@ Polyvalence et ponctualité indispensables. Débutant accepté. Contrat de 24 mo
     salaryText: null,
     startDate: null,
     publishedAt: '2026-10-21T06:00:00.000Z',
-    description: `Atlas Campus recrute pour le compte de ses entreprises partenaires des assistant(e)s RH en alternance !
+    description: `Atlas Campus recrute pour le compte de ses entreprises partenaires des assistant(e)s RH en alternance !
 
 Dynamique, organisé(e) et doté(e) d'un bon sens du relationnel, vous participerez à la gestion administrative du personnel et au recrutement dans un environnement stimulant.
 
@@ -260,10 +260,10 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     limites: ['Beaucoup de reporting répétitif probable', 'Une « première expérience » est souhaitée : la concurrence sera forte'],
     nonPrecise: ['Le nombre de personnes dans l’équipe', 'Le télétravail possible ou non', 'Les outils utilisés en dehors d’Excel'],
     questionsAPoser: [
-      'Combien de personnes compte l’équipe Insights, et qui serait mon ou ma tutrice ?',
-      'Quelle part de mon temps irait au reporting mensuel par rapport aux études ?',
-      'Quels outils d’analyse utilisez-vous en plus d’Excel ?',
-      'Le télétravail est-il possible pour les alternants ?',
+      'Combien de personnes compte l’équipe Insights, et qui serait mon ou ma tutrice ?',
+      'Quelle part de mon temps irait au reporting mensuel par rapport aux études ?',
+      'Quels outils d’analyse utilisez-vous en plus d’Excel ?',
+      'Le télétravail est-il possible pour les alternants ?',
     ],
     alertes: [],
     equipe: { service: 'Marketing Insights (études consommateurs)', aContacter: ['Alternant ou alternante en marketing insights', 'Chargé d’études marketing', 'Responsable études / insights manager'], motsCles: ['insights', 'études marketing', 'consumer insights'] },
@@ -298,11 +298,11 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: ['Débutant accepté', 'Tu apprends directement avec le chef', 'Horaires fixes et connus d’avance'],
     limites: ['Réveil très tôt toute l’année', 'Salaire au minimum légal', 'Travail le dimanche matin'],
     nonPrecise: ['Le nombre de personnes dans l’équipe', 'Les avantages éventuels (repas, pain offert)'],
-    questionsAPoser: ['Qui sera mon maître d’apprentissage au quotidien ?', 'Combien de dimanches par mois travaillerai-je ?', 'Est-ce que je participerai aussi à la pâtisserie ?'],
+    questionsAPoser: ['Qui sera mon maître d’apprentissage au quotidien ?', 'Combien de dimanches par mois travaillerai-je ?', 'Est-ce que je participerai aussi à la pâtisserie ?'],
     alertes: [],
     equipe: { service: 'Fournil', aContacter: ['Gérant ou gérante de la boulangerie', 'Chef boulanger'], motsCles: ['boulangerie', 'boulanger', 'Nantes'] },
     aMettreEnAvant: ['Ta ponctualité, avec un exemple', 'Ce qui te donne envie de faire ce métier', 'Un stage ou un job où tu te levais tôt'],
-    message: 'Bonjour, je suis [TON PRÉNOM], je prépare [TA FORMATION]. J’ai vu que vous cherchez un apprenti boulanger. Est-ce que je peux passer au fournil un matin pour voir le travail et vous laisser mon CV ?',
+    message: 'Bonjour, je suis [TON PRÉNOM], je prépare [TA FORMATION]. J’ai vu que vous cherchez un apprenti boulanger. Est-ce que je peux passer au fournil un matin pour voir le travail et vous laisser mon CV ?',
     jargon: [
       { expression: 'Polyvalence', traduction: 'Tu feras un peu de tout : fabrication, magasin, ménage.' },
       { expression: 'Selon grille légale', traduction: 'Tu seras payé au minimum prévu par la loi pour ton âge.' },
@@ -324,7 +324,7 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: [],
     limites: ['Aucune entreprise réelle derrière l’annonce', 'Des frais de dossier sont mentionnés'],
     nonPrecise: ['Le nom de l’entreprise', 'Le salaire', 'Le contrat et sa durée', 'Le rythme'],
-    questionsAPoser: ['Quel est le nom de l’entreprise qui recrute ?', 'Est-ce que je dois payer quelque chose si aucune entreprise ne me prend ?', 'Combien d’élèves de l’an dernier ont trouvé un contrat, et chez qui ?'],
+    questionsAPoser: ['Quel est le nom de l’entreprise qui recrute ?', 'Est-ce que je dois payer quelque chose si aucune entreprise ne me prend ?', 'Combien d’élèves de l’an dernier ont trouvé un contrat, et chez qui ?'],
     alertes: [
       { niveau: 'alerte', texte: 'Annonce publiée par une école qui recrute des élèves « pour ses entreprises partenaires ».' },
       { niveau: 'alerte', texte: 'L’annonce parle de frais de dossier : une vraie entreprise ne te fait jamais payer pour postuler.' },
@@ -332,7 +332,7 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     ],
     equipe: { service: 'Inconnu', aContacter: [], motsCles: [] },
     aMettreEnAvant: [],
-    message: 'Bonjour, avant toute inscription, pouvez-vous me donner le nom de l’entreprise qui recrute pour ce poste et confirmer qu’aucun frais n’est demandé ?',
+    message: 'Bonjour, avant toute inscription, pouvez-vous me donner le nom de l’entreprise qui recrute pour ce poste et confirmer qu’aucun frais n’est demandé ?',
     jargon: [
       { expression: 'Pour le compte de ses entreprises partenaires', traduction: 'L’école n’a pas d’entreprise précise : elle espère t’en trouver une après ton inscription.' },
       { expression: 'Environnement stimulant', traduction: 'Une formule vide, qui ne dit rien du poste.' },
@@ -361,7 +361,7 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: ['Équipe à taille humaine qui relit ton code', 'Technologies très demandées', 'Rythme 1/3 apprécié des entreprises'],
     limites: ['Le secteur du transport est peu connu des étudiants', 'Le télétravail n’arrive qu’après l’intégration'],
     nonPrecise: ['La durée du contrat', 'Qui sera ton tuteur'],
-    questionsAPoser: ['Combien de temps dure la période d’intégration avant le télétravail ?', 'Qui sera mon tuteur, et combien de temps par semaine aura-t-il pour moi ?', 'Sur quelle partie du produit travaillerait l’alternant en premier ?'],
+    questionsAPoser: ['Combien de temps dure la période d’intégration avant le télétravail ?', 'Qui sera mon tuteur, et combien de temps par semaine aura-t-il pour moi ?', 'Sur quelle partie du produit travaillerait l’alternant en premier ?'],
     alertes: [],
     equipe: { service: 'Équipe Produit (développement)', aContacter: ['Alternant développeur chez Kerlog', 'Développeur full-stack', 'Lead developer ou CTO'], motsCles: ['développeur', 'full-stack', 'TypeScript'] },
     aMettreEnAvant: ['Un projet perso en React ou Node.js avec le lien GitHub', 'Ta façon de travailler en équipe sur un projet d’école', 'Ton intérêt pour un produit utile au quotidien'],
@@ -393,7 +393,7 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: ['Salaire bien au-dessus du minimum légal', 'Grand groupe industriel', 'Métier très recherché après le diplôme'],
     limites: ['Horaires en 2x8 (matin ou après-midi selon les semaines)', 'Travail physique, en usine'],
     nonPrecise: ['La durée du contrat', 'Le montant de la prime d’équipe'],
-    questionsAPoser: ['Comment s’organisent les équipes 2x8 pendant mes semaines en entreprise ?', 'Quel est le montant de la prime d’équipe ?', 'Est-ce que d’anciens alternants ont été embauchés au service maintenance ?'],
+    questionsAPoser: ['Comment s’organisent les équipes 2x8 pendant mes semaines en entreprise ?', 'Quel est le montant de la prime d’équipe ?', 'Est-ce que d’anciens alternants ont été embauchés au service maintenance ?'],
     alertes: [],
     equipe: { service: 'Service Maintenance du site de Toulouse', aContacter: ['Alternant en maintenance chez Ventis', 'Technicien de maintenance', 'Responsable maintenance du site'], motsCles: ['maintenance', 'technicien maintenance', 'Toulouse'] },
     aMettreEnAvant: ['Un projet de bac pro ou de BTS sur une machine', 'Ton habilitation électrique si tu l’as', 'Ta capacité à travailler en horaires décalés'],
@@ -426,7 +426,7 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: ['Démarrage rapide', 'Petite enseigne, ambiance probablement familiale'],
     limites: ['Le salaire n’est pas chiffré', 'Le diplôme préparé n’est pas indiqué', 'Le samedi est probablement travaillé'],
     nonPrecise: ['Le diplôme ou le titre préparé', 'Le rythme école / entreprise', 'Le salaire', 'Les horaires'],
-    questionsAPoser: ['Quel diplôme ou titre prépare-t-on avec ce contrat, et dans quel organisme ?', 'Quel est le rythme entre la boutique et la formation ?', 'Quel salaire est prévu pour mon âge ?', 'Combien de samedis par mois travaillerai-je ?'],
+    questionsAPoser: ['Quel diplôme ou titre prépare-t-on avec ce contrat, et dans quel organisme ?', 'Quel est le rythme entre la boutique et la formation ?', 'Quel salaire est prévu pour mon âge ?', 'Combien de samedis par mois travaillerai-je ?'],
     alertes: [{ niveau: 'attention', texte: 'Ni le diplôme préparé ni le rythme ne sont indiqués : demande-les avant de signer.' }],
     equipe: { service: 'Boutique de Bordeaux centre', aContacter: ['Responsable de la boutique de Bordeaux', 'Conseiller de vente chez Maison Sorel'], motsCles: ['Maison Sorel', 'vente', 'Bordeaux'] },
     aMettreEnAvant: ['Un job où tu étais en contact avec des clients', 'Ton style et ce que tu aimes dans la mode', 'Tes disponibilités le samedi'],
@@ -456,7 +456,7 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: ['Tu travailles en direct avec le directeur financier', 'Missions complètes, du budget à la clôture', 'Power BI, très recherché'],
     limites: ['Salaire proche du minimum légal pour ton âge', 'Peu d’avantages annoncés'],
     nonPrecise: ['La durée du contrat', 'Les avantages (tickets resto, transport)'],
-    questionsAPoser: ['Quelle part de mon temps serait sur Power BI ?', 'Combien de personnes compte le service financier ?', 'Le contrat dure-t-il un ou deux ans ?'],
+    questionsAPoser: ['Quelle part de mon temps serait sur Power BI ?', 'Combien de personnes compte le service financier ?', 'Le contrat dure-t-il un ou deux ans ?'],
     alertes: [],
     equipe: { service: 'Direction administrative et financière', aContacter: ['Directeur administratif et financier', 'Contrôleur de gestion', 'Comptable'], motsCles: ['contrôle de gestion', 'DAF', 'finance'] },
     aMettreEnAvant: ['Un tableau de bord que tu as construit (même en cours)', 'Ton niveau sur Excel et Power BI', 'Un cas d’analyse d’écarts vu en cours'],
@@ -485,11 +485,11 @@ export const DEMO_DECODES: Record<string, DecodedOffer> = {
     pointsForts: ['Tu travailles en direct avec la fondatrice', 'Missions très concrètes, sur le terrain', 'Un portfolio à montrer à la fin'],
     limites: ['Petite structure : beaucoup d’autonomie dès le début', 'Salaire non indiqué'],
     nonPrecise: ['Le salaire', 'Le rythme école / entreprise', 'La durée du contrat'],
-    questionsAPoser: ['Combien de clients gérerais-je en même temps ?', 'Quel salaire proposez-vous pour mon âge et mon année ?', 'Quel rythme d’alternance vous convient ?'],
+    questionsAPoser: ['Combien de clients gérerais-je en même temps ?', 'Quel salaire proposez-vous pour mon âge et mon année ?', 'Quel rythme d’alternance vous convient ?'],
     alertes: [{ niveau: 'attention', texte: 'Le salaire n’est pas indiqué : vérifie qu’il respecte au moins le minimum légal.' }],
     equipe: { service: 'L’agence entière (8 personnes)', aContacter: ['Fondatrice de Studio Mistral', 'Community manager chez Studio Mistral'], motsCles: ['Studio Mistral', 'community manager', 'Marseille'] },
     aMettreEnAvant: ['Un compte ou un projet que tu as fait grandir', 'Deux ou trois contenus que tu as créés', 'Ta connaissance des restaurants et commerces de Marseille'],
-    message: 'Bonjour, je suis [TON PRÉNOM], en [TA FORMATION]. J’ai vu votre offre d’alternance en communication digitale. Je crée des vidéos courtes depuis deux ans, est-ce que je peux vous envoyer trois exemples ?',
+    message: 'Bonjour, je suis [TON PRÉNOM], en [TA FORMATION]. J’ai vu votre offre d’alternance en communication digitale. Je crée des vidéos courtes depuis deux ans, est-ce que je peux vous envoyer trois exemples ?',
     jargon: [
       { expression: 'Polyvalence', traduction: 'Dans une petite agence, tu feras un peu de tout.' },
       { expression: 'Autonomie', traduction: 'On ne sera pas toujours derrière toi : il faudra t’organiser seul.' },

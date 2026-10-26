@@ -277,7 +277,7 @@ function Settings({ account, sms, onChange }: { account: PublicAccount; sms: boo
           type="button"
           className="acct-link acct-link--danger"
           onClick={async () => {
-            if (!window.confirm('Supprimer ton compte et tout ce qu’il contient ?')) return;
+            if (!window.confirm('Supprimer ton compte et tout ce qu’il contient ?')) return;
             await call('/api/compte', 'DELETE');
             onChange(null);
           }}

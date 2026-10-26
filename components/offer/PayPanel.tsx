@@ -102,8 +102,8 @@ export function PayPanel({
               ? `${announcedMaxCents ? 'Au moins ' : ''}${formatEuros(pay.diffCents, 0)} de plus que ton minimum, soit +${pay.diffPercent} %.`
               : 'Payé au minimum légal.'
           : e.source === 'alternants'
-            ? 'C’est une tendance, pas un montant : pose la question du salaire exact à l’entretien. Il ne peut pas être sous ton minimum légal.'
-            : 'L’employeur ne peut pas payer moins. Pose la question du salaire exact à l’entretien.'}{' '}
+            ? 'Une tendance, pas un montant. Jamais sous ton minimum.'
+            : 'Jamais moins. Demande le montant exact en entretien.'}{' '}
         {contract === 'apprentissage' && `En apprentissage, sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
       </p>
       {perks.length > 0 && <p className="panel__note">En plus : {perks.join(' · ')}</p>}
@@ -114,13 +114,13 @@ export function PayPanel({
         </summary>
       <p className="panel__note">
         {fromOffer
-          ? `Minimum calculé pour un ${contract === 'apprentissage' ? 'contrat d’apprentissage' : 'contrat de professionnalisation'}, comme l’indique l’offre, sur la base du SMIC.`
-          : `L’offre ne précise pas le contrat (apprentissage ou contrat pro) : minimum calculé pour un ${contract === 'apprentissage' ? 'contrat d’apprentissage' : 'contrat de professionnalisation'}, comme dans ton profil, sur la base du SMIC.`}{' '}
+          ? `Base SMIC, ${contract === 'apprentissage' ? 'apprentissage' : 'contrat pro'} (d’après l’offre).`
+          : `Base SMIC, ${contract === 'apprentissage' ? 'apprentissage' : 'contrat pro'} (d’après ton profil).`}{' '}
         {minimum.conventionMayRaise
           ? contract === 'apprentissage'
-            ? 'À ton âge, si la convention collective fixe pour ton poste un salaire minimum (SMC) supérieur au SMIC, c’est lui qui sert de base : ton minimum peut être plus haut.'
-            : 'À ton âge, tu as droit au plus élevé entre le SMIC et 85 % du salaire minimum de ta convention collective (SMC) : ton minimum peut être plus haut.'
-          : 'Certaines conventions (banque, BTP, Syntec…) ont leur propre grille d’alternants, plus favorable : ton minimum peut être plus haut.'}
+            ? 'Ta convention collective peut monter ce minimum.'
+            : 'Ta convention collective peut monter ce minimum (85 % de son SMC).'
+          : 'Certaines conventions (banque, BTP, Syntec…) paient plus.'}
       </p>
       {contract === 'apprentissage' && (
         <>

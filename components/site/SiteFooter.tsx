@@ -60,7 +60,7 @@ export function SiteFooter() {
           </Link>
         </nav>
         <div className="site-footer__note">
-          <p>Décode ne garantit ni contrat, ni entretien, ni réponse. Il t’aide à comprendre les offres et à bien t’y prendre.</p>
+          <p>Décode ne garantit ni contrat, ni entretien, ni réponse.</p>
           <p>Salaires calculés sur le SMIC en vigueur et le Code du travail.</p>
         </div>
       </div>

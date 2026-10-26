@@ -124,3 +124,69 @@ export function sanitizeApplications(raw: unknown): Application[] {
     }))
     .filter((a) => a.company || a.title);
 }
+
+export interface WeekBar {
+  /** Lundi de la semaine (AAAA-MM-JJ). */
+  start: string;
+  sent: number;
+}
+
+/** Les envois des dernières semaines, du plus ancien au plus récent, semaine en cours comprise. */
+export function weekly(apps: Application[], today: string, weeks = 8): WeekBar[] {
+  const t = day(today);
+  const monday = t - ((new Date(t).getUTCDay() + 6) % 7) * DAY;
+  const bars = Array.from({ length: weeks }, (_, i) => ({ start: new Date(monday - (weeks - 1 - i) * 7 * DAY).toISOString().slice(0, 10), sent: 0 }));
+  const first = monday - (weeks - 1) * 7 * DAY;
+  for (const a of apps) {
+    if (!a.sentAt) continue;
+    const d = day(a.sentAt);
+    if (d < first || d > t) continue;
+    bars[Math.min(weeks - 1, Math.floor((d - first) / (7 * DAY)))]!.sent += 1;
+  }
+  return bars;
+}
+
+export interface FunnelStep {
+  label: string;
+  count: number;
+}
+
+/** De l'idée à la signature : combien de candidatures ont franchi chaque étape. */
+export function funnel(apps: Application[]): FunnelStep[] {
+  const sentApps = apps.filter((a) => SENT.includes(a.status));
+  return [
+    { label: 'Ajoutées', count: apps.length },
+    { label: 'Envoyées', count: sentApps.length },
+    { label: 'Réponses', count: sentApps.filter((a) => ANSWERED.includes(a.status)).length },
+    { label: 'Entretiens', count: sentApps.filter((a) => a.status === 'entretien' || a.status === 'acceptee').length },
+    { label: 'Acceptées', count: sentApps.filter((a) => a.status === 'acceptee').length },
+  ];
+}
+
+/** Quelques constats tirés du suivi, seulement quand les chiffres suffisent à dire quelque chose. */
+export function observations(apps: Application[], today: string): string[] {
+  const out: string[] = [];
+  const s = stats(apps);
+  if (s.sent === 0) return apps.length > 0 ? ['Rien d’envoyé pour l’instant : marque « Envoyée » dès que c’est parti.'] : [];
+
+  const weeks = weekly(apps, today, 4);
+  const thisWeek = weeks[3]!.sent;
+  const avg = Math.round((weeks.slice(0, 3).reduce((n, w) => n + w.sent, 0) / 3) * 10) / 10;
+  if (thisWeek === 0 && avg > 0) out.push(`Aucun envoi cette semaine, contre ${String(avg).replace('.', ',')} en moyenne avant.`);
+  else if (thisWeek > avg && avg > 0) out.push(`Bon rythme : ${thisWeek} envoi${thisWeek > 1 ? 's' : ''} cette semaine, plus que ta moyenne.`);
+
+  const ranked = s.byChannel.filter((c) => c.sent >= 3).sort((a, b) => b.answered / b.sent - a.answered / a.sent);
+  if (ranked.length >= 2 && ranked[0]!.answered > 0) {
+    const best = ranked[0]!;
+    out.push(`${CHANNELS.find((c) => c.value === best.channel)!.label} te répond le mieux : ${Math.round((best.answered / best.sent) * 100)} % de réponses.`);
+  }
+
+  const silent = apps.filter((a) => (a.status === 'envoyee' || a.status === 'relancee') && a.sentAt && daysSince(a.sentAt, today) > 21).length;
+  if (silent > 0) out.push(`${silent} candidature${silent > 1 ? 's' : ''} sans réponse depuis plus de 3 semaines.`);
+
+  const toSend = apps.filter((a) => a.status === 'a-envoyer').length;
+  if (toSend > 0) out.push(`${toSend} candidature${toSend > 1 ? 's' : ''} encore à envoyer.`);
+
+  if (s.sent < 10) out.push('Les taux deviennent parlants vers 10 envois.');
+  return out;
+}

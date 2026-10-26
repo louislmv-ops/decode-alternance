@@ -76,7 +76,7 @@ export function MoreFilters({ filters, count }: { filters: OfferFilters; count: 
           </div>
         </fieldset>
 
-        <p className="sheet__hint">Taille et secteur ne sont connus que pour une partie des offres : les autres sont écartées par ces filtres.</p>
+        <p className="sheet__hint">Ces filtres écartent les offres sans taille ni secteur connus.</p>
 
         <div className="sheet__foot">
           <Link href="/offres" className="link">

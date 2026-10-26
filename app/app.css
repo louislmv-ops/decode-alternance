@@ -1596,9 +1596,11 @@
 
 .app-row__actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   flex: none;
+  max-width: 100%;
 }
 
 /* ---------- Équipe ---------- */
@@ -7004,4 +7006,316 @@ body::before {
   margin: 32px 0 12px;
   font-size: 17px;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   Suivi : stats, constats et graphiques.
+   ========================================================================== */
+
+.tracker__charts {
+  margin-top: 16px;
+}
+
+.tnotes {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.tnotes li {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--mint);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.tcharts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.tchart {
+  margin: 0;
+  min-width: 0;
+}
+
+.tchart__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tchart__value {
+  font-size: 22px;
+}
+
+.tchart__value small,
+.tfunnel__n small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.tchart__bars {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  height: 150px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tchart__col {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tchart__bar {
+  width: 100%;
+  max-width: 28px;
+  border-radius: 4px 4px 0 0;
+  background: color-mix(in srgb, var(--brand) 35%, white);
+  transition:
+    height 420ms var(--ease-out),
+    background var(--t-hover) var(--ease-out);
+}
+
+.tchart__col.is-active .tchart__bar,
+.tchart__col:hover .tchart__bar {
+  background: var(--brand);
+}
+
+.tchart__tick {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tchart__col:last-child .tchart__tick {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.tchart:first-child {
+  padding-bottom: 22px;
+}
+
+.tchart__seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.tchart__seg button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.tchart__seg button[aria-pressed='true'] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+
+.tfunnel {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tfunnel__row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 76px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.tfunnel__row--static {
+  cursor: default;
+}
+
+.tfunnel__label {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tfunnel__track {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.tfunnel__bar {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--brand) 55%, white);
+  transition:
+    width 420ms var(--ease-out),
+    background var(--t-hover) var(--ease-out);
+}
+
+.tfunnel__row.is-active .tfunnel__bar,
+.tfunnel__row:hover .tfunnel__bar {
+  background: var(--brand);
+}
+
+.tfunnel__n {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .tcharts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+
+/* ==========================================================================
+   Logo : Décode prend la place du « o ».
+   ========================================================================== */
+
+.wordmark,
+.site-footer__mark .wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.wordmark__o {
+  display: inline-block;
+  align-self: center;
+  width: 0.9em;
+  height: auto;
+  margin: -0.12em 0.02em 0 0.04em;
+  transform-origin: 50% 85%;
+  transition: transform var(--t-ui) var(--ease-bounce, var(--ease-out));
+}
+
+a:hover .wordmark__o,
+.wordmark:hover .wordmark__o {
+  transform: rotate(-8deg) translateY(-0.04em);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark__o {
+    transition: none;
+  }
+}
+
+/* « Tu cherches où ? » : trois choix nets, de la même hauteur. */
+.locate__actions .btn,
+.locate__select select,
+.locate__actions .link {
+  min-height: 44px;
+}
+
+.locate__select select {
+  min-width: 220px;
+  padding: 0 14px;
+  border-radius: 999px;
+}
+
+.locate__actions .link {
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .locate__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .locate__select select {
+    width: 100%;
+  }
+}
+
+/* L'accueil se fond dans le fond de page : pas de bord net sous le titre. */
+.hero2 {
+  background: transparent;
+  border-bottom: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+/* Titre de bloc repliable : sur petit écran, titre et « + » sur une ligne, une longue précision dessous. */
+@media (max-width: 560px) {
+  .fold > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: 12px;
+    row-gap: 2px;
+    align-items: center;
+  }
+  .fold > summary h2 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .fold > summary::after {
+    grid-column: 3;
+    grid-row: 1;
+    margin-left: 0;
+  }
+  .fold > summary > :not(h2) {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .fold > summary > .panel__meta--long {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    text-align: left;
+  }
 }

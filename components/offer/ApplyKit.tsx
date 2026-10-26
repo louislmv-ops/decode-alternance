@@ -31,7 +31,7 @@ export function ApplyKit({ offer }: { offer: { title: string; company: string | 
     return (
       <section className="panel apply-kit apply-kit--pitch" data-needs="comptes" aria-labelledby="apply-title">
         <h2 id="apply-title">Postule en 2 clics</h2>
-        <p className="panel__note">Crée ton compte et ajoute ton CV une fois : sur chaque offre, Décode te prépare ton CV et un message prêt à copier.</p>
+        <p className="panel__note">Ajoute ton CV une fois : Décode te prépare la candidature sur chaque offre.</p>
         <Link href="/compte" className="btn btn--small">
           Créer mon compte
         </Link>

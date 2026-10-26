@@ -9,23 +9,23 @@ import { connectionMessage, followUpMessage, MESSAGE_MAX, teamSearches } from '@
 const STEPS = [
   {
     title: 'Trouve le service, pas seulement l’entreprise',
-    text: 'Une offre « assistant contrôle de gestion » se joue dans l’équipe finance. C’est elle que tu cherches : le service qui t’accueillera au quotidien.',
+    text: '« Assistant contrôle de gestion » = l’équipe finance. C’est elle qu’il faut viser.',
   },
   {
     title: 'Commence par un alternant',
-    text: 'Un alternant actuel ou ancien du service répond plus souvent qu’un recruteur, et il sait ce que l’équipe attend vraiment.',
+    text: 'Un alternant du service répond plus souvent qu’un recruteur.',
   },
   {
     title: 'Pose une vraie question',
-    text: 'Pas « pouvez-vous me recommander ? », mais une question précise sur le poste ou l’équipe. Tu obtiens une réponse, et ton nom est connu quand ta candidature arrive.',
+    text: 'Pas « tu me recommandes ? ». Une vraie question sur le poste.',
   },
   {
     title: 'Postule par le canal officiel',
-    text: 'Le message ne remplace pas la candidature : envoie-la sur le site de l’entreprise, et mentionne l’échange si la personne est d’accord.',
+    text: 'Postule quand même sur le site de l’entreprise.',
   },
   {
     title: 'Relance une fois',
-    text: 'Sans réponse après une semaine, une relance courte. Pas deux. Au-delà, passe à la personne suivante de ta liste.',
+    text: 'Pas de réponse en 7 jours ? Une relance, pas deux.',
   },
 ];
 

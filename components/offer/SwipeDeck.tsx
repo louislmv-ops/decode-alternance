@@ -87,7 +87,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
         <Mascotte pose={kept > 0 ? 'clin-oeil' : 'surpris'} size={144} className="swipe__mascotte" />
         <p className="swipe__done">C’est tout pour cette série.</p>
         <p className="c-note">
-          {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''} dans ton suivi et tes likes. Décode s’en sert pour te proposer des offres qui te ressemblent.` : 'Aucune offre gardée.'}
+          {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''}.` : 'Aucune offre gardée.'}
         </p>
         <div className="swipe__end-actions">
           {kept > 0 && (
@@ -178,7 +178,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           <Emoji name="coeur" size="30px" />
         </button>
       </div>
-      <p className="swipe__hint">Glisse à droite pour garder dans ton suivi, à gauche pour passer. Flèches du clavier aussi.</p>
+      <p className="swipe__hint">Droite : je garde. Gauche : je passe.</p>
     </div>
   );
 }

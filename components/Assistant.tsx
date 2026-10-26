@@ -7,7 +7,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 type Message = { role: 'user' | 'assistant'; content: string };
 
 const STORE = 'decode-assistant';
-const SUGGESTIONS = ['Combien je vais toucher en alternance ?', 'Comment marche le décodeur ?', 'Aide-moi pour ma lettre de motivation', 'Je n’ai pas encore d’entreprise, je fais quoi ?'];
+const SUGGESTIONS = ['Combien je vais toucher en alternance ?', 'Comment marche le décodeur ?', 'Aide-moi pour ma lettre de motivation', 'Je n’ai pas encore d’entreprise, je fais quoi ?'];
 
 /** Les chemins du site cités par l'assistant deviennent des liens. */
 function withLinks(text: string) {
@@ -109,7 +109,7 @@ export function Assistant() {
 
           <div className="assistant__list" ref={listRef} aria-live="polite">
             <p className="assistant__msg assistant__msg--bot">
-              Salut ! Pose-moi tes questions sur l’alternance : salaire, contrat, candidature, ou comment utiliser le site.
+              Salut ! Une question sur l’alternance ou le site ?
             </p>
             {messages.map((m, i) => (
               <p key={i} className={`assistant__msg assistant__msg--${m.role === 'user' ? 'me' : 'bot'}`}>
@@ -179,7 +179,7 @@ export function Assistant() {
         aria-label={open ? 'Fermer l’assistant' : 'Ouvrir l’assistant'}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="assistant__launcher-label">Une question ?</span>
+        <span className="assistant__launcher-label">Une question ?</span>
         <span className="assistant__mascot">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/decode/content-256.webp" alt="" width={256} height={256} />

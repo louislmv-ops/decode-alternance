@@ -64,7 +64,7 @@ export function RecruiterApp({ open }: { open: boolean }) {
           </section>
         </>
       ) : (
-        <p className="c-note">On vérifie l’entreprise à la main, sous 48 h ouvrées. Tu pourras ensuite chercher et contacter des alternants.</p>
+        <p className="c-note">Vérification sous 48 h ouvrées, puis tu contactes des alternants.</p>
       )}
     </>
   );

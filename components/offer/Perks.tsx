@@ -18,7 +18,7 @@ export function PerksPanel({ perks }: { perks: string[] }) {
         </ul>
       ) : (
         <p className="panel__note">
-          L’annonce ne cite aucun avantage. Pose la question en entretien : tickets resto, transport, télétravail, mutuelle, primes.
+          Aucun avantage cité. Demande en entretien.
         </p>
       )}
     </section>
