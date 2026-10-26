@@ -33,6 +33,7 @@ export function publicAccount(a: Account) {
     alertEmail: a.alertEmail,
     alertSms: a.alertSms,
     alertFrequency: a.alertFrequency,
+    alertMatch: a.alertMatch,
     savedSearch: a.savedSearch,
     profile: a.profile,
     tracker: a.tracker,

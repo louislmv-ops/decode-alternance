@@ -26,6 +26,8 @@ export interface Taste {
   levels: Map<number, number>;
   perks: Map<string, number>;
   likes: TasteItem[];
+  /** Les offres ouvertes et décodées : un signal plus faible qu'un like. */
+  decoded: TasteItem[];
 }
 
 const STOP = new Set([
@@ -47,8 +49,10 @@ function bump<K>(m: Map<K, number>, k: K | null | undefined, by: number) {
   m.set(k, (m.get(k) ?? 0) + by);
 }
 
-export function buildTaste(likes: TasteItem[], passes: TasteItem[] = []): Taste {
-  const t: Taste = { words: new Map(), departments: new Map(), sectors: new Map(), sizes: new Map(), levels: new Map(), perks: new Map(), likes };
+export function buildTaste(likes: TasteItem[], passes: TasteItem[] = [], decoded: TasteItem[] = []): Taste {
+  const liked = new Set(likes.map((l) => l.id));
+  const seen = decoded.filter((d) => !liked.has(d.id));
+  const t: Taste = { words: new Map(), departments: new Map(), sectors: new Map(), sizes: new Map(), levels: new Map(), perks: new Map(), likes, decoded: seen };
   const add = (it: TasteItem, w: number) => {
     titleWords(it.title).forEach((word) => bump(t.words, word, w));
     bump(t.departments, it.department, w);
@@ -58,6 +62,8 @@ export function buildTaste(likes: TasteItem[], passes: TasteItem[] = []): Taste 
     it.perks.forEach((p) => bump(t.perks, p, w * 0.5));
   };
   likes.forEach((it) => add(it, 1));
+  // Ouvrir une offre dit qu'elle intrigue, pas qu'on la veut.
+  seen.forEach((it) => add(it, 0.4));
   // Une offre passée compte moins qu'un like : on a pu la passer pour mille raisons.
   passes.forEach((it) => add(it, -0.35));
   return t;
@@ -71,7 +77,7 @@ export interface TasteMatch {
 
 /** Note d'une offre selon les goûts : plus c'est haut, plus elle ressemble à ce que la personne aime. */
 export function scoreOffer(o: Omit<TasteItem, 'at' | 'href'>, t: Taste): TasteMatch {
-  if (t.likes.length === 0) return { score: 0, reason: null };
+  if (t.likes.length === 0 && t.decoded.length === 0) return { score: 0, reason: null };
   let score = 0;
   let best: { w: number; reason: string } | null = null;
   const consider = (w: number, reason: string) => {
@@ -83,7 +89,11 @@ export function scoreOffer(o: Omit<TasteItem, 'at' | 'href'>, t: Taste): TasteMa
   const wordScore = words.reduce((s, w) => s + (t.words.get(w) ?? 0), 0);
   if (wordScore) {
     const twin = t.likes.find((l) => titleWords(l.title).some((w) => words.includes(w)));
-    consider(wordScore * 2, twin ? `Comme « ${twin.title} » que tu as aimée` : 'Proche de tes likes');
+    const seenTwin = twin ? null : t.decoded.find((l) => titleWords(l.title).some((w) => words.includes(w)));
+    consider(
+      wordScore * 2,
+      twin ? `Comme « ${twin.title} » que tu as aimée` : seenTwin ? `Proche de « ${seenTwin.title} » que tu as décodée` : 'Proche de tes likes',
+    );
   }
   const sec = sector(o.romeCode);
   if (sec && t.sectors.get(sec)) consider(t.sectors.get(sec)! * 1.5, 'Le secteur que tu likes');

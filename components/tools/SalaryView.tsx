@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AgeInput } from '@/components/AgeInput';
 import { CopyButton } from '@/components/offer/CopyButton';
 import { useProfile } from '@/components/useProfile';
 import { formatEuros } from '@/lib/format';
@@ -85,17 +86,9 @@ export function SalaryView() {
             </div>
             <div className="ui-field">
               <label className="ui-label" htmlFor="age-input">
-                Ton âge {input.contract === 'apprentissage' ? 'au début du contrat' : 'à la signature'}
+                Ton âge
               </label>
-              <input
-                id="age-input"
-                className="ui-input ui-input--short num"
-                type="number"
-                min={15}
-                max={60}
-                value={input.age}
-                onChange={(e) => set({ age: Math.max(15, Math.min(60, Number(e.target.value) || 15)) })}
-              />
+              <AgeInput id="age-input" value={input.age} onChange={(age) => set({ age })} />
             </div>
             {input.contract === 'apprentissage' ? (
               <div className="ui-field">

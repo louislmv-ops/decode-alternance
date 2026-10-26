@@ -7,10 +7,11 @@ import { ApplyKit } from './ApplyKit';
 import { LikeButton } from './LikeButton';
 import type { TasteItem } from '@/lib/taste';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Emoji } from '@/components/Emoji';
 import { useProfile } from '@/components/useProfile';
 import { useTracker } from '@/components/useTracker';
+import { recordDecoded } from '@/components/useLikes';
 import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
 import { formatEuros, relativeDays } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
@@ -80,6 +81,10 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const [profile] = useProfile();
   const { add, apps } = useTracker();
   const [added, setAdded] = useState(false);
+  const taste = offer?.isExample ? undefined : offer?.taste;
+  useEffect(() => {
+    if (taste) recordDecoded(taste);
+  }, [taste]);
 
   const minimum = minimumSalary({ contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   // Pour une offre de la base, seul le montant lu dans l'annonce compte ; l'IA ne chiffre qu'une offre collée à la main.

@@ -1,5 +1,6 @@
 'use client';
 
+import { AgeInput } from '@/components/AgeInput';
 import { useState } from 'react';
 import { useProfile } from '@/components/useProfile';
 import { formatEuros } from '@/lib/format';
@@ -82,10 +83,12 @@ export function ProfileView() {
                 <option value="professionnalisation">Contrat de professionnalisation</option>
               </select>
             </label>
-            <label className="ui-field">
-              <span className="ui-label">Âge au début du contrat</span>
-              <input className="ui-input num" type="number" min={15} max={60} value={p.age} onChange={(e) => set({ age: Math.max(15, Math.min(60, Number(e.target.value) || 15)) })} />
-            </label>
+            <div className="ui-field">
+              <label className="ui-label" htmlFor="profile-age">
+                Âge au début du contrat
+              </label>
+              <AgeInput id="profile-age" value={p.age} onChange={(age) => set({ age })} />
+            </div>
             <label className="ui-field">
               <span className="ui-label">Année de contrat</span>
               <select className="ui-select" value={p.year} onChange={(e) => set({ year: Number(e.target.value) as 1 | 2 | 3 })}>

@@ -6966,3 +6966,42 @@ body::before {
     background: rgb(255 255 255 / 0.96);
   }
 }
+
+/* L'âge : on tape librement, ou on ajuste avec − et +. */
+.age-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.age-stepper input {
+  width: 64px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.age-stepper button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--glass-bg-strong);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.age-stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.likes-list__h {
+  margin: 32px 0 12px;
+  font-size: 17px;
+  font-weight: 700;
+}

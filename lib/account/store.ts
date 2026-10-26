@@ -41,6 +41,8 @@ export function ensureSchema(): Promise<void> {
     // Ajouts : le dossier de candidature et les likes.
     await s`alter table accounts add column if not exists candidate jsonb`;
     await s`alter table accounts add column if not exists likes jsonb`;
+    // Les offres pour toi : choisies d'après le profil, les likes et les offres décodées. À activer soi-même.
+    await s`alter table accounts add column if not exists alert_match boolean not null default false`;
     // Le CV à part : un fichier de quelques Mo n'a rien à faire dans chaque lecture du compte.
     await s`create table if not exists account_cvs (
       account_id uuid primary key references accounts(id) on delete cascade,
@@ -136,6 +138,7 @@ export interface Account {
   alertEmail: boolean;
   alertSms: boolean;
   alertFrequency: 'quotidien' | 'hebdo';
+  alertMatch: boolean;
   savedSearch: SavedSearch;
   profile: unknown;
   tracker: unknown;
@@ -151,6 +154,7 @@ interface AccountRow {
   alert_email: boolean;
   alert_sms: boolean;
   alert_frequency: 'quotidien' | 'hebdo';
+  alert_match: boolean;
   saved_search: SavedSearch;
   profile: unknown;
   tracker: unknown;
@@ -168,6 +172,7 @@ function toAccount(r: AccountRow): Account {
     alertEmail: r.alert_email,
     alertSms: r.alert_sms,
     alertFrequency: r.alert_frequency,
+    alertMatch: r.alert_match ?? false,
     savedSearch: r.saved_search ?? {},
     profile: r.profile,
     tracker: r.tracker,
@@ -232,6 +237,7 @@ export interface AccountPatch {
   alertEmail?: boolean;
   alertSms?: boolean;
   alertFrequency?: 'quotidien' | 'hebdo';
+  alertMatch?: boolean;
   savedSearch?: SavedSearch;
   profile?: unknown;
   tracker?: unknown;
@@ -245,6 +251,7 @@ export async function updateAccount(id: string, patch: AccountPatch): Promise<Ac
       alert_email = coalesce(${patch.alertEmail ?? null}, alert_email),
       alert_sms = coalesce(${patch.alertSms ?? null}, alert_sms),
       alert_frequency = coalesce(${patch.alertFrequency ?? null}, alert_frequency),
+      alert_match = coalesce(${patch.alertMatch ?? null}, alert_match),
       saved_search = coalesce(${patch.savedSearch ? s.json(patch.savedSearch) : null}, saved_search),
       profile = coalesce(${patch.profile !== undefined ? s.json(patch.profile as never) : null}, profile),
       tracker = coalesce(${patch.tracker !== undefined ? s.json(patch.tracker as never) : null}, tracker),
@@ -268,12 +275,12 @@ export async function deleteAccount(id: string): Promise<void> {
   await db()`delete from accounts where id = ${id}`;
 }
 
-/** Les comptes à prévenir maintenant, selon leur fréquence. */
+/** Les comptes à prévenir maintenant, selon leur fréquence : une recherche suivie, ou un profil et des likes à faire correspondre. */
 export async function accountsDueForAlert(): Promise<(Account & { lastAlertAt: Date | null })[]> {
   await ensureSchema();
   const rows = await db()<AccountRow[]>`select * from accounts
     where (alert_email or (alert_sms and phone_verified))
-      and saved_search <> '{}'::jsonb
+      and (saved_search <> '{}'::jsonb or alert_match)
       and (last_alert_at is null
         or (alert_frequency = 'quotidien' and last_alert_at < now() - interval '20 hours')
         or (alert_frequency = 'hebdo' and last_alert_at < now() - interval '6 days 12 hours'))`;
@@ -285,7 +292,7 @@ export async function accountsDueHourly(): Promise<(Account & { lastAlertAt: Dat
   await ensureSchema();
   const rows = await db()<AccountRow[]>`select * from accounts
     where (alert_email or (alert_sms and phone_verified))
-      and saved_search <> '{}'::jsonb
+      and (saved_search <> '{}'::jsonb or alert_match)
       and (last_alert_at is null or last_alert_at < now() - interval '50 minutes')`;
   return rows.map((r) => ({ ...toAccount(r), lastAlertAt: r.last_alert_at }));
 }
