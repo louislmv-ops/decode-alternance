@@ -15,11 +15,11 @@ export function BullshitBingo({ text, ai = NONE }: { text: string; ai?: AiJargon
   if (list.length === 0) return null;
 
   return (
-    <section className="panel bingo" aria-labelledby="bingo-title">
-      <div className="panel__head">
+    <details className="panel fold bingo" aria-labelledby="bingo-title">
+      <summary className="panel__head fold__head">
         <h2 id="bingo-title">Bullshit Bingo</h2>
         <span className={`bingo__score${grid.lines > 0 ? ' is-bingo' : ''}`}>{grid.lines > 0 ? 'Bingo !' : `${count} / 9`}</span>
-      </div>
+      </summary>
       <ol className="bingo__grid" aria-label="La grille">
         {grid.cells.map((c) => (
           <li key={c.id} className={c.found ? 'is-on' : undefined} aria-label={`${c.label}${c.found ? ' : dans l’annonce' : ''}`}>
@@ -36,7 +36,7 @@ export function BullshitBingo({ text, ai = NONE }: { text: string; ai?: AiJargon
         ))}
       </ul>
       <p className="panel__note">Ce que ces formules veulent souvent dire, pas un avis sur cette entreprise.</p>
-    </section>
+    </details>
   );
 }
 

@@ -1,7 +1,9 @@
 // Le chiffre de paie d'une offre, du plus sûr au plus prudent :
 // 1. le montant écrit dans l'annonce ;
 // 2. ce que déclarent les alternants de la même entreprise (au moins MIN_TO_SHOW), ramené à ton âge et ton année ;
-// 3. ton minimum légal, que l'employeur doit payer quoi qu'il arrive.
+// 3. le salaire que la même entreprise écrit dans ses autres annonces (au moins EMPLOYER_MIN_OFFERS) ;
+// 4. ton minimum légal, que l'employeur doit payer quoi qu'il arrive.
+// Aucune supposition tirée de la région, de la taille ou du métier : sans donnée, « Non précisé ».
 // Jamais un montant inventé : chaque chiffre dit d'où il vient.
 
 /** Les salaires déclarés dans une entreprise, en écart à leur minimum légal (+12 = 12 % au-dessus). */
@@ -14,7 +16,16 @@ export interface CommunityPay {
   highPercent: number;
 }
 
-export type PaySource = 'annonce' | 'alternants' | 'minimum';
+export type PaySource = 'annonce' | 'alternants' | 'entreprise' | 'minimum';
+
+/** Les salaires écrits dans les autres annonces de la même entreprise. */
+export interface EmployerPay {
+  count: number;
+  medianCents: number;
+}
+
+/** Il faut au moins ce nombre d'annonces chiffrées pour parler du salaire habituel d'une entreprise. */
+export const EMPLOYER_MIN_OFFERS = 3;
 
 export interface PayEstimate {
   source: PaySource;
@@ -23,7 +34,7 @@ export interface PayEstimate {
   /** Fourchette, quand on en a une (déclarations des alternants). */
   lowCents: number | null;
   highCents: number | null;
-  /** Nombre de déclarations, pour la source « alternants ». */
+  /** Nombre de déclarations (« alternants ») ou d'annonces chiffrées (« entreprise »). */
   count: number;
   /** L'annonce renvoie à la grille légale (« selon l'âge », « selon la législation »…). */
   legalGrid: boolean;
@@ -41,7 +52,13 @@ export function mentionsLegalGrid(...texts: (string | null | undefined)[]): bool
 /** Le minimum légal relevé d'un pourcentage ; jamais en dessous du minimum, que la loi impose. */
 const above = (minimumCents: number, percent: number) => Math.max(minimumCents, Math.round((minimumCents * (100 + percent)) / 100));
 
-export function payEstimate(announcedCents: number | null, minimumCents: number, community: CommunityPay | null, legalGrid = false): PayEstimate {
+export function payEstimate(
+  announcedCents: number | null,
+  minimumCents: number,
+  community: CommunityPay | null,
+  legalGrid = false,
+  employer: EmployerPay | null = null,
+): PayEstimate {
   if (announcedCents !== null) return { source: 'annonce', cents: announcedCents, lowCents: null, highCents: null, count: 0, legalGrid };
   if (community && community.count > 0 && !legalGrid) {
     return {
@@ -53,6 +70,10 @@ export function payEstimate(announcedCents: number | null, minimumCents: number,
       legalGrid,
     };
   }
+  // Une annonce qui renvoie à la grille légale paie le minimum, quoi que disent les autres annonces.
+  if (employer && employer.count >= EMPLOYER_MIN_OFFERS && !legalGrid) {
+    return { source: 'entreprise', cents: Math.max(minimumCents, employer.medianCents), lowCents: null, highCents: null, count: employer.count, legalGrid };
+  }
   return { source: 'minimum', cents: minimumCents, lowCents: null, highCents: null, count: 0, legalGrid };
 }
 
@@ -60,6 +81,7 @@ export function payEstimate(announcedCents: number | null, minimumCents: number,
 export function payEstimateHint(e: PayEstimate, tierLabel: string): string {
   if (e.source === 'annonce') return `${tierLabel} (salaire annoncé)`;
   if (e.source === 'alternants') return `${tierLabel}, estimé d’après ${e.count} alternants de cette entreprise`;
+  if (e.source === 'entreprise') return `${tierLabel}, d’après ${e.count} autres annonces chiffrées de cette entreprise`;
   return e.legalGrid ? 'L’annonce renvoie à la grille légale : ton minimum légal' : 'Pas de montant dans l’annonce : au moins ton minimum légal';
 }
 
@@ -94,4 +116,6 @@ export interface PayContext {
   reviewCount: number;
   companyHref: string | null;
   conventions: { idcc: string; name: string | null }[];
+  /** Le salaire écrit dans les autres annonces de l'entreprise. */
+  employer?: EmployerPay | null;
 }

@@ -2,7 +2,6 @@ import type { PayProfile } from '@/lib/profile';
 import { comparePay, contractForOffer, minimumSalary, type PayComparison } from '@/lib/rules/salary';
 import { type CommunityPay, mentionsLegalGrid, type PayEstimate, payEstimate } from './pay-estimate';
 import { isCac40 } from './companies';
-import { type PayLean, paySignals } from './pay-signals';
 import { isQualifiedRole } from './rank';
 import { type PayTier, payTier } from './pay-tier';
 import type { Offer } from './types';
@@ -22,19 +21,17 @@ export interface Highlights {
    */
   pepite: boolean;
   schoolBait: boolean;
-  /** Tendance de salaire tirée d'indices, quand l'annonce ne chiffre rien. */
-  lean: PayLean | null;
 }
 
 export function highlights(
   offer: Pick<Offer, 'companySize' | 'salaryMonthlyCents' | 'schoolFlags'> &
-    Partial<Pick<Offer, 'salaryText' | 'description' | 'company' | 'contract' | 'title' | 'diplomaLevel' | 'department' | 'romeCode'>>,
+    Partial<Pick<Offer, 'salaryText' | 'description' | 'company' | 'contract' | 'title' | 'diplomaLevel' | 'department' | 'romeCode' | 'employerPay'>>,
   profile: PayProfile,
   community: CommunityPay | null = null,
 ): Highlights {
   const minimum = minimumSalary({ contract: contractForOffer(offer.contract, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
   const pay = offer.salaryMonthlyCents !== null ? comparePay(offer.salaryMonthlyCents, minimum.cents) : null;
-  const estimate = payEstimate(offer.salaryMonthlyCents, minimum.cents, community, mentionsLegalGrid(offer.salaryText, offer.description));
+  const estimate = payEstimate(offer.salaryMonthlyCents, minimum.cents, community, mentionsLegalGrid(offer.salaryText, offer.description), offer.employerPay ?? null);
   const bigCompany = offer.companySize === 'grande';
   const schoolBait = offer.schoolFlags.length > 0;
   return {
@@ -50,6 +47,5 @@ export function highlights(
       estimate.source !== 'minimum' &&
       estimate.cents >= minimum.cents * 1.2,
     schoolBait,
-    lean: paySignals(offer),
   };
 }

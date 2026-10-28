@@ -4018,7 +4018,8 @@ label {
 .swipe__stack {
   position: relative;
   width: 100%;
-  min-height: 380px;
+  /* Une hauteur fixe : les boutons restent au même endroit, quelle que soit la longueur de l'offre. */
+  height: clamp(360px, calc(100dvh - 330px), 480px);
 }
 
 .swipe__card {
@@ -4026,7 +4027,8 @@ label {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 380px;
+  height: 100%;
+  overflow: hidden;
   padding: 28px 24px;
   border: 2px solid var(--ink);
   border-radius: 16px;
@@ -4052,11 +4054,28 @@ label {
 }
 
 .swipe__title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
   font-family: var(--font-display);
   font-stretch: 112%;
-  font-size: clamp(26px, 7vw, 34px);
+  font-size: clamp(24px, 6.5vw, 32px);
   font-weight: 800;
   line-height: 1.08;
+}
+
+.swipe__card .orow__company {
+  flex-shrink: 0;
+  max-height: 3em;
+  overflow: hidden;
+}
+
+.swipe__card .orow__meta {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .swipe__pay {

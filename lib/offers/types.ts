@@ -89,6 +89,8 @@ export interface Offer {
   geoPrecision?: GeoPrecision | null;
   /** Distance au centre d'une recherche « autour de », en kilomètres. */
   distanceKm?: number | null;
+  /** Le salaire que l'entreprise écrit dans ses autres annonces, quand celle-ci n'en donne pas. */
+  employerPay?: { count: number; medianCents: number } | null;
 }
 
 export type GeoPrecision = 'adresse' | 'ville';

@@ -1,7 +1,6 @@
 import { JsonLd } from '@/components/JsonLd';
 import { breadcrumbJsonLd, jobPostingJsonLd } from '@/lib/seo';
 import { SITE_URL } from '@/lib/site';
-import { paySignals } from '@/lib/offers/pay-signals';
 import { extractPerks } from '@/lib/offers/perks';
 import { tasteOf } from '@/lib/taste';
 import { offerHref } from '@/lib/offers/link';
@@ -13,7 +12,7 @@ import { BackLink } from '@/components/BackLink';
 import { InterviewPrep } from '@/components/pro/InterviewPrep';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
-import { findDecode, findOffer } from '@/lib/offers/repository';
+import { findDecode, findOffer, withEmployerPay } from '@/lib/offers/repository';
 import { payContext } from '@/lib/offers/pay-context';
 import { isTrustedSourceLink } from '@/lib/offers/link';
 import { SOURCE_LABELS } from '@/lib/offers/types';
@@ -37,13 +36,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function OfferPage({ params, searchParams }: Props) {
   const id = decodeURIComponent((await params).id);
-  const offer = await findOffer(id);
-  if (!offer) {
+  const found = await findOffer(id);
+  if (!found) {
     // Une offre d'agrégateur que ce serveur n'a plus en mémoire : on renvoie vers l'annonce d'origine.
     const { u, s } = await searchParams;
     if (u && isTrustedSourceLink(u, s)) redirect(u);
     notFound();
   }
+  // Sans salaire dans l'annonce : celui que l'entreprise écrit dans ses autres annonces, quand on le connaît.
+  const [offer] = (await withEmployerPay([found])) as [typeof found];
   const [decoded, pay, point] = await Promise.all([
     findDecode(id),
     payContext(offer),
@@ -69,7 +70,6 @@ export default async function OfferPage({ params, searchParams }: Props) {
     department: offer.department,
     diplomaLevel: offer.diplomaLevel,
     pay,
-    lean: paySignals(offer),
     perks: extractPerks(offer.description, offer.salaryText),
     taste: tasteOf(offer, offerHref(offer), extractPerks(offer.description, offer.salaryText)),
     publishedAt: offer.publishedAt,

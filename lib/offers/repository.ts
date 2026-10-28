@@ -10,7 +10,9 @@ import { isAccountsConfigured } from '@/lib/account/store';
 import { injectSponsored, sponsorOf } from '@/lib/sponsors/match';
 import { activeSponsors } from '@/lib/sponsors/store';
 import { companyRatingOf } from '@/lib/companies/store';
-import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
+import { announcedPayByCompany, countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
+import { EMPLOYER_MIN_OFFERS } from './pay-estimate';
+import { companyKey } from './normalize';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer, rememberSeen } from './aggregators';
 import { isLiveConfigured, liveOffer, liveSearch } from './live';
 import type { Offer, OfferFilters, OfferPage } from './types';
@@ -101,7 +103,24 @@ async function sponsoredFor(filters: OfferFilters, pageOffers: Offer[]): Promise
 export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
   const page = await cachedSearch(JSON.stringify(filters));
   rememberSeen(page.offers);
-  return page;
+  return { ...page, offers: await withEmployerPay(page.offers) };
+}
+
+/** Le salaire écrit dans les autres annonces de chaque entreprise, recalculé au plus toutes les heures. */
+let employerPay: { until: number; value: Promise<Map<string, { count: number; medianCents: number }>> } | null = null;
+
+/** Aux offres sans salaire, ajoute celui que leur entreprise écrit dans ses autres annonces, quand on le connaît. */
+export async function withEmployerPay(offers: Offer[]): Promise<Offer[]> {
+  if (!offers.some((o) => o.salaryMonthlyCents === null && o.company) || !(await hasStoredOffers())) return offers;
+  if (!employerPay || employerPay.until < Date.now()) {
+    employerPay = { until: Date.now() + 3_600_000, value: announcedPayByCompany(EMPLOYER_MIN_OFFERS).catch(() => new Map()) };
+  }
+  const index = await employerPay.value;
+  return offers.map((o) => {
+    if (o.salaryMonthlyCents !== null || !o.company || o.source === 'exemple') return o;
+    const hit = index.get(companyKey(o.company));
+    return hit ? { ...o, employerPay: hit } : o;
+  });
 }
 
 async function fetchOffers(filters: OfferFilters): Promise<OfferPage> {

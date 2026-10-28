@@ -86,7 +86,6 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         place={offer.city}
         rhythm={null}
         contract={offer.contract}
-        lean={offer.lean ?? null}
       />
       {offer.place && <OfferMap place={offer.place} />}
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
@@ -99,7 +98,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         company={offer.company}
         sourceLabel={offer.sourceLabel}
         offerContract={offer.contractKind ?? null}
-        lean={offer.lean ?? null}
+        folded
       />
       {state.status === 'idle' && (
         <div className="decode-pitch">

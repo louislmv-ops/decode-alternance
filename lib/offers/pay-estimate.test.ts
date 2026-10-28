@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { payDisplay } from './pay-display';
 import { mentionsLegalGrid, payEstimate, summarizePercents } from './pay-estimate';
 
 describe('payEstimate', () => {
@@ -35,5 +36,18 @@ describe('mentionsLegalGrid', () => {
 describe('summarizePercents', () => {
   it('donne la médiane et les quartiles', () => {
     expect(summarizePercents('1', [0, 10, 20, 30, 40])).toEqual({ siren: '1', count: 5, medianPercent: 20, lowPercent: 10, highPercent: 30 });
+  });
+});
+
+describe('salaire habituel de l’entreprise', () => {
+  it('sert seulement sans montant, sans déclaration et avec assez d’annonces chiffrées', () => {
+    expect(payEstimate(null, 100_000, null, false, { count: 4, medianCents: 150_000 })).toMatchObject({ source: 'entreprise', cents: 150_000, count: 4 });
+    expect(payEstimate(null, 100_000, null, false, { count: 2, medianCents: 150_000 }).source).toBe('minimum');
+    expect(payEstimate(null, 100_000, null, true, { count: 4, medianCents: 150_000 }).source).toBe('minimum');
+    expect(payEstimate(120_000, 100_000, null, false, { count: 4, medianCents: 150_000 }).source).toBe('annonce');
+  });
+
+  it('sans aucune donnée : non précisé, sans verdict', () => {
+    expect(payDisplay(payEstimate(null, 100_000, null), 100_000)).toMatchObject({ kind: 'inconnu', tier: null, word: 'Non précisé' });
   });
 });

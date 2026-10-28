@@ -23,6 +23,8 @@ export interface SwipeCard {
   easyApply: boolean;
   tier: PayTier | null;
   /** D'où vient la note : annonce, alternants de l'entreprise ou minimum légal. */
+  /** Le mot court affiché sur la carte (« Bien payé », « Non précisé ») ; le détail est dans payHint. */
+  payWord: string;
   payHint: string;
   pepite: boolean;
   /** Une mise en avant payée par l'entreprise : toujours signalée. */
@@ -257,7 +259,7 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           </p>
           <div className="swipe__pay">
             <PayEuros tier={card.tier} size="large" hint={card.payHint} />
-            <span className="orow__sub">{card.payHint}</span>
+            <span className="orow__sub" title={card.payHint}>{card.payWord}</span>
           </div>
           <Link href={card.href} className="link swipe__open" onPointerDown={(e) => e.stopPropagation()}>
             Voir l’offre décodée

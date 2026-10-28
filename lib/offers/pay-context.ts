@@ -37,5 +37,6 @@ export async function payContext(offer: Offer): Promise<PayContext> {
     reviewCount: page?.reviews.count ?? 0,
     companyHref: page ? `/entreprises/${page.company.siren}` : null,
     conventions,
+    employer: offer.employerPay ?? null,
   };
 }

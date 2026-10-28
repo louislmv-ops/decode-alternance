@@ -421,3 +421,28 @@ export async function geocodeStoredOffers(
   }
   return { places: looked, found, offers };
 }
+
+/**
+ * Le salaire que chaque entreprise écrit dans ses annonces : la médiane de ses offres chiffrées, pour les
+ * entreprises qui en ont au moins `minOffers`. Sert aux offres de la même entreprise qui ne chiffrent rien.
+ */
+export async function announcedPayByCompany(minOffers: number): Promise<Map<string, { count: number; medianCents: number }>> {
+  const s = db();
+  const rows = await s<{ company: string; cents: number }[]>`
+    select company, salary_monthly_cents as cents from offers_unique
+    where company is not null and salary_monthly_cents is not null and cardinality(school_flags) = 0`;
+  const byCompany = new Map<string, number[]>();
+  for (const r of rows) {
+    const key = companyKey(r.company);
+    if (key.length < 2) continue;
+    byCompany.set(key, [...(byCompany.get(key) ?? []), r.cents]);
+  }
+  const out = new Map<string, { count: number; medianCents: number }>();
+  for (const [key, list] of byCompany) {
+    if (list.length < minOffers) continue;
+    const v = [...list].sort((a, b) => a - b);
+    const mid = Math.floor(v.length / 2);
+    out.set(key, { count: v.length, medianCents: v.length % 2 ? v[mid]! : Math.round((v[mid - 1]! + v[mid]!) / 2) });
+  }
+  return out;
+}

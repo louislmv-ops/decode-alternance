@@ -32,7 +32,8 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
   const cards: SwipeCard[] = (result?.offers ?? [])
     .map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }))
     .filter(({ h }) => !h.schoolBait)
-    .map(({ offer, h }) => ({
+    .map(({ offer, h }) => ({ offer, h, pay: payDisplay(h.estimate, h.minimumCents) }))
+    .map(({ offer, h, pay }) => ({
       id: offer.id,
       href: offerHref(offer),
       logo: logoSrc(offer),
@@ -41,8 +42,9 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       facts: [offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null), CONTRACT_LABELS[offer.contract], relativeDays(offer.publishedAt)]
         .filter((x): x is string => Boolean(x))
         .join(' · '),
-      tier: payDisplay(h.estimate, h.minimumCents, h.lean).tier,
-      payHint: payDisplay(h.estimate, h.minimumCents, h.lean).hint,
+      tier: pay.tier,
+      payWord: pay.word,
+      payHint: pay.hint,
       pepite: h.pepite,
       ...(offer.sponsored && offer.sponsorId ? { sponsorId: offer.sponsorId } : {}),
       easyApply: Boolean(offer.easyApply),
