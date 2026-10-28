@@ -22,9 +22,11 @@ import {
   schoolBaitFlags,
 } from '../normalize';
 import type { CompanySizeTag, Offer } from '../types';
+import { fetchWorkdayJobs, parseWorkdaySlug, workdayApi } from './workday';
 
-export type AtsProvider = 'greenhouse' | 'lever' | 'smartrecruiters' | 'ashby' | 'recruitee' | 'personio';
+export type AtsProvider = 'greenhouse' | 'lever' | 'smartrecruiters' | 'ashby' | 'recruitee' | 'personio' | 'workday';
 
+/** Les fournisseurs qu'on essaie avec un identifiant tiré du nom. Workday a sa propre recherche (workday.ts). */
 export const ATS_PROVIDERS: AtsProvider[] = ['greenhouse', 'lever', 'smartrecruiters', 'ashby', 'recruitee', 'personio'];
 
 export interface AtsBoard {
@@ -68,6 +70,10 @@ export function boardUrl(provider: AtsProvider, slug: string): string {
       return `https://${s}.recruitee.com/api/offers/`;
     case 'personio':
       return `https://${s}.jobs.personio.de/xml?language=fr`;
+    case 'workday': {
+      const board = parseWorkdaySlug(slug);
+      return board ? `${workdayApi(board)}/jobs` : '';
+    }
   }
 }
 
@@ -89,6 +95,8 @@ function text(html: unknown): string {
 /** Lit la réponse d'un fournisseur. Une réponse d'une autre forme donne une liste vide, jamais une erreur. */
 export function parseBoard(provider: AtsProvider, body: string): AtsJob[] {
   if (provider === 'personio') return parsePersonio(body);
+  // Workday ne donne la description qu'annonce par annonce : sa lecture est dans workday.ts.
+  if (provider === 'workday') return [];
   let data: unknown;
   try {
     data = JSON.parse(body);
@@ -275,6 +283,12 @@ export class BoardMismatchError extends Error {}
 
 /** Toutes les offres d'alternance en France d'un tableau. Lève une erreur si le tableau ne répond pas. */
 export async function fetchAtsBoard(board: AtsBoard): Promise<Offer[]> {
+  if (board.provider === 'workday') {
+    const workday = parseWorkdaySlug(board.slug);
+    if (!workday) throw new BoardMismatchError(`workday/${board.slug} : identifiant illisible`);
+    const jobs = await fetchWorkdayJobs(workday);
+    return jobs.map((j) => atsJobToOffer(j, board)).filter((o): o is Offer => o !== null);
+  }
   const res = await fetchText(boardUrl(board.provider, board.slug), { headers: { Accept: board.provider === 'personio' ? 'application/xml' : 'application/json' } });
   if (res.status !== 200) throw new Error(`${board.provider}/${board.slug} : HTTP ${res.status}`);
   let jobs = parseBoard(board.provider, res.text);

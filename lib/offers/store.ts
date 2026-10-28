@@ -297,11 +297,14 @@ export async function markAtsBoard(board: AtsBoard, result: { offers: number } |
   else await s`update ats_boards set failures = 0, offers = ${result.offers}, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
 }
 
+/** La clé d'une recherche : « workday » a sa propre clé, pour chercher aussi les employeurs déjà essayés ailleurs. */
+const probeKey = (company: string, scope: string) => (scope ? `${scope}:${normalizeText(company)}` : normalizeText(company));
+
 /**
  * Les employeurs à chercher cette nuit : ceux de la liste de départ puis ceux qui publient le plus d'offres en base,
  * sauf ceux déjà cherchés depuis moins de 30 jours.
  */
-export async function companiesToProbe(seeds: string[], limit: number): Promise<{ company: string; size: CompanySizeTag | null }[]> {
+export async function companiesToProbe(seeds: string[], limit: number, scope = ''): Promise<{ company: string; size: CompanySizeTag | null }[]> {
   const s = db();
   const probed = new Set((await s<{ company_key: string }[]>`select company_key from ats_probes where probed_at > now() - interval '30 days'`).map((r) => r.company_key));
   const frequent = await s<{ company: string; size: CompanySizeTag | null }[]>`
@@ -311,8 +314,8 @@ export async function companiesToProbe(seeds: string[], limit: number): Promise<
   const out: { company: string; size: CompanySizeTag | null }[] = [];
   const seen = new Set<string>();
   for (const c of [...seeds.map((company) => ({ company, size: 'grande' as CompanySizeTag })), ...frequent]) {
-    const key = normalizeText(c.company);
-    if (!key || probed.has(key) || seen.has(key)) continue;
+    const key = probeKey(c.company, scope);
+    if (!normalizeText(c.company) || probed.has(key) || seen.has(key)) continue;
     seen.add(key);
     out.push(c);
     if (out.length >= limit) break;
@@ -320,9 +323,9 @@ export async function companiesToProbe(seeds: string[], limit: number): Promise<
   return out;
 }
 
-export async function markProbed(company: string, found: boolean): Promise<void> {
+export async function markProbed(company: string, found: boolean, scope = ''): Promise<void> {
   const s = db();
   await s`
-    insert into ats_probes (company_key, company, found) values (${normalizeText(company)}, ${company}, ${found})
+    insert into ats_probes (company_key, company, found) values (${probeKey(company, scope)}, ${company}, ${found})
     on conflict (company_key) do update set probed_at = now(), found = excluded.found`;
 }
