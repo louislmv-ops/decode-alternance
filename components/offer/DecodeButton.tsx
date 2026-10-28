@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { OfferMap } from './OfferMap';
+import { CompanyInsight } from './CompanyInsight';
 import { Mascotte } from '@/components/Mascotte';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { Emoji } from '@/components/Emoji';
@@ -87,6 +88,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         rhythm={null}
         contract={offer.contract}
       />
+      {!offer.isExample && offer.company && <CompanyInsight company={offer.company} context={offer.pay ?? null} />}
       {offer.place && <OfferMap place={offer.place} />}
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
       <PerksPanel perks={offer.perks ?? []} />
@@ -95,14 +97,13 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         announcedCents={offer.salaryCents}
         announcedMaxCents={offer.salaryMaxCents ?? null}
         context={offer.pay ?? null}
-        company={offer.company}
         sourceLabel={offer.sourceLabel}
         offerContract={offer.contractKind ?? null}
         folded
       />
       {state.status === 'idle' && (
         <div className="decode-pitch">
-          <p>L’offre en clair, les pièges, comment sortir du lot.</p>
+          <p>Ce que tu feras vraiment, les pièges, et comment sortir du lot.</p>
         </div>
       )}
       {state.status === 'error' && (
@@ -114,8 +115,8 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         <div className="decode-wait" role="status">
           <Mascotte pose="loupe" size={72} className="decode-wait__mascotte" />
           <div>
-            <p className="decode-wait__title">Décode lit l’annonce pour toi…</p>
-            <p className="decode-wait__sub">Missions en clair, pièges, salaire : une vingtaine de secondes.</p>
+            <p className="decode-wait__title">Décode lit l’annonce à ta place…</p>
+            <p className="decode-wait__sub">Missions, salaire, pièges : une vingtaine de secondes.</p>
             <span className="decode-wait__bar" aria-hidden="true" />
           </div>
         </div>

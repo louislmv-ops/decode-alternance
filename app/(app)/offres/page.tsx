@@ -176,7 +176,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           <div className="empty">
             <Mascotte pose="surpris" size={128} className="empty__mascotte" />
             <p>
-              Aucune offre ne correspond. Retire un filtre ou élargis le lieu. <Link href="/offres">Réinitialiser les filtres</Link>
+              Rien qui colle. Enlève un filtre ou élargis la zone. <Link href="/offres">Réinitialiser les filtres</Link>
             </p>
           </div>
         ) : (

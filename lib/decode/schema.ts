@@ -31,6 +31,14 @@ export const DecodedOfferSchema = z.object({
     .array(z.object({ moment: z.string(), activite: z.string() }))
     .describe('Quatre à six moments d’une semaine probable, déduits des missions'),
   apprentissages: z.array(z.string()).describe('Ce que la personne va apprendre, trois à cinq éléments'),
+  profil: z
+    .object({
+      enClair: z.string().describe('Une phrase, en tutoyant : le profil qu’ils cherchent en vrai (« quelqu’un en BTS qui aime Excel et le téléphone »)'),
+      exige: z.array(z.string()).describe('Ce qui est vraiment exigé par l’annonce, quatre éléments au plus, chacun en six mots au plus'),
+      bonus: z.array(z.string()).describe('Ce qui est seulement « apprécié » ou « un plus », trois éléments au plus'),
+    })
+    .optional()
+    .describe('Le profil recherché, d’après l’annonce seulement'),
   contrat: z.object({
     type: z.enum(['apprentissage', 'professionnalisation', 'inconnu']),
     diplome: z.string().nullable(),

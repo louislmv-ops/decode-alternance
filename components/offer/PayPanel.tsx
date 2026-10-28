@@ -17,7 +17,6 @@ export function PayPanel({
   announcedCents,
   announcedMaxCents = null,
   context,
-  company,
   sourceLabel,
   perks = [],
   offerContract = null,
@@ -27,7 +26,6 @@ export function PayPanel({
   /** Haut de la fourchette annoncée, ou plafond d'un « jusqu'à » : jamais présenté comme le salaire. */
   announcedMaxCents?: number | null;
   context: PayContext | null;
-  company: string | null;
   sourceLabel: string;
   perks?: string[];
   /** Le contrat de l'offre quand elle le précise : c'est lui qui fixe le minimum légal. */
@@ -43,8 +41,6 @@ export function PayPanel({
   const shown = payDisplay(e, minimum.cents);
   const pay = announcedCents !== null ? comparePay(announcedCents, minimum.cents) : null;
   const years = ([1, 2, 3] as const).map((year) => minimumSalary({ contract: 'apprentissage', age: profile.age, year, hasBacPro: profile.hasBacPro }));
-  const jobs = context?.jobs ?? [];
-  const reviews = context?.reviews ?? [];
 
   const link = (
     <Link href="/profil" className="panel__link">
@@ -137,55 +133,6 @@ export function PayPanel({
       )}
 
       </details>
-
-      <h3 className="pay__h">Ce qu’en disent les alternants</h3>
-      {jobs.length > 0 && (
-        <ul className="pay__jobs">
-          {jobs.map((j) => (
-            <li key={j.jobTitle}>
-              <span>{j.jobTitle}</span>
-              <span className="num">
-                {j.medianCents !== null ? formatEuros(j.medianCents, 0) : '–'} <small>médiane, {j.count} déclarations</small>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {reviews.length > 0 && (
-        <ul className="pay__reviews">
-          {reviews.map((r) => (
-            <li key={r.id}>
-              <p className="pay__review-head">
-                <strong>{r.title}</strong> <span className="num">{r.overall}/5</span>
-              </p>
-              <p className="pay__review-meta">
-                {r.jobTitle}, contrat commencé en {r.startYear}
-                {r.verified ? ' · e-mail pro vérifié' : ''}
-              </p>
-              <p>
-                <b>Plus :</b> {r.pros}
-              </p>
-              <p>
-                <b>Moins :</b> {r.cons}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-      {jobs.length === 0 && reviews.length === 0 && (
-        <p className="panel__note">
-          {e.source === 'alternants'
-            ? 'Les déclarations existent mais aucun poste n’en a encore assez pour être détaillé.'
-            : 'Aucun alternant n’a encore déclaré son salaire ni laissé d’avis sur cette entreprise.'}
-        </p>
-      )}
-      {company && (
-        <p className="panel__note" data-needs="comptes">
-          <Link className="link" href={context?.companyHref ?? `/entreprises?q=${encodeURIComponent(company)}`}>
-            {context?.companyHref ? `Tous les avis et salaires (${context.reviewCount} avis)` : 'Tu y es passé ? Déclare ton salaire, anonymement'}
-          </Link>
-        </p>
-      )}
 
       <details className="fold pay__more">
         <summary className="fold__head">

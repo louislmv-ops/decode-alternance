@@ -1,6 +1,7 @@
 'use client';
 
 import { OfferMap, type OfferPlace } from './OfferMap';
+import { CompanyInsight } from './CompanyInsight';
 import { mergePerks } from '@/lib/offers/perks';
 import { BullshitBingo, JargonText } from './BullshitBingo';
 import { ApplyKit } from './ApplyKit';
@@ -222,6 +223,45 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             )}
           </section>
 
+          {decoded.profil && (
+            <section className="panel" aria-labelledby="profil-title">
+              <div className="panel__head">
+                <h2 id="profil-title">Le profil qu’ils cherchent</h2>
+              </div>
+              <p className="lead-sub lead-sub--first">{decoded.profil.enClair}</p>
+              {(decoded.profil.exige.length > 0 || decoded.profil.bonus.length > 0) && (
+                <div className="split">
+                  {decoded.profil.exige.length > 0 && (
+                    <div>
+                      <p className="ui-label">Obligatoire</p>
+                      <ul className="ebullets" role="list">
+                        {decoded.profil.exige.slice(0, 4).map((x, i) => (
+                          <li key={i}>
+                            <span className="ebullets__e" aria-hidden="true">✔️</span>
+                            <span>{x}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {decoded.profil.bonus.length > 0 && (
+                    <div>
+                      <p className="ui-label">Un plus, pas obligatoire</p>
+                      <ul className="ebullets" role="list">
+                        {decoded.profil.bonus.slice(0, 3).map((x, i) => (
+                          <li key={i}>
+                            <span className="ebullets__e" aria-hidden="true">➕</span>
+                            <span>{x}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+
           {(decoded.pointsForts.length > 0 || decoded.limites.length > 0) && (
             <section className="panel" aria-labelledby="proscons-title">
               <h2 id="proscons-title" className="sr-only">
@@ -263,6 +303,8 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               </div>
             </section>
           )}
+
+          {offer && !offer.isExample && company && <CompanyInsight company={company} context={offer.pay ?? null} />}
 
           {offer?.place && <OfferMap place={offer.place} />}
 
@@ -376,7 +418,6 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             announcedCents={offerCents}
             announcedMaxCents={offerMaxCents}
             context={offer?.pay ?? null}
-            company={company || null}
             sourceLabel={offer?.sourceLabel ?? 'l’annonce'}
             offerContract={offer?.contractKind ?? null}
             folded
