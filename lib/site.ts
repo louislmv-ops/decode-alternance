@@ -1,2 +1,2 @@
-/** L'adresse publique du site, pour les liens absolus (sitemap, partage) : décode-alternance.fr, écrit en punycode. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://xn--dcode-alternance-bqb.fr').replace(/\/$/, '');
+/** L'adresse publique du site, pour les liens absolus (sitemap, liens canoniques, partage). L'ancien domaine avec accent y redirige. */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.decode-alternance.fr').replace(/\/$/, '');
