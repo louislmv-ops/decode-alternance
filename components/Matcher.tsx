@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useProfile } from '@/components/useProfile';
+import { OPEN_EVENT, PENDING_KEY } from './MatchButton';
 import type { CvGuess } from '@/lib/cv/extract';
 import { DEPARTMENT_OPTIONS } from '@/lib/departments';
 import { savePlace } from '@/lib/place';
@@ -10,7 +11,6 @@ import { DOMAINS } from '@/lib/domains';
 import { CV_ACCEPT } from '@/lib/cv/accept';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 
-const OPEN_EVENT = 'decode:match';
 const SEEN_KEY = 'decode.match.vu';
 
 const LEVELS: { level: DiplomaLevel; label: string }[] = [
@@ -23,19 +23,6 @@ const LEVELS: { level: DiplomaLevel; label: string }[] = [
 
 type Step = 'start' | 'job' | 'place' | 'level' | 'age';
 const STEPS: Step[] = ['job', 'place', 'level', 'age'];
-
-/** Ouvre le questionnaire depuis n'importe quel bouton. */
-export function openMatcher() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
-}
-
-export function MatchButton({ className, children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <button type="button" className={className} onClick={openMatcher}>
-      {children}
-    </button>
-  );
-}
 
 /** Le questionnaire de 30 secondes : un CV ou quatre questions, puis les offres qui collent. */
 export function Matcher() {
@@ -50,6 +37,7 @@ export function Matcher() {
   const [cv, setCv] = useState<{ status: 'idle' | 'reading' } | { status: 'done'; city: string | null } | { status: 'error'; message: string }>({ status: 'idle' });
 
   const open = useCallback(() => {
+    (window as unknown as Record<string, boolean>)[PENDING_KEY] = false;
     setJob(profile.job);
     setDepartment(profile.department);
     setLevel(profile.filled ? profile.level : null);
@@ -66,6 +54,9 @@ export function Matcher() {
 
   useEffect(() => {
     window.addEventListener(OPEN_EVENT, open);
+    // Un clic arrivé avant le chargement du questionnaire.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if ((window as unknown as Record<string, boolean>)[PENDING_KEY]) open();
     return () => window.removeEventListener(OPEN_EVENT, open);
   }, [open]);
 

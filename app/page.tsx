@@ -5,7 +5,7 @@ import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
 import { SwipePromo } from '@/components/offer/SwipePromo';
 import { Mascotte, type MascottePose } from '@/components/Mascotte';
-import { MatchButton } from '@/components/Matcher';
+import { MatchButton } from '@/components/MatchButton';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { DEPARTMENT_NAMES, DEPARTMENT_OPTIONS } from '@/lib/departments';

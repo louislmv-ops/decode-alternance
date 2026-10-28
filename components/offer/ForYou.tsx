@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MatchButton } from '@/components/Matcher';
+import { MatchButton } from '@/components/MatchButton';
 import { useProfile } from '@/components/useProfile';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 

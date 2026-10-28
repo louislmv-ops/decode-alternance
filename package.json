@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "ingest": "tsx --env-file-if-exists=.env.local scripts/ingest.ts",
-    "alerts": "tsx --env-file-if-exists=.env.local scripts/alerts.ts"
+    "alerts": "tsx --env-file-if-exists=.env.local scripts/alerts.ts",
+    "analyze": "next analyze"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.0.0",
