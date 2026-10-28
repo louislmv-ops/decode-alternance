@@ -39,10 +39,10 @@ async function latestOffers(departments: string[]): Promise<OfferPage | null> {
 
 export const metadata: Metadata = { alternates: { canonical: '/' } };
 
-/** Décode s'assoit sur un mot du titre : il se pose en douceur, puis respire et cligne de l'œil. */
-function Peek({ where }: { where: 'd' | 'm' }) {
+/** Décode sort du trait jaune, au bout de « En clair. » : il se pose en douceur, puis respire et cligne de l'œil. */
+function Peek() {
   return (
-    <span className={`hero2__peek hero2__peek--${where}`} aria-hidden="true">
+    <span className="hero2__peek hero2__peek--end" aria-hidden="true">
       <span className="hero2__peek-in">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/decode/assis-320.webp" alt="" width={320} height={268} fetchPriority="high" />
@@ -70,7 +70,11 @@ export default async function Home() {
         <section className="hero2" aria-labelledby="hero-title">
           {/* Le ciel : des étoiles, la planète de Décode en image fixe, puis en mouvement quand elle est prête. */}
           <div className="sky" aria-hidden="true">
-            <div className="sky__stars" />
+            <div className="aurora">
+              <span />
+              <span />
+              <span />
+            </div>
             <div className="sky__poster" />
             <Planet />
           </div>
@@ -80,18 +84,16 @@ export default async function Home() {
                 Trouve
               </span>{' '}
               <span className="hero2__w hero2__ton" style={{ '--i': 1 } as React.CSSProperties}>
-                {/* Sur téléphone, le titre passe sur trois lignes : Décode s'accroche à la première, au-dessus de « ton ». */}
-                <Peek where="m" />
                 ton
               </span>{' '}
               <span className="hero2__w hero2__hang" style={{ '--i': 2 } as React.CSSProperties}>
-                <Peek where="d" />
                 alternance.
               </span>
               <br />
               <span className="hero2__w hero2__mark" style={{ '--i': 3 } as React.CSSProperties}>
                 En clair.
               </span>
+              <Peek />
             </h1>
             <p className="hero2__lead">Les offres traduites, ton salaire calculé, les pièges écartés. Gratuit.</p>
 

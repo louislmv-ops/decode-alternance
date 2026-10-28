@@ -11,6 +11,7 @@ import { Reveal } from '@/components/Reveal';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { SITE_URL } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
+import { Cosmos } from '@/components/Cosmos';
 import { siteJsonLd } from '@/lib/seo';
 
 // Archivo ne sert plus qu'au mot « décode » du logo : la police est réduite à ces lettres (moins de 6 Ko).
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
+        <Cosmos />
         <JsonLd data={siteJsonLd()} />
         {children}
         <AccountSync />
