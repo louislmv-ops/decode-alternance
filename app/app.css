@@ -8427,3 +8427,24 @@ a:hover .wordmark__o,
 .conv-pay p + p {
   margin-top: 8px;
 }
+
+.conv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step-small);
+}
+
+.conv-table th,
+.conv-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+
+.conv-table td {
+  text-align: right;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}

@@ -7,6 +7,8 @@ import { CampaignCard } from '@/components/campaigns/CampaignCard';
 import { Contribute } from '@/components/companies/Contribute';
 import { SpontaneousCta } from '@/components/companies/SpontaneousCta';
 import { ReviewCard } from '@/components/companies/ReviewCard';
+import { ConventionGrid } from '@/components/companies/ConventionGrid';
+import { gridFor } from '@/lib/rules/convention-grids';
 import { Score } from '@/components/companies/Stars';
 import { companyBySiren, type CompanyRef } from '@/lib/companies/search';
 import { isTopForApprentices } from '@/lib/companies/shared';
@@ -147,6 +149,11 @@ export default async function CompanyPageView({ params }: Props) {
         </section>
 
         <SpontaneousCta name={company.name} />
+
+        {(() => {
+          const grid = (company.idcc ?? []).map(gridFor).find((g) => g !== null);
+          return grid ? <ConventionGrid grid={grid} /> : null;
+        })()}
 
         {isCommunityOpen() && <Contribute siren={company.siren} name={company.name} />}
 
