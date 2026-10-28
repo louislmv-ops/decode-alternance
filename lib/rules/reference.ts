@@ -35,26 +35,7 @@ export const PROFESSIONNALISATION_RATES = [
 export const APPRENTI_EXEMPTION_SHARE = 0.5;
 export const APPRENTI_EXEMPTION_SOURCE = 'Décret n° 2025-290 (seuil abaissé de 79 % à 50 % du SMIC en 2025)';
 
-/**
- * Aides de l'État à l'employeur pour la première année d'un contrat d'apprentissage conclu
- * à partir du 8 mars 2026 et commencé avant le 1er janvier 2027.
- * Montants maximaux, en centimes, selon la taille de l'entreprise et le niveau du diplôme préparé.
- */
-export const EMPLOYER_AID_2026 = {
-  source: 'Décret n° 2026-168 du 6 mars 2026 ; aide unique pour les niveaux 3 et 4 dans les entreprises de moins de 250 salariés',
-  validFrom: '2026-03-08',
-  validUntil: '2026-12-31',
-  under250: { level3to4: 500_000, level5: 450_000, level6to7: 200_000 },
-  from250: { level3to4: 200_000, level5: 150_000, level6to7: 75_000 },
-  disabledWorker: 600_000,
-} as const;
-
-/** Participation forfaitaire de l'employeur pour un diplôme de niveau 6 ou 7, contrats conclus depuis le 1er juillet 2025. */
-export const EMPLOYER_PARTICIPATION = {
-  cents: 75_000,
-  since: '2025-07-01',
-  source: 'Décrets publiés au JO du 29 juin 2025 sur le financement de l’apprentissage',
-} as const;
+// Les aides à l'employeur et la participation à la formation sont dans employer-aids.ts.
 
 /** Délai maximal pour trouver un employeur après le début de la formation en CFA (article L6222-12-1). */
 export const NO_EMPLOYER_GRACE_MONTHS = 3;

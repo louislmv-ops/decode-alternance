@@ -2,14 +2,15 @@ import type { Metadata } from 'next';
 import { DecoderView } from '@/components/offer/DecoderView';
 import { isDecodeConfigured } from '@/lib/decode/ai';
 import { DEMO_OFFERS } from '@/lib/offers/demo';
+import { aiProvider } from '@/lib/legal';
 
 export const metadata: Metadata = {
   title: 'Décoder une offre d’alternance',
-  description: 'Colle une offre d’alternance : missions en clair, semaine type, pièges, salaire comparé à ton minimum et questions à poser.',
+  description: 'Colle une offre d’alternance : missions en clair, semaine type, points de vigilance, salaire comparé à ton minimum et questions à poser.',
   alternates: { canonical: '/decoder' },
 };
 
 export default function DecoderPage() {
   const examples = DEMO_OFFERS.filter((o) => !o.id.endsWith('-relais')).map((o) => ({ id: o.id, title: o.title, company: o.company ?? '' }));
-  return <DecoderView aiEnabled={isDecodeConfigured()} examples={examples} />;
+  return <DecoderView aiEnabled={isDecodeConfigured()} provider={aiProvider()} examples={examples} />;
 }

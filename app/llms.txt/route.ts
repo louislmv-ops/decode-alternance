@@ -29,7 +29,7 @@ Décode ne garantit ni contrat, ni entretien, ni réponse. Les salaires minimums
 
 ## Outils
 
-- [Offres d'alternance](${SITE_URL}/offres) : recherche par métier, ville, niveau ; chaque offre est décodée (missions en clair, salaire comparé au minimum, avantages, pièges)
+- [Offres d'alternance](${SITE_URL}/offres) : recherche par métier, ville, niveau ; chaque offre est décodée (missions en clair, salaire comparé au minimum, avantages, points de vigilance)
 - [Décoder une offre](${SITE_URL}/decoder) : colle n'importe quelle annonce, Décode la traduit
 - [Salaire minimum d'un alternant](${SITE_URL}/salaire) : calcul selon le contrat (apprentissage ou contrat pro), l'âge et l'année
 - [Trouver l'équipe](${SITE_URL}/equipe) : la méthode pour contacter le service qui recrute, pas seulement les RH
