@@ -1,7 +1,8 @@
 import { detailsOf } from './details';
 import { MIN_SALARIES, SKILL_OPTIONS } from './filter-options';
 import { matchesQuery } from './query';
-import { MAX_DEPARTMENTS } from '@/lib/place';
+import { distanceKm } from '@/lib/geo';
+import { decodeNearCookie, encodeCenter, MAX_DEPARTMENTS, parseNear } from '@/lib/place';
 import { type OfferSort, SORT_OPTIONS, sortOffers } from './rank';
 import { SECTOR_CODES, sectorOf } from './sectors';
 import { type CompanySizeTag, SOURCE_PRIORITY, type Offer, type OfferFilters, type OfferPage } from './types';
@@ -34,8 +35,9 @@ export function dedupe(offers: Offer[]): Offer[] {
 export function matchesFilters(o: Offer, filters: OfferFilters, now = Date.now()): boolean {
   // Les offres d'écoles déguisées ne sont jamais listées.
   if (o.schoolFlags.length > 0) return false;
+  if (filters.near && !isNear(o, filters.near)) return false;
   // Un département connu hors de la sélection (Jooble ne cherche qu'un lieu, par exemple).
-  if (filters.departments?.length && o.department && !filters.departments.includes(o.department)) return false;
+  if (!filters.near && filters.departments?.length && o.department && !filters.departments.includes(o.department)) return false;
   if (filters.contract && o.contract !== filters.contract && o.contract !== 'alternance') return false;
   if (filters.level && o.diplomaLevel !== null && o.diplomaLevel > filters.level) return false;
   if (filters.sizes?.length && (!o.companySize || !filters.sizes.includes(o.companySize))) return false;
@@ -57,14 +59,29 @@ export function matchesFilters(o: Offer, filters: OfferFilters, now = Date.now()
   return true;
 }
 
+/**
+ * Dans le rayon ? Une offre sans position n'est gardée que dans le département du centre : mieux vaut une offre
+ * un peu loin qu'une offre perdue.
+ */
+export function isNear(o: Offer, near: NonNullable<OfferFilters['near']>): boolean {
+  if (o.lat == null || o.lon == null) return o.department === near.department;
+  return distanceKm(near, { lat: o.lat, lon: o.lon }) <= near.km;
+}
+
+/** La distance au centre de la recherche, pour l'afficher sur l'offre. */
+export function withDistance(o: Offer, near: OfferFilters['near']): Offer {
+  if (!near || o.lat == null || o.lon == null) return o;
+  return { ...o, distanceKm: Math.round(distanceKm(near, { lat: o.lat, lon: o.lon })) };
+}
+
 /** Le même filtrage que la requête SQL, pour les offres d'exemple. */
 export function filterOffers(offers: Offer[], filters: OfferFilters, mode: OfferPage['mode']): OfferPage {
   const matching = sortOffers(
     dedupe(offers).filter((o) => {
       if (!matchesFilters(o, filters)) return false;
-      if (filters.departments?.length && (!o.department || !filters.departments.includes(o.department))) return false;
-      return matchesQuery(`${o.title} ${o.company ?? ''} ${o.city ?? ''}`, filters.q);
-    }),
+      if (!filters.near && filters.departments?.length && (!o.department || !filters.departments.includes(o.department))) return false;
+      return matchesQuery(`${o.title} ${o.company ?? ''} ${o.city ?? ''} ${o.description.slice(0, 3000)}`, filters.q);
+    }).map((o) => withDistance(o, filters.near)),
     filters.sort,
   );
 
@@ -103,9 +120,11 @@ export function parseFilters(params: Params): OfferFilters {
   const sizes = many(params, 'taille').filter((t): t is CompanySizeTag => (SIZES as string[]).includes(t));
   // Ancienne adresse : « grandes=1 ».
   if (one('grandes') === '1' && !sizes.includes('grande')) sizes.push('grande');
+  const near = parseNear(one('autour'), one('km'), one('ville')) ?? undefined;
   return {
     q: one('q')?.slice(0, 120),
-    departments: validDepartments(many(params, 'dep')),
+    departments: near ? [] : validDepartments(many(params, 'dep')),
+    near,
     contract: contract === 'apprentissage' || contract === 'professionnalisation' ? contract : undefined,
     level: level >= 3 && level <= 7 ? (level as OfferFilters['level']) : undefined,
     sizes: [...new Set(sizes)],
@@ -128,7 +147,10 @@ export function parseFilters(params: Params): OfferFilters {
  */
 export function filtersWithPlace(params: Params, placeCookie: string | undefined): OfferFilters {
   const filters = parseFilters(params);
-  if (params.dep === undefined && placeCookie && placeCookie !== 'fr') filters.departments = validDepartments(placeCookie.split('.'));
+  if (params.dep !== undefined || params.autour !== undefined || !placeCookie || placeCookie === 'fr') return filters;
+  const near = decodeNearCookie(placeCookie);
+  if (near) return { ...filters, near, departments: [] };
+  filters.departments = validDepartments(placeCookie.split('.'));
   return filters;
 }
 
@@ -136,7 +158,11 @@ export function filtersWithPlace(params: Params, placeCookie: string | undefined
 export function filtersQuery(f: OfferFilters, page = 1): URLSearchParams {
   const p = new URLSearchParams();
   if (f.q) p.set('q', f.q);
-  if (f.departments?.length) for (const d of f.departments) p.append('dep', d);
+  if (f.near) {
+    p.set('autour', encodeCenter(f.near));
+    p.set('km', String(f.near.km));
+    p.set('ville', f.near.label);
+  } else if (f.departments?.length) for (const d of f.departments) p.append('dep', d);
   else p.set('dep', 'fr');
   if (f.level) p.set('niveau', String(f.level));
   if (f.contract) p.set('contrat', f.contract);

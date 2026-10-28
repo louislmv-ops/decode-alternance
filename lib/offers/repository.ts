@@ -3,7 +3,7 @@ import { unstable_cache } from 'next/cache';
 
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { DEMO_DECODES, DEMO_OFFERS } from './demo';
-import { dedupe, filterOffers, matchesFilters } from './filter';
+import { dedupe, filterOffers, matchesFilters, withDistance } from './filter';
 import { diversify, sortOffers } from './rank';
 import { canonicalQuery } from './query';
 import { isAccountsConfigured } from '@/lib/account/store';
@@ -47,8 +47,15 @@ async function hasStoredLba(): Promise<boolean> {
   return value;
 }
 
-/** Les API ne connaissent pas nos synonymes : elles reçoivent la forme la plus courante (« compta » : « comptable »). */
-const forApis = (filters: OfferFilters): OfferFilters => ({ ...filters, q: canonicalQuery(filters.q) });
+/**
+ * Les API ne connaissent pas nos synonymes : elles reçoivent la forme la plus courante (« compta » : « comptable »).
+ * Ni nos rayons : elles cherchent dans le département du centre, et le rayon est vérifié ensuite.
+ */
+const forApis = (filters: OfferFilters): OfferFilters => ({
+  ...filters,
+  q: canonicalQuery(filters.q),
+  ...(filters.near ? { departments: [filters.near.department] } : {}),
+});
 
 async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
@@ -112,7 +119,7 @@ async function fetchOffers(filters: OfferFilters): Promise<OfferPage> {
   const pageSize = primary?.pageSize ?? 20;
   const extra = await aggregatorSearch(forApis(filters), primary ? Math.ceil(pageSize / 2) : pageSize, withLba);
   // Les agrégateurs ne savent filtrer ni la taille, ni le secteur, ni le salaire : on le fait ici.
-  const kept = extra.offers.filter((o) => matchesFilters(o, filters));
+  const kept = extra.offers.filter((o) => matchesFilters(o, filters)).map((o) => withDistance(o, filters.near));
   const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort, filters.sort === 'reviews' ? await companyRatingOf() : undefined);
   return {
     offers,

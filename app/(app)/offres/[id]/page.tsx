@@ -18,6 +18,7 @@ import { payContext } from '@/lib/offers/pay-context';
 import { isTrustedSourceLink } from '@/lib/offers/link';
 import { SOURCE_LABELS } from '@/lib/offers/types';
 import { detailsOf, REMOTE_LABELS, skillLabel } from '@/lib/offers/details';
+import { geocodeCached } from '@/lib/offers/geocode';
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ u?: string; s?: string }> };
 
@@ -43,7 +44,16 @@ export default async function OfferPage({ params, searchParams }: Props) {
     if (u && isTrustedSourceLink(u, s)) redirect(u);
     notFound();
   }
-  const [decoded, pay] = await Promise.all([findDecode(id), payContext(offer)]);
+  const [decoded, pay, point] = await Promise.all([
+    findDecode(id),
+    payContext(offer),
+    // La position donnée par la source, sinon le centre de sa ville (cherché une fois, puis gardé en mémoire).
+    offer.lat != null && offer.lon != null
+      ? Promise.resolve({ lat: offer.lat, lon: offer.lon })
+      : offer.city || offer.postalCode
+        ? geocodeCached({ postalCode: offer.postalCode, city: offer.city, department: offer.department })
+        : Promise.resolve(null),
+  ]);
 
   const meta: OfferMeta = {
     id: offer.id,
@@ -73,6 +83,13 @@ export default async function OfferPage({ params, searchParams }: Props) {
     })(),
     skills: detailsOf(offer).skills.map((x) => skillLabel(x) ?? x),
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
+    place: point
+      ? {
+          ...point,
+          precision: offer.lat != null && offer.geoPrecision === 'adresse' ? 'adresse' : 'ville',
+          label: [offer.postalCode, offer.city].filter(Boolean).join(' ') || null,
+        }
+      : null,
   };
 
   const posting = offer.source === 'exemple' ? null : jobPostingJsonLd(offer, `${SITE_URL}/offres/${encodeURIComponent(offer.id)}`);

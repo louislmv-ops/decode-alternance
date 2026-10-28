@@ -24,6 +24,8 @@ export interface AdzunaJob {
   location?: { display_name?: string; area?: string[] };
   salary_min?: number;
   salary_is_predicted?: string | number;
+  latitude?: number;
+  longitude?: number;
 }
 
 export function adzunaToOffer(job: AdzunaJob, department: string | null = null): Offer | null {
@@ -46,6 +48,8 @@ export function adzunaToOffer(job: AdzunaJob, department: string | null = null):
     salaryText: monthly ? `${Math.round(monthly / 100)} € brut par mois` : null,
     salaryMonthlyCents: monthly ?? salaryFromDescription(description),
     publishedAt: job.created ?? '',
+    lat: typeof job.latitude === 'number' ? job.latitude : null,
+    lon: typeof job.longitude === 'number' ? job.longitude : null,
   });
 }
 

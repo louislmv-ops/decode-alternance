@@ -21,3 +21,28 @@ export const DEPARTMENT_NAMES: Record<string, string> = {
 export const DEPARTMENT_OPTIONS = Object.entries(DEPARTMENT_NAMES)
   .map(([code, name]) => ({ code, name }))
   .sort((a, b) => a.code.localeCompare(b.code, 'fr', { numeric: true }));
+
+/** Les régions et leurs départements : « Île-de-France » sélectionne les huit départements d'un coup. */
+export const REGIONS: { code: string; name: string; departments: string[] }[] = [
+  { code: 'idf', name: 'Île-de-France', departments: ['75', '77', '78', '91', '92', '93', '94', '95'] },
+  { code: 'ara', name: 'Auvergne-Rhône-Alpes', departments: ['01', '03', '07', '15', '26', '38', '42', '43', '63', '69', '73', '74'] },
+  { code: 'hdf', name: 'Hauts-de-France', departments: ['02', '59', '60', '62', '80'] },
+  { code: 'paca', name: 'Provence-Alpes-Côte d’Azur', departments: ['04', '05', '06', '13', '83', '84'] },
+  { code: 'occ', name: 'Occitanie', departments: ['09', '11', '12', '30', '31', '32', '34', '46', '48', '65', '66', '81', '82'] },
+  { code: 'naq', name: 'Nouvelle-Aquitaine', departments: ['16', '17', '19', '23', '24', '33', '40', '47', '64', '79', '86', '87'] },
+  { code: 'ges', name: 'Grand Est', departments: ['08', '10', '51', '52', '54', '55', '57', '67', '68', '88'] },
+  { code: 'pdl', name: 'Pays de la Loire', departments: ['44', '49', '53', '72', '85'] },
+  { code: 'bre', name: 'Bretagne', departments: ['22', '29', '35', '56'] },
+  { code: 'nor', name: 'Normandie', departments: ['14', '27', '50', '61', '76'] },
+  { code: 'bfc', name: 'Bourgogne-Franche-Comté', departments: ['21', '25', '39', '58', '70', '71', '89', '90'] },
+  { code: 'cvl', name: 'Centre-Val de Loire', departments: ['18', '28', '36', '37', '41', '45'] },
+  { code: 'cor', name: 'Corse', departments: ['2A', '2B'] },
+  { code: 'om', name: 'Outre-mer', departments: ['971', '972', '973', '974', '976'] },
+];
+
+/** La région exactement couverte par cette liste de départements, s'il y en a une. */
+export function regionOf(departments: string[]): (typeof REGIONS)[number] | null {
+  if (departments.length === 0) return null;
+  const set = new Set(departments);
+  return REGIONS.find((r) => r.departments.length === set.size && r.departments.every((d) => set.has(d))) ?? null;
+}

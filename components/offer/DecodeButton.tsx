@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { OfferMap } from './OfferMap';
 import { Mascotte } from '@/components/Mascotte';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { Emoji } from '@/components/Emoji';
@@ -87,6 +88,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         contract={offer.contract}
         lean={offer.lean ?? null}
       />
+      {offer.place && <OfferMap place={offer.place} />}
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
       <PerksPanel perks={offer.perks ?? []} />
       {!offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}

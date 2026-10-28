@@ -31,10 +31,15 @@ export function widenings(filters: OfferFilters): Widening[] {
   const out: Widening[] = [];
   const hasSecondary = SECONDARY.some((k) => filters[k] !== undefined && filters[k] !== false);
   if (hasSecondary) out.push({ label: 'Même recherche, sans les autres filtres', filters: loose });
-  if (filters.q && filters.departments?.length) out.push({ label: 'Même métier, ailleurs en France', filters: { ...loose, departments: [] } });
-  if (filters.q && filters.departments?.length) out.push({ label: 'D’autres métiers près de chez toi', filters: { ...loose, q: undefined } });
-  if (filters.q && !filters.departments?.length) out.push({ label: 'D’autres offres du moment', filters: { ...loose, q: undefined } });
-  if (!filters.q && filters.departments?.length) out.push({ label: 'Ailleurs en France', filters: { ...loose, departments: [] } });
+  // Autour d'une ville : d'abord un rayon plus large, puis la région du centre (son département).
+  const wider = filters.near && filters.near.km < 100 ? { ...filters.near, km: Math.min(100, filters.near.km * 3) } : null;
+  if (wider) out.push({ label: `Même recherche, jusqu’à ${wider.km} km`, filters: { ...loose, near: wider } });
+  const placed = Boolean(filters.departments?.length || filters.near);
+  const nowhere = { departments: [], near: undefined };
+  if (filters.q && placed) out.push({ label: 'Même métier, ailleurs en France', filters: { ...loose, ...nowhere } });
+  if (filters.q && placed) out.push({ label: 'D’autres métiers près de chez toi', filters: { ...loose, q: undefined } });
+  if (filters.q && !placed) out.push({ label: 'D’autres offres du moment', filters: { ...loose, q: undefined } });
+  if (!filters.q && placed) out.push({ label: 'Ailleurs en France', filters: { ...loose, ...nowhere } });
   return out;
 }
 

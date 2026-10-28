@@ -1,6 +1,7 @@
 'use client';
 
 import type { PayLean } from '@/lib/offers/pay-signals';
+import { OfferMap, type OfferPlace } from './OfferMap';
 import { mergePerks } from '@/lib/offers/perks';
 import { AskedPanel, PerksPanel } from './Perks';
 import { BullshitBingo, JargonText } from './BullshitBingo';
@@ -58,6 +59,8 @@ export interface OfferMeta {
   skills?: string[];
   /** Le résumé gardé quand on like l'offre. */
   taste?: Omit<TasteItem, 'at'>;
+  /** Le lieu sur la carte, quand on le connaît. */
+  place?: OfferPlace | null;
   /** Le texte de l'annonce tel que la source le donne, mot pour mot. */
   description?: string;
   /** La source ne donne qu'un extrait (Adzuna, Jooble) : le texte complet est sur son site. */
@@ -186,6 +189,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         rhythm={decoded.contrat.rythme}
         contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
       />
+      {offer?.place && <OfferMap place={offer.place} />}
       {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
       <PerksPanel perks={perks} />
       {/* Le télétravail n'est redit ici que si les avantages n'en parlent pas déjà. */}

@@ -56,7 +56,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
   const [params, jar] = await Promise.all([searchParams, cookies()]);
   const placeCookie = jar.get(PLACE_COOKIE)?.value;
   const filters = filtersWithPlace(params, placeCookie);
-  const askPlace = !placeCookie && params.dep === undefined;
+  const askPlace = !placeCookie && params.dep === undefined && params.autour === undefined;
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
   const more = moreFiltersCount(filters);
   const anyFilter = Boolean(filters.q || filters.level || filters.contract || filters.sinceDays || filters.easyApply || filters.remote || more > 0);
@@ -69,7 +69,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
   const pages = Math.min(result.maxPage ?? Infinity, Math.max(1, Math.ceil(result.total / result.pageSize)));
   // Moins d'une page de résultats : on complète avec des offres proches, en disant ce qui a été élargi.
   const similar =
-    (filters.page ?? 1) <= 1 && result.total < PAGE_SIZE && (anyFilter || Boolean(filters.departments?.length))
+    (filters.page ?? 1) <= 1 && result.total < PAGE_SIZE && (anyFilter || Boolean(filters.departments?.length) || Boolean(filters.near))
       ? await completeWith(filters, result.offers, PAGE_SIZE - result.offers.length, listOffers)
       : [];
   const similarCommunity = similar.length ? await communityPayFor(similar.flatMap((g) => g.offers)) : new Map();
@@ -95,19 +95,19 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       <form id="osearch" className="osearch" action="/offres" method="get" role="search">
         <div className="osearch__bar">
           <label className="osearch__field">
-            <span className="sr-only">Métier, entreprise ou ville</span>
+            <span className="sr-only">Métier, domaine, entreprise ou mot-clé</span>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <circle cx="9" cy="9" r="6" />
               <path d="M13.5 13.5L17 17" strokeLinecap="round" />
             </svg>
-            <input type="search" name="q" defaultValue={filters.q} placeholder="Métier, entreprise, ville" />
+            <input type="search" name="q" defaultValue={filters.q} placeholder="Métier, domaine, mot-clé…" />
           </label>
           <button type="submit" className="osearch__go">
             Rechercher
           </button>
         </div>
         <div className="osearch__chips">
-          <PlacePicker formId="osearch" selected={filters.departments ?? []} />
+          <PlacePicker formId="osearch" selected={filters.departments ?? []} near={filters.near ?? null} />
           <label className={`chip${filters.level ? ' is-on' : ''}`}>
             <span className="sr-only">Ton niveau de diplôme</span>
             <select name="niveau" defaultValue={filters.level ? String(filters.level) : ''}>
@@ -166,11 +166,17 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
           </Link>
         </div>
 
+        {result.relaxed && rows.length > 0 && (
+          <p className="offers__relaxed">
+            Aucune offre n’a tous les mots de « {filters.q} ». Voici celles qui en ont le plus.
+          </p>
+        )}
+
         {rows.length === 0 ? (
           <div className="empty">
             <Mascotte pose="surpris" size={128} className="empty__mascotte" />
             <p>
-              Aucune offre ne correspond. Retire un filtre ou ajoute un département. <Link href="/offres">Réinitialiser les filtres</Link>
+              Aucune offre ne correspond. Retire un filtre ou élargis le lieu. <Link href="/offres">Réinitialiser les filtres</Link>
             </p>
           </div>
         ) : (

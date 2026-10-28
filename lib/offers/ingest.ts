@@ -10,12 +10,15 @@ import { harvestLba, type LbaHarvestReport } from './connectors/lba-harvest';
 import { discoverAts, discoverWorkday, SEED_COMPANIES } from './ats-discovery';
 import { BoardMismatchError, fetchAtsBoard } from './connectors/ats';
 import { sleep } from './connectors/http';
-import { companiesToProbe, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
+import { geocodePlace, placeKey } from './geocode';
+import { companiesToProbe, geocodeStoredOffers, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
 
 export const STALE_HOURS = 36;
 
 /** Employeurs cherchés chez les logiciels de recrutement à chaque collecte : quelques minutes de requêtes. */
 export const ATS_PROBES_PER_NIGHT = 120;
+/** Lieux nouveaux placés sur la carte par nuit : l'API Géo est gratuite, on la ménage. */
+export const GEOCODE_PER_NIGHT = 4000;
 /** Workday demande plus d'appels par employeur (un par serveur possible) : moins d'employeurs par nuit. */
 export const WORKDAY_PROBES_PER_NIGHT = 60;
 
@@ -78,6 +81,7 @@ export interface IngestReport {
   franceTravail: { fetched: number; truncated: string[] } | { skipped: string };
   careerSites: { company: string; offers: number; pagesRead: number; error?: string }[];
   ats: { boards: number; offers: number; discovered: number; probed: number; failed: number } | { skipped: string };
+  geocoded?: number;
   removed: number;
 }
 
@@ -123,6 +127,15 @@ export async function runIngest(
   }
 
   if (opts.careerSites !== false && opts.ats !== false) report.ats = await ingestAts(log, opts.probeLimit ?? ATS_PROBES_PER_NIGHT);
+
+  // Les offres sans position reçoivent le centre de leur ville : la recherche « autour de » et la carte en ont besoin.
+  try {
+    const geo = await geocodeStoredOffers(geocodePlace, placeKey, GEOCODE_PER_NIGHT);
+    report.geocoded = geo.offers;
+    log(`Carte : ${geo.places} lieux cherchés, ${geo.offers} offres placées`);
+  } catch (error) {
+    log(`Carte : échec (${(error as Error).message})`);
+  }
 
   const cutoff = new Date(Date.now() - STALE_HOURS * 3_600_000);
   // Une source qui n'a pas tourné ne retire rien : une panne ne doit pas vider la base. Une collecte partielle
