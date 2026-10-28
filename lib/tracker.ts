@@ -190,3 +190,25 @@ export function observations(apps: Application[], today: string): string[] {
   if (s.sent < 10) out.push('Les taux deviennent parlants vers 10 envois.');
   return out;
 }
+
+/** Les colonnes du tableau. « Relancée » reste avec « Envoyée » : c'est toujours une candidature en attente. */
+export type Column = 'a-envoyer' | 'envoyee' | 'entretien' | 'acceptee' | 'refus';
+
+export const COLUMNS: { value: Column; label: string }[] = [
+  { value: 'a-envoyer', label: 'À postuler' },
+  { value: 'envoyee', label: 'Postulé' },
+  { value: 'entretien', label: 'Entretien' },
+  { value: 'acceptee', label: 'Offre' },
+  { value: 'refus', label: 'Refus' },
+];
+
+export function columnOf(status: Status): Column {
+  return status === 'relancee' ? 'envoyee' : status;
+}
+
+/** Ce qui change quand une carte passe dans une colonne : le statut, et la date d'envoi si elle manquait. */
+export function moveTo(app: Application, column: Column, today: string): Partial<Application> {
+  if (columnOf(app.status) === column) return {};
+  if (column === 'a-envoyer') return { status: 'a-envoyer', sentAt: null, followedUpAt: null };
+  return { status: column, sentAt: app.sentAt ?? today };
+}

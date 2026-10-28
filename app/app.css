@@ -7838,3 +7838,375 @@ a:hover .wordmark__o,
   font-size: 14px;
   font-weight: 600;
 }
+
+/* ==========================================================================
+   Bullshit Bingo : la grille des formules toutes faites, et l'annonce surlignée.
+   ========================================================================== */
+
+.bingo__score {
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  background: var(--mint);
+  color: var(--brand-dark);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.bingo__score.is-bingo {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.bingo__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bingo__grid li {
+  display: grid;
+  place-items: center;
+  min-height: 64px;
+  padding: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.bingo__grid li.is-on {
+  position: relative;
+  border: 0;
+  background: var(--uv-gradient);
+  color: #fff;
+}
+
+.bingo__grid li.is-on::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  font-size: 12px;
+}
+
+.bingo__list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bingo__list li {
+  display: grid;
+  gap: 2px;
+}
+
+.bingo__list q {
+  font-weight: 700;
+}
+
+.bingo__list span {
+  color: var(--muted);
+}
+
+.jargon {
+  position: relative;
+}
+
+.jargon__mark {
+  padding: 0 0.15em;
+  border: 0;
+  border-radius: 0.3em;
+  background: rgb(var(--brand-rgb) / 0.12);
+  color: inherit;
+  font: inherit;
+  text-decoration: underline dotted rgb(var(--brand-rgb) / 0.7);
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.jargon__mark[aria-expanded='true'] {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.jargon__tip {
+  display: block;
+  margin: 6px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Swipe : revenir en arrière, et les catégories masquées après trois refus.
+   ========================================================================== */
+
+.swipe__btn--rewind {
+  width: 52px;
+  height: 52px;
+  align-self: center;
+  color: var(--brand);
+}
+
+.swipe__btn--rewind:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.swipe__hidden {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.swipe__hidden .chip {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.swipe__toast {
+  margin: 0 0 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 14px;
+}
+
+.swipe__toast .link {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Suivi en colonnes (Kanban). Ordinateur : cinq colonnes côte à côte.
+   Téléphone : une colonne et demie à l'écran, on fait défiler de côté.
+   ========================================================================== */
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.kcol {
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 10px;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  transition:
+    background-color var(--t-hover) ease,
+    box-shadow var(--t-hover) ease;
+}
+
+.kcol.is-over {
+  background: var(--mint);
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.kcol__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2px 4px 10px;
+  font-size: 15px;
+}
+
+.kcol__head .num {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.kcol--acceptee .kcol__head .num {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.kcol__cards {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kcol__empty {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 80px;
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.kcard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  padding: 10px 10px 8px 6px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow:
+    0 0 0 0.5px rgb(var(--shade-rgb) / 0.12),
+    0 4px 12px -8px rgb(var(--shade-rgb) / 0.3);
+}
+
+.kcard.is-ghosted {
+  opacity: 0.35;
+}
+
+.kcard--float {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 18px 40px -12px rgb(var(--shade-rgb) / 0.45);
+}
+
+.kcard__grip {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--control);
+  cursor: grab;
+  /* La poignée seule bloque le défilement : le reste de la carte laisse faire défiler le tableau. */
+  touch-action: none;
+}
+
+.kcard__grip:hover {
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.kanban.is-dragging,
+.kanban.is-dragging .kcard__grip {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.kcard__body {
+  min-width: 0;
+}
+
+.kcard__company {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.kcard__company a {
+  text-decoration: none;
+}
+
+.kcard__title,
+.kcard__meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.kcard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.kcard__tag {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kcard__tag--due {
+  background: var(--notice-bg);
+  color: var(--notice-ink);
+}
+
+.kcard__actions {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kcard__move {
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  font-size: 13px;
+}
+
+.kcard__remove {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.kcard__remove:hover {
+  background: var(--alert-bg);
+  color: var(--alert);
+}
+
+@media (max-width: 1100px) {
+  .kanban {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-inline: calc(var(--margin) * -1);
+    padding: 0 var(--margin) 8px;
+    scroll-padding-inline: var(--margin);
+  }
+  .kcol {
+    flex: 0 0 min(78vw, 300px);
+    scroll-snap-align: start;
+  }
+}
+
+.bingo__list q {
+  quotes: '« ' ' »';
+}

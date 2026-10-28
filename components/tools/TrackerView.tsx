@@ -9,7 +9,8 @@ import { TrackerCharts } from './TrackerCharts';
 import { AccountNudge } from '@/components/account/AccountNudge';
 import { formatDate } from '@/lib/format';
 import { followUpMessage } from '@/lib/linkedin';
-import { CHANNELS, daysSince, followUpDate, isFollowUpDue, stats, STATUSES, todayIso, type Application, type Channel, type Status } from '@/lib/tracker';
+import { CHANNELS, daysSince, followUpDate, isFollowUpDue, moveTo, stats, todayIso, type Channel } from '@/lib/tracker';
+import { KanbanBoard } from './KanbanBoard';
 
 const channelLabel = (c: Channel) => CHANNELS.find((x) => x.value === c)?.label ?? c;
 
@@ -22,10 +23,6 @@ export function TrackerView() {
   const today = todayIso();
   const due = apps.filter((a) => isFollowUpDue(a, today));
   const s = stats(apps);
-
-  function markSent(app: Application) {
-    update(app.id, { status: 'envoyee', sentAt: today });
-  }
 
   return (
     <div className="screen">
@@ -107,7 +104,7 @@ export function TrackerView() {
 
       <section className="panel" aria-labelledby="all-title">
         <div className="panel__head">
-          <h2 id="all-title">Toutes mes candidatures</h2>
+          <h2 id="all-title">Mes candidatures</h2>
           <span className="panel__meta num">{apps.length}</span>
         </div>
 
@@ -149,58 +146,13 @@ export function TrackerView() {
 
         {apps.length === 0 ? (
           <p className="empty">
-            Rien pour l’instant. Ajoute-en une, ou depuis une <Link href="/offres">offre</Link>.
+            Rien pour l’instant. Ajoute-en une, ou garde une <Link href="/offres/swipe">offre au swipe</Link> : elle arrive dans « À postuler ».
           </p>
         ) : (
-          <ul className="app-rows" role="list">
-            {apps.map((a) => (
-              <li key={a.id} className="app-row">
-                <div className="app-row__main">
-                  <p className="app-row__name">
-                    {a.url ? (
-                      <a href={a.url} target="_blank" rel="noopener noreferrer">
-                        {a.company}
-                      </a>
-                    ) : (
-                      a.company
-                    )}
-                  </p>
-                  <p className="app-row__meta">
-                    {[a.title, channelLabel(a.channel), a.sentAt ? `envoyée le ${formatDate(a.sentAt, true)}` : null, a.followedUpAt ? `relancée le ${formatDate(a.followedUpAt, true)}` : null]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </p>
-                </div>
-                <div className="app-row__actions">
-                  {a.status === 'a-envoyer' ? (
-                    <button type="button" className="ui-btn ui-btn--small" onClick={() => markSent(a)}>
-                      Envoyée aujourd’hui
-                    </button>
-                  ) : null}
-                  <label>
-                    <span className="sr-only">Statut de {a.company}</span>
-                    <select
-                      className="ui-select ui-select--small"
-                      value={a.status}
-                      onChange={(e) => {
-                        const status = e.target.value as Status;
-                        update(a.id, { status, sentAt: status !== 'a-envoyer' && !a.sentAt ? today : a.sentAt });
-                      }}
-                    >
-                      {STATUSES.map((st) => (
-                        <option key={st.value} value={st.value}>
-                          {st.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button type="button" className="ui-btn ui-btn--small ui-btn--ghost" onClick={() => remove(a.id)} aria-label={`Supprimer ${a.company}`}>
-                    Supprimer
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <KanbanBoard apps={apps} today={today} onMove={(id, column) => {
+            const app = apps.find((a) => a.id === id);
+            if (app) update(id, moveTo(app, column, today));
+          }} onRemove={remove} />
         )}
       </section>
     </div>

@@ -10,6 +10,7 @@ import type { PayTier } from '@/lib/offers/pay-tier';
 import { CompanyLogo } from './CompanyLogo';
 import { PayEuros } from './PayTier';
 import { Mascotte } from '@/components/Mascotte';
+import { afterDecision, type Category, EMPTY_MEMORY, parseMemory, SWIPE_KEY, type SwipeMemory, unhide } from '@/lib/swipe';
 
 export interface SwipeCard {
   id: string;
@@ -25,61 +26,131 @@ export interface SwipeCard {
   pepite: boolean;
   /** Le résumé gardé pour apprendre les goûts (like à droite, offre passée à gauche). */
   taste: Omit<TasteItem, 'at'>;
+  /** Secteur ou domaine : trois refus d'affilée le masquent. */
+  category: Category | null;
+}
+
+interface Decision {
+  id: string;
+  dir: 'left' | 'right';
+  /** La candidature ajoutée au suivi par ce « je garde », à retirer si on revient en arrière. */
+  appId: string | null;
+  /** Le compteur des refus avant cette décision. */
+  before: SwipeMemory;
+}
+
+function loadMemory(): SwipeMemory {
+  try {
+    return parseMemory(window.localStorage.getItem(SWIPE_KEY));
+  } catch {
+    return EMPTY_MEMORY;
+  }
+}
+
+function saveMemory(memory: SwipeMemory) {
+  try {
+    window.localStorage.setItem(SWIPE_KEY, JSON.stringify(memory));
+  } catch {
+    // Stockage bloqué : la mémoire vit le temps de la page.
+  }
 }
 
 /** Au-delà de ce déplacement (en px), le geste vaut décision. */
 const THRESHOLD = 110;
 
 export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: string | null }) {
-  const { add, apps } = useTracker();
-  const [index, setIndex] = useState(0);
-  const [kept, setKept] = useState(0);
+  const { add, apps, remove } = useTracker();
   const [dx, setDx] = useState(0);
   const [leaving, setLeaving] = useState<'left' | 'right' | null>(null);
   const start = useRef<number | null>(null);
   const [dragging, setDragging] = useState(false);
-  const { likes, like, pass, taste } = useLikes();
+  const { likes, like, unlike, pass, unpass, taste } = useLikes();
+  const [history, setHistory] = useState<Decision[]>([]);
+  const [memory, setMemory] = useState<SwipeMemory>(EMPTY_MEMORY);
+  const [toast, setToast] = useState<Category | null>(null);
   // Au début de la série, les offres qui ressemblent le plus aux likes passent en premier.
   const [deck, setDeck] = useState(cards);
   useEffect(() => {
-    if (likes.length === 0) return;
+    // La mémoire est dans le navigateur : lue après le premier affichage, pour que serveur et navigateur affichent la même chose.
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMemory(loadMemory());
+    if (likes.length === 0) return;
     setDeck([...cards].sort((a, b) => scoreOffer(b.taste, taste).score - scoreOffer(a.taste, taste).score));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards]);
-  const card = deck[index];
+
+  const decided = new Set(history.map((h) => h.id));
+  const isHidden = (c: SwipeCard) => Boolean(c.category && memory.hidden[c.category.key]);
+  const card = deck.find((c) => !decided.has(c.id) && !isHidden(c));
+  const kept = history.filter((h) => h.dir === 'right').length;
+  const remaining = deck.filter((c) => !decided.has(c.id) && !isHidden(c)).length;
+
+  const remember = useCallback((next: SwipeMemory) => {
+    setMemory(next);
+    saveMemory(next);
+  }, []);
 
   const decide = useCallback(
     (dir: 'left' | 'right') => {
       if (!card || leaving) return;
+      let appId: string | null = null;
       if (dir === 'right') {
-        const url = card.href;
-        if (!apps.some((a) => a.url === url)) {
-          add({ company: card.company, title: card.title, url, channel: 'offre', status: 'a-envoyer', sentAt: null, followedUpAt: null, notes: '' });
+        if (!apps.some((a) => a.url === card.href)) {
+          appId = add({ company: card.company, title: card.title, url: card.href, channel: 'offre', status: 'a-envoyer', sentAt: null, followedUpAt: null, notes: '' });
         }
-        setKept((k) => k + 1);
         like(card.taste);
       } else {
         pass(card.taste);
       }
+      const next = afterDecision(memory, card.category, dir);
       setLeaving(dir);
       window.setTimeout(() => {
         setLeaving(null);
         setDx(0);
-        setIndex((i) => i + 1);
+        setHistory((h) => [...h, { id: card.id, dir, appId, before: memory }]);
+        remember(next.memory);
+        if (next.hid) setToast(next.hid);
       }, 220);
     },
-    [card, leaving, apps, add, like, pass],
+    [card, leaving, apps, add, like, pass, memory, remember],
   );
+
+  /** Revient sur la dernière décision : la carte revient, le like, le refus ou l'ajout au suivi sont annulés. */
+  const rewind = useCallback(() => {
+    const last = history.at(-1);
+    if (!last || leaving) return;
+    if (last.dir === 'right') {
+      unlike(last.id);
+      if (last.appId) remove(last.appId);
+    } else {
+      unpass(last.id);
+    }
+    remember(last.before);
+    setToast(null);
+    setHistory((h) => h.slice(0, -1));
+  }, [history, leaving, unlike, unpass, remove, remember]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') decide('right');
       if (e.key === 'ArrowLeft') decide('left');
+      if (e.key === 'Backspace' || (e.key === 'z' && (e.metaKey || e.ctrlKey))) rewind();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [decide]);
+  }, [decide, rewind]);
+
+  const hiddenList = Object.entries(memory.hidden);
+  const hiddenBar = hiddenList.length > 0 && (
+    <div className="swipe__hidden" aria-label="Catégories masquées">
+      <span>Masquées :</span>
+      {hiddenList.map(([key, label]) => (
+        <button key={key} type="button" className="chip chip--button" onClick={() => remember(unhide(memory, key))} aria-label={`Afficher à nouveau ${label}`}>
+          <span>{label} ×</span>
+        </button>
+      ))}
+    </div>
+  );
 
   if (!card) {
     return (
@@ -89,7 +160,13 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
         <p className="c-note">
           {kept > 0 ? `${kept} offre${kept > 1 ? 's' : ''} gardée${kept > 1 ? 's' : ''}.` : 'Aucune offre gardée.'}
         </p>
+        {hiddenBar}
         <div className="swipe__end-actions">
+          {history.length > 0 && (
+            <button type="button" className="ui-btn" onClick={rewind}>
+              Revenir à la dernière
+            </button>
+          )}
           {kept > 0 && (
             <Link href="/likes" className="btn">
               Mes likes
@@ -116,12 +193,21 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
           Liste
         </Link>
         <span className="num">
-          {index + 1} / {cards.length}
+          {history.length + 1} / {history.length + remaining}
         </span>
       </div>
+      {hiddenBar}
+      {toast && (
+        <p className="swipe__toast" role="status">
+          {toast.label} masqué : 3 passées d’affilée.{' '}
+          <button type="button" className="link link--always" onClick={() => (remember(unhide(memory, toast.key)), setToast(null))}>
+            Annuler
+          </button>
+        </p>
+      )}
 
       <div className="swipe__stack">
-        {cards[index + 1] && <div className="swipe__card swipe__card--under" aria-hidden="true" />}
+        {remaining > 1 && <div className="swipe__card swipe__card--under" aria-hidden="true" />}
         <article
           className="swipe__card"
           style={{ transform: `translateX(${offset}px) rotate(${offset / 22}deg)`, transition: dragging ? 'none' : 'transform 220ms ease' }}
@@ -174,11 +260,17 @@ export function SwipeDeck({ cards, nextHref }: { cards: SwipeCard[]; nextHref: s
         <button type="button" className="swipe__btn swipe__btn--pass" onClick={() => decide('left')} aria-label="Je passe">
           <Emoji name="croix" size="30px" />
         </button>
+        <button type="button" className="swipe__btn swipe__btn--rewind" onClick={rewind} disabled={history.length === 0} aria-label="Revenir à l’offre précédente">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 14L4 9l5-5" />
+            <path d="M4 9h11a5 5 0 010 10h-3" />
+          </svg>
+        </button>
         <button type="button" className="swipe__btn swipe__btn--keep" onClick={() => decide('right')} aria-label="Je garde, dans mon suivi">
           <Emoji name="coeur" size="30px" />
         </button>
       </div>
-      <p className="swipe__hint">Droite : je garde. Gauche : je passe.</p>
+      <p className="swipe__hint">Droite : je garde. Gauche : je passe. Trois passées d’affilée dans un domaine, et il est masqué.</p>
     </div>
   );
 }

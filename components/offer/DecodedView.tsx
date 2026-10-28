@@ -3,6 +3,7 @@
 import type { PayLean } from '@/lib/offers/pay-signals';
 import { mergePerks } from '@/lib/offers/perks';
 import { AskedPanel, PerksPanel } from './Perks';
+import { BullshitBingo, JargonText } from './BullshitBingo';
 import { ApplyKit } from './ApplyKit';
 import { LikeButton } from './LikeButton';
 import type { TasteItem } from '@/lib/taste';
@@ -220,6 +221,8 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             {decoded.entreprise.ceQuElleFait && <p className="lead-sub">{decoded.entreprise.ceQuElleFait}</p>}
           </section>
 
+          <BullshitBingo text={offer?.description ?? ''} ai={decoded.jargon} />
+
           {(decoded.pointsForts.length > 0 || decoded.limites.length > 0) && (
             <section className="panel" aria-labelledby="proscons-title">
               <h2 id="proscons-title" className="sr-only">
@@ -417,7 +420,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
                 <h2 id="raw-title">L’annonce d’origine</h2>
               </summary>
               {offer.excerpt && <p className="panel__note">Extrait donné par {offer.sourceLabel} : le texte complet est sur leur site.</p>}
-              <p className="raw-text">{offer.description}</p>
+              <JargonText text={offer.description} ai={decoded.jargon} />
               {realSource && (
                 <a className="link raw-text__src" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer">
                   Voir sur {offer.sourceLabel}
