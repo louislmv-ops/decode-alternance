@@ -61,21 +61,29 @@ export function documentText(xml: string): string {
     .join('\n');
 }
 
-const WHO = /\b(apprenti|apprentie|apprentis|apprenties|alternant|alternante|alternants|alternantes|contrats? de professionnalisation|contrats? d['’]apprentissage)\b/i;
-const PAY = /(\d[\d\s.,]*\s?%|\d[\d\s.,]*\s?(€|euros?)\b|r[ée]mun[ée]ration|salaire|prime|gratification|treizi[eè]me mois|13e mois|tickets? restaurant|indemnit[ée])/i;
+const WHO = "(?:apprenti|apprentie|apprentis|apprenties|alternant|alternante|alternants|alternantes|contrats? de professionnalisation|contrats? d['’]apprentissage)";
+/** Le passage dit ce que les alternants touchent : « les apprentis seront rémunérés… », « la rémunération des alternants… ». */
+const PAYS = new RegExp(
+  `\\b${WHO}\\b[^.;]{0,160}\\b(seront r[ée]mun[ée]r|sont r[ée]mun[ée]r|per[çc]oi|percevr|touche|b[ée]n[ée]ficie(?:nt|ront)? (?:d['’]une|de la|du|d['’]un) (?:r[ée]mun[ée]ration|salaire|prime|majoration|gratification|treizi)|r[ée]mun[ée]ration (?:[ée]gale|fix[ée]e|major[ée]e|de)|salaire (?:[ée]gal|de|minimum))` +
+    `|\\b(r[ée]mun[ée]ration|salaire|grille|bar[èe]me|prime) (?:des|aux|pour les) ${WHO}`,
+  'i',
+);
+/** Les passages qui nomment les alternants pour les exclure, ou pour autre chose que leur paie. */
+const NOT_THEIR_PAY =
+  /\b(hors|sauf|except[ée]|exclu|exclus|[àa] l['’]exclusion|[àa] l['’]exception|ne sont pas concern|non concern|ne b[ée]n[ée]ficient pas)\b|frais de sant|mutuelle|pr[ée]voyance|cotisation|ma[iî]tres? d['’]apprentissage|tuteurs?\b|proportion|objectifs?\b|effectifs?\b|recrut|t[ée]l[ée]travail|convivialit/i;
 const MONEY = /\d[\d\s.,]*\s?(%|€|euros?\b)/i;
 
 /**
- * Les passages de l'accord sur la paie des alternants : un paragraphe qui nomme les alternants et parle d'argent,
- * avec un chiffre (pourcentage ou montant), ou la ligne suivante quand le chiffre y est. Trois au plus, coupés à
- * 700 caractères.
+ * Les passages de l'accord qui fixent la paie des alternants : un paragraphe qui dit ce qu'ils touchent, avec un
+ * chiffre (pourcentage ou montant), et qui ne les nomme pas pour les exclure ou parler d'autre chose (mutuelle,
+ * tuteurs, objectifs d'embauche). Trois au plus, coupés à 700 caractères.
  */
 export function apprenticePayExcerpts(text: string, max = 3): string[] {
   const lines = text.split('\n');
   const out: string[] = [];
   for (let i = 0; i < lines.length && out.length < max; i++) {
     const line = lines[i]!;
-    if (!WHO.test(line) || !PAY.test(line)) continue;
+    if (!PAYS.test(line) || NOT_THEIR_PAY.test(line)) continue;
     const next = lines[i + 1] ?? '';
     const passage = MONEY.test(line) ? line : MONEY.test(next) ? `${line} ${next}` : null;
     if (!passage) continue;

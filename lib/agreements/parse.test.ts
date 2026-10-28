@@ -41,4 +41,24 @@ describe('accords d’entreprise', () => {
     ]);
     expect(apprenticePayExcerpts('Les apprentis sont accueillis par un tuteur.')).toEqual([]);
   });
+
+  it('écarte les vrais faux positifs relevés sur une archive d’octobre 2026', () => {
+    const noise = [
+      'Augmentation de la valeur du point ETAM et du point Cadre de 1.2% au 1er janvier 2027 hors apprentis (non soumis aux coefficients), stagiaires, contrats d’intervention et contrats d’usage.',
+      'Pour le personnel Ouvriers : une augmentation généralisée de 1,3% pour le personnel en CDI justifiant d’une ancienneté minimum de 6 mois dans l’année 2025 (hors stagiaires, alternants et apprentis).',
+      "Les salariés à temps partiel et apprentis dont l'adhésion au système de garanties les conduirait à s'acquitter d'une cotisation au moins égale à 10 % de leur rémunération brute.",
+      'La Fondation se fixe l’objectif d’atteindre 3% d’alternants (apprentissage, professionnalisation) au sein de ses effectifs à l’échéance du présent accord.',
+      'Attribution d’une prime maître d’apprentissage de 250€ brut par an par apprentis.',
+      "Les salariés sous contrats particuliers type contrats d'apprentissage, contrats de qualification, contrat de professionnalisation et autres contrats atypiques ne sont pas concernés car les évolutions des salaires de ces salariés sont régies par la législation en vigueur les concernant.",
+      'A cet effet, chaque service disposera, pour l’exercice 2026, d’un budget de 100 euros TTC par salarié, alternant et stagiaire présent au moment de l’organisation du moment de convivialité.',
+      'Augmentations légales et conventionnelles : correspondent à une enveloppe de + 0,40 % de la masse salariale pour les augmentations liées à l’application de la CCN (minima conventionnels), aux primes d’ancienneté et aux évolutions conventionnelles concernant les apprentis.',
+    ];
+    for (const line of noise) expect(apprenticePayExcerpts(line)).toEqual([]);
+  });
+
+  it('garde un vrai passage sur la paie des alternants', () => {
+    const real =
+      'Enfin, il est convenu que les alternants, titulaires d’un contrat de professionnalisation ou d’apprentissage, seront rémunérés en fonction d’un pourcentage basé sur le minima grille de rémunération de la catégorie professionnelle d’appartenance (OE1A, TAM1A, CAD1A). Exemple, pour un alternant en apprentissage de première année en catégorie TAM, qui devrait normalement toucher 27 % du Smic, soit 504,09 €, touchera 27% du salaire mini du TAM de la grille, soit 594€ (exemple avec les éléments 2026).';
+    expect(apprenticePayExcerpts(real)).toHaveLength(1);
+  });
 });
