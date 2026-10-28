@@ -2,6 +2,17 @@
 
 Ce que seul le propriétaire des comptes peut faire. Le code est prêt : dès que les clés sont dans Vercel, tout se met à jour tout seul.
 
+## Le domaine
+
+Tu possèdes **décode-alternance.fr** (avec accent, chez Gandi). C'est l'adresse officielle du site. **decode-alternance.fr** (sans accent) n'est pas acheté : n'importe qui peut le prendre.
+
+Pour passer au domaine sans accent :
+1. Achète `decode-alternance.fr` (Gandi ou Vercel, autour d'une dizaine d'euros par an).
+2. Chez le registrar, fais pointer `decode-alternance.fr` et `www.decode-alternance.fr` vers Vercel (les valeurs exactes sont dans Vercel, Settings, Domains). Les deux sont déjà ajoutés au projet.
+3. Une fois que `https://www.decode-alternance.fr` s'ouvre, change `NEXT_PUBLIC_SITE_URL` dans Vercel en `https://www.decode-alternance.fr`, puis Redeploy. Le domaine avec accent y redirigera tout seul (next.config.ts).
+
+Ne change jamais `NEXT_PUBLIC_SITE_URL` vers un domaine qui ne s'ouvre pas encore : le site deviendrait inaccessible.
+
 ## 1. Les vraies offres (France Travail)
 
 1. Sur francetravail.io : finir la création du compte (cocher les CGU, valider l'e-mail).
@@ -67,7 +78,7 @@ Décode est gratuit pour les alternants. Ce qui se vend : la mise en avant, un a
 1. Crée un compte sur stripe.com (statut micro-entreprise ou société nécessaire pour recevoir l'argent).
 2. **Catalogue de produits → Ajouter un produit** : « Mise en avant Décode », prix **récurrent mensuel**, en hors taxes. Le montant est ton choix : tant que l'audience est petite, un prix d'entrée modeste (quelques dizaines d'euros HT par mois) rend la première vente plus facile ; tu le monteras avec les chiffres de vues du tableau de bord. Copie l'identifiant du prix (`price_...`) dans Vercel : `STRIPE_PRICE_ID`. Le site affiche toujours le prix de Stripe, jamais un prix écrit en dur.
 3. **Développeurs → Clés API** : la clé secrète (`sk_live_...`) dans Vercel : `STRIPE_SECRET_KEY`. Ne la colle jamais dans un chat.
-4. **Développeurs → Webhooks → Ajouter un endpoint** : `https://www.decode-alternance.fr/api/pro/webhook`, événements `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Copie le secret de signature (`whsec_...`) dans Vercel : `STRIPE_WEBHOOK_SECRET`.
+4. **Développeurs → Webhooks → Ajouter un endpoint** : `https://xn--dcode-alternance-bqb.fr/api/pro/webhook` (l'adresse officielle du moment, voir « Le domaine »), événements `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Copie le secret de signature (`whsec_...`) dans Vercel : `STRIPE_WEBHOOK_SECRET`.
 5. **Paramètres → Facturation → Portail client** : active « Mettre à jour le moyen de paiement », « Historique des factures » et « Annuler l'abonnement » (à la fin de la période).
 6. Micro-entrepreneur sans TVA : ajoute la mention « TVA non applicable, art. 293 B du CGI » dans Stripe (Paramètres → Factures → Pied de page).
 7. Vérifie chaque entreprise dans `/communaute/moderation` (SIRET et site) : seules les entreprises vérifiées peuvent s'abonner et être mises en avant.
