@@ -1,6 +1,7 @@
 // Ce que les agrégateurs (Adzuna, Jooble) ont en commun : retrouver le département à partir d'un nom
 // de lieu, et transformer une annonce en offre normalisée.
 
+import { CITY_DEPARTMENTS } from '@/lib/cities';
 import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { departmentFromPostalCode, detectContract, detectDiplomaLevel, fingerprint, isAlternance, normalizeText, schoolBaitFlags } from '../normalize';
 import type { Offer, OfferSource } from '../types';
@@ -17,8 +18,12 @@ export function departmentFromPlace(parts: (string | null | undefined)[]): strin
       const code = BY_NAME.get(normalizeText(piece));
       if (code) return code;
     }
-    // Paris n'est pas écrit « Paris (75) » partout : la ville vaut le département.
+    // Paris n'est pas écrit « Paris (75) » partout : la ville vaut le département. Pareil pour les grandes villes.
     if (/^paris\b/.test(normalizeText(part))) return '75';
+    for (const piece of part.split(/[,(]/)) {
+      const city = normalizeText(piece).replace(/ (cedex|\d+e?r?)( \d+)?$/, '');
+      if (CITY_DEPARTMENTS[city]) return CITY_DEPARTMENTS[city];
+    }
   }
   return null;
 }

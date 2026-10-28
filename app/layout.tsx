@@ -5,9 +5,8 @@ import './site.css';
 import './app.css';
 import './ultraviolet.css';
 import { AccountSync } from '@/components/account/AccountSync';
-import { Assistant } from '@/components/Assistant';
 import { isChatConfigured } from '@/lib/assistant/chat';
-import { Matcher } from '@/components/Matcher';
+import { LazyGlobals } from '@/components/LazyGlobals';
 import { Reveal } from '@/components/Reveal';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { SITE_URL } from '@/lib/site';
@@ -50,10 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <JsonLd data={siteJsonLd()} />
         {children}
-        <Matcher />
         <AccountSync />
         <Reveal />
-        {isChatConfigured() && <Assistant />}
+        <LazyGlobals chat={isChatConfigured()} />
       </body>
     </html>
   );

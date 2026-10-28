@@ -87,6 +87,17 @@ Chaque traduction appelle `claude-opus-5-5` (4 $ par million de jetons en entré
 
 Direction Apple (Human Interface Guidelines et verre liquide d'iOS 26, transposés au web) avec la palette « Ultraviolet » : bleu électrique `#3A1CFF`, violet `#8A2BFF`, rose `#FF3EC8`, cyan `#5CE1FF`. Le bleu-violet `#5B21FF` porte les actions ; le rose et le cyan ne servent qu'aux lueurs vues à travers le verre (l'aura cannelée sous la recherche de l'accueil, la carte du swipe), jamais au texte. Le jaune reste le surligneur des pépites. Les tokens sont dans `app/globals.css`, l'aura dans `app/ultraviolet.css`, chargé en dernier.
 
+## Toutes les offres : d'où elles viennent
+
+Personne n'a 100 % des offres, ni Welcome to the Jungle, ni LinkedIn : chacun a celles que les entreprises lui confient. Décode les additionne par les voies légales :
+
+1. **France Travail** et **La bonne alternance** : la très grande majorité des offres d'alternance publiées en France.
+2. **Les logiciels de recrutement des entreprises** (`lib/offers/connectors/ats.ts`) : Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee et Personio publient les offres de leurs clients par une API publique, faite pour être affichée ailleurs. C'est là que les start-up et beaucoup de grands groupes publient d'abord. Chaque nuit, la collecte cherche les tableaux de 120 employeurs de plus (`ats-discovery.ts` : ceux de la liste de départ, puis ceux qui ont le plus d'offres en base), les vérifie (nom ou offres en France), puis lit tous les tableaux connus. Un tableau qui échoue cinq nuits de suite n'est plus lu. Tester à la main : `pnpm ingest --discover Qonto` ou `pnpm ingest --ats lever:qonto`.
+3. **Les sites carrière** qui publient le balisage `JobPosting` (`companies.ts`).
+4. **Adzuna et Jooble**, agrégateurs avec API officielle.
+
+Ce que Décode ne fait pas : aspirer LinkedIn, Welcome to the Jungle, JobTeaser, Indeed ou HelloWork. Leurs bases d'annonces sont protégées (droit des producteurs de bases de données), leurs conditions l'interdisent, et la CNIL sanctionne l'aspiration (Kaspr, 240 000 €, 2024). Pour leurs offres, il faut un partenariat : voir `A_FAIRE.md`.
+
 ## Recherche, filtres et tri
 
 - Recherche sans accents (« developpeur » trouve « Développeur ») et avec les mots des annonces : « dev », « RH », « compta », « cyber »… (`lib/offers/query.ts`). En base, la fonction `decode_fold` et l'index `offers_search_folded` (`db/schema.sql`).

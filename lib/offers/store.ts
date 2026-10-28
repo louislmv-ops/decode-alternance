@@ -2,7 +2,9 @@
 
 import postgres from 'postgres';
 import type { DecodedOffer } from '@/lib/decode/schema';
+import type { AtsBoard, AtsProvider } from './connectors/ats';
 import { type RemotePolicy, remoteOf, skillsOf } from './details';
+import { normalizeText } from './normalize';
 import { expandQuery } from './query';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SMIC } from '@/lib/rules/reference';
@@ -254,4 +256,57 @@ export async function ensureOfferSchema(): Promise<void> {
 export async function closeDb(): Promise<void> {
   await sql?.end();
   sql = null;
+}
+
+/** Les tableaux d'offres connus, sauf ceux qui échouent depuis cinq collectes. */
+export async function listAtsBoards(): Promise<AtsBoard[]> {
+  const s = db();
+  const rows = await s<{ provider: AtsProvider; slug: string; company: string; company_size: CompanySizeTag | null }[]>`
+    select provider, slug, company, company_size from ats_boards where failures < 5 order by provider, slug`;
+  return rows.map((r) => ({ provider: r.provider, slug: r.slug, company: r.company, size: r.company_size }));
+}
+
+export async function saveAtsBoard(board: AtsBoard): Promise<void> {
+  const s = db();
+  await s`
+    insert into ats_boards (provider, slug, company, company_size) values (${board.provider}, ${board.slug}, ${board.company}, ${board.size ?? null})
+    on conflict (provider, slug) do update set company = excluded.company, failures = 0`;
+}
+
+export async function markAtsBoard(board: AtsBoard, result: { offers: number } | { error: true; disable?: boolean }): Promise<void> {
+  const s = db();
+  // Un tableau qui n'est pas celui de l'employeur est écarté tout de suite (cinq échecs d'un coup).
+  if ('error' in result && result.disable) await s`update ats_boards set failures = 5, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
+  else if ('error' in result) await s`update ats_boards set failures = failures + 1, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
+  else await s`update ats_boards set failures = 0, offers = ${result.offers}, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
+}
+
+/**
+ * Les employeurs à chercher cette nuit : ceux de la liste de départ puis ceux qui publient le plus d'offres en base,
+ * sauf ceux déjà cherchés depuis moins de 30 jours.
+ */
+export async function companiesToProbe(seeds: string[], limit: number): Promise<{ company: string; size: CompanySizeTag | null }[]> {
+  const s = db();
+  const probed = new Set((await s<{ company_key: string }[]>`select company_key from ats_probes where probed_at > now() - interval '30 days'`).map((r) => r.company_key));
+  const frequent = await s<{ company: string; size: CompanySizeTag | null }[]>`
+    select company, (array_agg(company_size) filter (where company_size is not null))[1] as size from offers
+    where company is not null and source <> 'site-carriere' and cardinality(school_flags) = 0
+    group by company order by count(*) desc limit 2000`;
+  const out: { company: string; size: CompanySizeTag | null }[] = [];
+  const seen = new Set<string>();
+  for (const c of [...seeds.map((company) => ({ company, size: 'grande' as CompanySizeTag })), ...frequent]) {
+    const key = normalizeText(c.company);
+    if (!key || probed.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    out.push(c);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+export async function markProbed(company: string, found: boolean): Promise<void> {
+  const s = db();
+  await s`
+    insert into ats_probes (company_key, company, found) values (${normalizeText(company)}, ${company}, ${found})
+    on conflict (company_key) do update set probed_at = now(), found = excluded.found`;
 }
