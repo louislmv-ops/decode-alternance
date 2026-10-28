@@ -1,4 +1,5 @@
 import type { DiplomaLevel } from '@/lib/rules/employer';
+import type { RemotePolicy } from './details';
 import type { OfferSort } from './rank';
 
 /** D'où vient une offre. L'ordre de `SOURCE_PRIORITY` décide laquelle garder quand une offre est publiée deux fois. */
@@ -73,6 +74,10 @@ export interface Offer {
   companySiren?: string | null;
   /** Logo fourni par la source elle-même. */
   logoUrl?: string | null;
+  /** Télétravail lu dans l'annonce (lib/offers/details.ts) ; absent tant qu'il n'a pas été calculé. */
+  remote?: RemotePolicy | null;
+  /** Compétences citées dans l'annonce (slugs de SKILLS). */
+  skills?: string[];
 }
 
 export interface OfferFilters {
@@ -91,6 +96,12 @@ export interface OfferFilters {
   direct?: boolean;
   /** Seulement les offres à candidature simplifiée. */
   easyApply?: boolean;
+  /** « partiel » : au moins un peu de télétravail ; « total » : entièrement à distance. */
+  remote?: 'partiel' | 'total';
+  /** Salaire annoncé d'au moins ce montant mensuel brut, en centimes. */
+  minSalaryCents?: number;
+  /** Une compétence citée dans l'annonce (slug de SKILLS). */
+  skill?: string;
   /** Par défaut, les plus attirantes d'abord. */
   sort?: OfferSort;
   page?: number;

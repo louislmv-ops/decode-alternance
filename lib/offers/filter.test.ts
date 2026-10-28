@@ -100,3 +100,38 @@ describe('plusieurs départements', () => {
     expect(matchesFilters({ ...base, department: null }, { departments: ['69'] })).toBe(true);
   });
 });
+
+describe('télétravail, salaire minimum et compétence', () => {
+  const base = DEMO_OFFERS[0]!;
+  const offer = (description: string, salaryMonthlyCents: number | null = 140000) => ({ ...base, description, salaryMonthlyCents, schoolFlags: [] });
+
+  it('lit les filtres de l’adresse et les y remet', () => {
+    const f = parseFilters({ teletravail: '1', salairemin: '1400', competence: 'excel' });
+    expect(f).toMatchObject({ remote: 'partiel', minSalaryCents: 140000, skill: 'excel' });
+    const q = filtersQuery(f);
+    expect([q.get('teletravail'), q.get('salairemin'), q.get('competence')]).toEqual(['1', '1400', 'excel']);
+  });
+
+  it('ignore les valeurs inventées', () => {
+    expect(parseFilters({ teletravail: 'oui', salairemin: '1337', competence: 'cobol' })).toMatchObject({ remote: undefined, minSalaryCents: undefined, skill: undefined });
+  });
+
+  it('« télétravail » garde le partiel et le complet, pas les annonces muettes', () => {
+    expect(matchesFilters(offer('Télétravail 2 jours'), { remote: 'partiel' })).toBe(true);
+    expect(matchesFilters(offer('Full remote'), { remote: 'partiel' })).toBe(true);
+    expect(matchesFilters(offer('Full remote'), { remote: 'total' })).toBe(true);
+    expect(matchesFilters(offer('Télétravail 2 jours'), { remote: 'total' })).toBe(false);
+    expect(matchesFilters(offer('Rien à ce sujet'), { remote: 'partiel' })).toBe(false);
+  });
+
+  it('le salaire minimum écarte les offres sans montant', () => {
+    expect(matchesFilters(offer('x', 140000), { minSalaryCents: 140000 })).toBe(true);
+    expect(matchesFilters(offer('x', 120000), { minSalaryCents: 140000 })).toBe(false);
+    expect(matchesFilters(offer('x', null), { minSalaryCents: 100000 })).toBe(false);
+  });
+
+  it('la compétence doit être citée', () => {
+    expect(matchesFilters(offer('Excel avancé'), { skill: 'excel' })).toBe(true);
+    expect(matchesFilters(offer('Word'), { skill: 'excel' })).toBe(false);
+  });
+});

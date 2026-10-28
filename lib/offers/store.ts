@@ -2,6 +2,8 @@
 
 import postgres from 'postgres';
 import type { DecodedOffer } from '@/lib/decode/schema';
+import { type RemotePolicy, remoteOf, skillsOf } from './details';
+import { expandQuery } from './query';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SMIC } from '@/lib/rules/reference';
 import { PAGE_SIZE } from './filter';
@@ -16,7 +18,8 @@ export function isDatabaseConfigured(): boolean {
 
 export function db(): postgres.Sql {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL manquant');
-  sql ??= postgres(process.env.DATABASE_URL, { max: 5, idle_timeout: 20, prepare: false });
+  // Les « déjà existant, on passe » du schéma ne disent rien d'utile.
+  sql ??= postgres(process.env.DATABASE_URL, { max: 5, idle_timeout: 20, prepare: false, onnotice: () => {} });
   return sql;
 }
 
@@ -44,6 +47,8 @@ interface OfferRow {
   school_flags: string[];
   rome_code?: string | null;
   easy_apply?: boolean;
+  remote?: RemotePolicy | null;
+  skills?: string[] | null;
   also_on?: OfferSource[];
 }
 
@@ -73,6 +78,8 @@ function toOffer(row: OfferRow): Offer {
     alsoOn: row.also_on ?? [],
     romeCode: row.rome_code ?? null,
     easyApply: row.easy_apply ?? false,
+    // Une base pas encore migrée n'a pas ces colonnes : le texte sera relu au besoin.
+    ...(row.skills !== undefined ? { remote: row.remote ?? null, skills: row.skills ?? [] } : {}),
   };
 }
 
@@ -102,6 +109,9 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
     school_flags: o.schoolFlags,
     rome_code: o.romeCode ?? null,
     easy_apply: o.easyApply ?? false,
+    // Toujours relus dans le texte : l'annonce a pu changer depuis la dernière collecte.
+    remote: remoteOf(`${o.title}\n${o.description}`),
+    skills: skillsOf(`${o.title}\n${o.description}`),
   }));
   const s = db();
   await s`
@@ -112,7 +122,8 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
       department = excluded.department, contract = excluded.contract, diploma_level = excluded.diploma_level,
       salary_text = excluded.salary_text, salary_monthly_cents = excluded.salary_monthly_cents, salary_max_cents = excluded.salary_max_cents,
       description = excluded.description, fingerprint = excluded.fingerprint,
-      school_flags = excluded.school_flags, rome_code = excluded.rome_code, easy_apply = excluded.easy_apply, seen_at = now()`;
+      school_flags = excluded.school_flags, rome_code = excluded.rome_code, easy_apply = excluded.easy_apply,
+      remote = excluded.remote, skills = excluded.skills, seen_at = now()`;
 }
 
 /** Retire les offres d'une source qu'aucune collecte n'a revues depuis `cutoff`. */
@@ -134,7 +145,28 @@ const TOP_ORDER = (s: ReturnType<typeof db>) => s`(
     - least(3, extract(epoch from now() - published_at) / 864000)
   ) desc, published_at desc`;
 
+/** Codes Postgres d'une base pas encore migrée : fonction ou colonne inconnue. */
+const NOT_MIGRATED = new Set(['42883', '42703']);
+let migrating: Promise<void> | null = null;
+
+/**
+ * La collecte de nuit applique db/schema.sql ; si le site est déployé avant elle, la première recherche
+ * qui tombe sur une base pas encore à jour l'applique une fois, puis recommence.
+ */
 export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
+  try {
+    return await runSearch(filters);
+  } catch (error) {
+    if (!NOT_MIGRATED.has((error as { code?: string }).code ?? '')) throw error;
+    migrating ??= ensureOfferSchema().finally(() => {
+      migrating = null;
+    });
+    await migrating;
+    return runSearch(filters);
+  }
+}
+
+async function runSearch(filters: OfferFilters): Promise<OfferPage> {
   const s = db();
   // Les offres d'écoles déguisées ne sont jamais listées.
   const conditions = [s`cardinality(school_flags) = 0`];
@@ -153,10 +185,15 @@ export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
   if (filters.sinceDays) conditions.push(s`published_at > now() - ${`${filters.sinceDays} days`}::interval`);
   if (filters.direct) conditions.push(s`direct`);
   if (filters.easyApply) conditions.push(s`easy_apply`);
-  if (filters.q) {
-    conditions.push(
-      s`to_tsvector('french', title || ' ' || coalesce(company, '') || ' ' || coalesce(city, '')) @@ plainto_tsquery('french', ${filters.q})`,
-    );
+  if (filters.minSalaryCents) conditions.push(s`salary_monthly_cents >= ${filters.minSalaryCents}`);
+  if (filters.remote === 'total') conditions.push(s`remote = 'total'`);
+  else if (filters.remote === 'partiel') conditions.push(s`remote in ('partiel', 'total')`);
+  if (filters.skill) conditions.push(s`skills @> ${[filters.skill]}::text[]`);
+  const variants = expandQuery(filters.q);
+  if (variants.length > 0) {
+    // La saisie ou un de ses synonymes (« dev » : « développeur »), sans tenir compte des accents.
+    const query = variants.map((v) => s`plainto_tsquery('french', decode_fold(${v}))`).reduce((acc, c) => s`${acc} || ${c}`);
+    conditions.push(s`to_tsvector('french', decode_fold(title || ' ' || coalesce(company, '') || ' ' || coalesce(city, ''))) @@ (${query})`);
   }
   const where = conditions.reduce((acc, c) => s`${acc} and ${c}`);
   const page = Math.max(1, filters.page ?? 1);

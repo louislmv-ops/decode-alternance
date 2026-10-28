@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRef } from 'react';
 import { Emoji } from '@/components/Emoji';
+import { MIN_SALARIES, SKILL_OPTIONS } from '@/lib/offers/filter-options';
 import { SECTORS } from '@/lib/offers/sectors';
 import { COMPANY_SIZE_LABELS, type CompanySizeTag, type OfferFilters } from '@/lib/offers/types';
 
@@ -54,6 +55,32 @@ export function MoreFilters({ filters, count }: { filters: OfferFilters; count: 
           <label className="sheet__opt">
             <input type="checkbox" name="salaire" value="1" defaultChecked={filters.withSalary} /> <Emoji name="billets" /> Salaire affiché dans l’annonce
           </label>
+          <label className="sheet__select">
+            <span>Au moins (brut par mois)</span>
+            <select name="salairemin" defaultValue={filters.minSalaryCents ? String(filters.minSalaryCents / 100) : ''}>
+              <option value="">Peu importe</option>
+              {MIN_SALARIES.map((euros) => (
+                <option key={euros} value={euros}>
+                  {euros.toLocaleString('fr-FR')} €
+                </option>
+              ))}
+            </select>
+          </label>
+        </fieldset>
+
+        <fieldset className="sheet__group">
+          <legend>Compétence demandée</legend>
+          <label className="sheet__select">
+            <span className="sr-only">Compétence citée dans l’annonce</span>
+            <select name="competence" defaultValue={filters.skill ?? ''}>
+              <option value="">Toutes</option>
+              {SKILL_OPTIONS.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </fieldset>
 
         <fieldset className="sheet__group">
@@ -76,7 +103,7 @@ export function MoreFilters({ filters, count }: { filters: OfferFilters; count: 
           </div>
         </fieldset>
 
-        <p className="sheet__hint">Ces filtres écartent les offres sans taille ni secteur connus.</p>
+        <p className="sheet__hint">Ces filtres écartent les offres qui ne disent rien de ce qu’ils demandent : taille, secteur, salaire, compétence.</p>
 
         <div className="sheet__foot">
           <Link href="/offres" className="link">

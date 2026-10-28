@@ -2,7 +2,7 @@
 
 import type { PayLean } from '@/lib/offers/pay-signals';
 import { mergePerks } from '@/lib/offers/perks';
-import { PerksPanel } from './Perks';
+import { AskedPanel, PerksPanel } from './Perks';
 import { ApplyKit } from './ApplyKit';
 import { LikeButton } from './LikeButton';
 import type { TasteItem } from '@/lib/taste';
@@ -51,6 +51,10 @@ export interface OfferMeta {
   lean?: PayLean | null;
   /** Avantages repérés dans le texte de l'annonce. */
   perks?: string[];
+  /** Télétravail en clair (« Télétravail partiel »), lu dans l'annonce. */
+  remote?: string | null;
+  /** Compétences citées, en clair. */
+  skills?: string[];
   /** Le résumé gardé quand on like l'offre. */
   taste?: Omit<TasteItem, 'at'>;
   /** Le texte de l'annonce tel que la source le donne, mot pour mot. */
@@ -106,6 +110,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const schoolBait = alerts.some((a) => a.niveau === 'alerte') || (offer?.schoolFlags.length ?? 0) > 0;
   const company = decoded.entreprise.nom ?? offer?.company ?? '';
   const rhythm = rhythmVerdict(decoded.contrat.rythme, profile.rhythm);
+  const perks = mergePerks(decoded.salaire.avantages, offer?.perks ?? []);
   const searches = teamSearches({
     company,
     service: decoded.equipe.motsCles[0] ?? decoded.equipe.service,
@@ -181,7 +186,9 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
       />
       {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
-      <PerksPanel perks={mergePerks(decoded.salaire.avantages, offer?.perks ?? [])} />
+      <PerksPanel perks={perks} />
+      {/* Le télétravail n'est redit ici que si les avantages n'en parlent pas déjà. */}
+      <AskedPanel remote={perks.some((p) => /t[ée]l[ée]travail/i.test(p)) ? null : (offer?.remote ?? null)} skills={offer?.skills ?? []} />
       {offer && !offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
 
       <div className="detail">

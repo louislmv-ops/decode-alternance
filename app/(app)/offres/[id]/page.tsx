@@ -17,6 +17,7 @@ import { findDecode, findOffer } from '@/lib/offers/repository';
 import { payContext } from '@/lib/offers/pay-context';
 import { isTrustedSourceLink } from '@/lib/offers/link';
 import { SOURCE_LABELS } from '@/lib/offers/types';
+import { detailsOf, REMOTE_LABELS, skillLabel } from '@/lib/offers/details';
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ u?: string; s?: string }> };
 
@@ -66,6 +67,11 @@ export default async function OfferPage({ params, searchParams }: Props) {
     excerpt: offer.source === 'adzuna' || offer.source === 'jooble',
     contractKind: offer.contract,
     easyApply: offer.easyApply ?? false,
+    remote: (() => {
+      const r = detailsOf(offer).remote;
+      return r ? REMOTE_LABELS[r] : null;
+    })(),
+    skills: detailsOf(offer).skills.map((x) => skillLabel(x) ?? x),
     contract: offer.contract === 'apprentissage' ? 'Apprentissage' : offer.contract === 'professionnalisation' ? 'Contrat pro' : null,
   };
 
