@@ -3,7 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import './site.css';
 import './app.css';
-import './ultraviolet.css';
+import './nuit.css';
 import { AccountSync } from '@/components/account/AccountSync';
 import { isChatConfigured } from '@/lib/assistant/chat';
 import { LazyGlobals } from '@/components/LazyGlobals';
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
     'Les offres d’alternance traduites : ce que tu feras vraiment, ton salaire minimum garanti, les fausses offres d’écoles écartées et qui contacter dans l’équipe.',
   metadataBase: new URL(SITE_URL),
   openGraph: { type: 'website', locale: 'fr_FR', siteName: 'Décode' },
-  appleWebApp: { capable: true, title: 'Décode', statusBarStyle: 'default' },
+  appleWebApp: { capable: true, title: 'Décode', statusBarStyle: 'black-translucent' },
   formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  themeColor: '#08061a',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',

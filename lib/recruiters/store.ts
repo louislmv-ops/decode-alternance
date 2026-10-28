@@ -6,6 +6,7 @@ import { ensureCommunitySchema } from '@/lib/community/store';
 import type { Member } from '@/lib/community/shared';
 import { db } from '@/lib/offers/store';
 import { isValidSiret } from './siret';
+import { ensureOnce } from '@/lib/offers/schema-once';
 
 /** Un recruteur vérifié peut contacter au plus 20 alternants par jour. */
 export const CONTACTS_PER_DAY = 20;
@@ -60,7 +61,7 @@ const toRecruiter = (r: RecruiterRow): Recruiter => ({
 let ready: Promise<void> | null = null;
 
 function ensureSchema(): Promise<void> {
-  ready ??= (async () => {
+  ready ??= ensureOnce('recruiters', async () => {
     await ensureCommunitySchema();
     const s = db();
     await s`create table if not exists recruiters (
@@ -79,7 +80,7 @@ function ensureSchema(): Promise<void> {
       message text not null,
       created_at timestamptz not null default now()
     )`;
-  })().catch((error) => {
+  }).catch((error) => {
     ready = null;
     throw error;
   });

@@ -7,11 +7,12 @@ import { companyKey } from '@/lib/offers/normalize';
 import { ensureRecruiterSchema } from '@/lib/recruiters/store';
 import type { Sponsor } from './match';
 import { ACTIVE_STATUSES, isSponsorActive } from './plan';
+import { ensureOnce } from '@/lib/offers/schema-once';
 
 let ready: Promise<void> | null = null;
 
 function ensureSchema(): Promise<void> {
-  ready ??= (async () => {
+  ready ??= ensureOnce('sponsors', async () => {
     await ensureRecruiterSchema();
     const s = db();
     await s`create table if not exists sponsors (
@@ -30,7 +31,7 @@ function ensureSchema(): Promise<void> {
       clicks integer not null default 0,
       primary key (account_id, day)
     )`;
-  })().catch((error) => {
+  }).catch((error) => {
     ready = null;
     throw error;
   });

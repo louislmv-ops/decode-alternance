@@ -10,21 +10,28 @@
    ========================================================================== */
 
 :root {
-  --bg: #ffffff;
-  --surface: #f5f5f7;
-  --ink: #1d1d1f;
-  --muted: #6e6e73;
+  /* Nuit : un fond d'espace bleu-violet, presque noir, jamais noir pur ; le texte presque blanc. */
+  color-scheme: dark;
+  --bg: #08061a;
+  --surface: #120f2b;
+  --ink: #f4f2ff;
+  /* 7:1 sur les cartes. */
+  --muted: #aca8cc;
   --uv-blue: #3a1cff;
   --uv-violet: #8a2bff;
   --uv-pink: #ff3ec8;
   --uv-cyan: #5ce1ff;
 
-  /* 6,8:1 sur blanc : lisible en texte courant comme en fond de bouton. */
-  --brand: #5b21ff;
+  /* Fond des boutons : 5,9:1 avec du texte blanc. Trop sombre pour du texte sur la nuit : les liens prennent --brand-text. */
+  --brand: #6a35ff;
+  /* 8,8:1 sur le fond : liens et textes en violet. */
+  --brand-text: #b69cff;
   --brand-dark: #3a1cff;
   --brand-rgb: 91 33 255;
   /* L'ombre colorée des éléments qui flottent. */
-  --shade-rgb: 34 14 120;
+  --shade-rgb: 0 0 0;
+  /* Le verre sombre des barres et des menus. */
+  --glass-rgb: 20 17 46;
   --brand-ink: #ffffff;
   --accent: #ffd60a;
   --accent-ink: #15131c;
@@ -32,33 +39,35 @@
   --field-2-ink: #ffffff;
 
   /* Aplats pastel : un par domaine ou par outil, jamais pour le texte courant. */
-  --mint: #efebff;
-  --sky: #dff8ff;
-  --peach: #ffe3f6;
-  --butter: #fff2bf;
+  --mint: #1f1847;
+  --sky: #0e2638;
+  --peach: #2d1532;
+  --butter: #2a2410;
 
   /* Les fonctions de l'appli : alerte et prudence, jamais décoratives. */
-  --alert: #b3261e;
-  --alert-bg: #ffedea;
-  --alert-ink: #831c1e;
-  --notice-bg: #fff8e1;
-  --notice-ink: #7a4b00;
-  --positive: #1f7a4d;
+  --alert: #ff6b5e;
+  --alert-bg: #3a1416;
+  --alert-ink: #ffb4ab;
+  --notice-bg: #2c2408;
+  --notice-ink: #ffd27a;
+  --positive: #4ade80;
 
-  --tint-1: #3a1cff;
+  --tint-1: #c4b0ff;
   --tint-2: #5b21ff;
   --tint-3: #8a2bff;
   --tint-4: #f5c400;
   --tint-5: #ffd60a;
-  --tint-6: #fff4bf;
+  --tint-6: #2a2410;
 
   /* L'appli : un fond gris très clair, neutre, et des cartes blanches. */
-  --ground: #f5f5f7;
-  --card: #ffffff;
-  --border: #e5e5ea;
-  --rule: #f2f2f7;
-  --control: #c7c7cc;
-  --active: #ebebf0;
+  --ground: #08061a;
+  --card: #141130;
+  --border: #2b2754;
+  --rule: #1d1a3c;
+  --control: #4b4680;
+  --active: #241f4a;
+  /* Les blocs qui ressortent (pied de page, bulles, badges) : un violet nuit plus clair, texte blanc. */
+  --inverse: #2a2360;
 
   /* La police du système (San Francisco sur Apple, Segoe ou Roboto ailleurs). Archivo élargie ne sert plus qu'au logo. */
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', system-ui, sans-serif;
@@ -211,7 +220,7 @@ textarea {
 }
 
 .bullets--ink li::before {
-  background: var(--ink);
+  background: var(--inverse);
 }
 
 /* Le surlignage dans un texte : un aplat de menthe, comme au feutre. */

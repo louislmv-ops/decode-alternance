@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomInt } from 'node:crypto';
 import { z } from 'zod/v4';
 import { db, isDatabaseConfigured } from '@/lib/offers/store';
 import { isEmailConfigured } from './senders';
+import { ensureOnce } from '@/lib/offers/schema-once';
 
 // Les comptes : une adresse e-mail, des préférences d'alerte, une copie du profil, du suivi et des likes
 // pour les retrouver sur un autre appareil, et le dossier de candidature (coordonnées, pitch, CV) pour postuler vite. Connexion par code à 6 chiffres, sans mot de passe.
@@ -21,7 +22,7 @@ let schemaReady: Promise<void> | null = null;
 
 /** Les tables des comptes sont créées au premier usage : rien à lancer à la main. */
 export function ensureSchema(): Promise<void> {
-  schemaReady ??= (async () => {
+  schemaReady ??= ensureOnce('accounts', async () => {
     const s = db();
     await s`create table if not exists accounts (
       id uuid primary key default gen_random_uuid(),
@@ -66,7 +67,7 @@ export function ensureSchema(): Promise<void> {
       account_id uuid not null references accounts(id) on delete cascade,
       expires_at timestamptz not null
     )`;
-  })().catch((error) => {
+  }).catch((error) => {
     schemaReady = null;
     throw error;
   });

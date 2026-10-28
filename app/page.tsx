@@ -5,6 +5,7 @@ import { OfferRow } from '@/components/offer/OfferRow';
 import { Faq } from '@/components/site/Faq';
 import { SwipePromo } from '@/components/offer/SwipePromo';
 import { Mascotte, type MascottePose } from '@/components/Mascotte';
+import { Planet } from '@/components/home/Planet';
 import { MatchButton } from '@/components/MatchButton';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
@@ -67,6 +68,12 @@ export default async function Home() {
       <SiteNav />
       <main className="home">
         <section className="hero2" aria-labelledby="hero-title">
+          {/* Le ciel : des étoiles, la planète de Décode en image fixe, puis en mouvement quand elle est prête. */}
+          <div className="sky" aria-hidden="true">
+            <div className="sky__stars" />
+            <div className="sky__poster" />
+            <Planet />
+          </div>
           <div className="hero2__content">
             <h1 id="hero-title" className="hero2__title">
               <span className="hero2__w" style={{ '--i': 0 } as React.CSSProperties}>

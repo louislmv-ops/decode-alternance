@@ -60,7 +60,7 @@
 
 .topbar__link[aria-current='page'] {
   background: var(--mint);
-  color: var(--brand-dark);
+  color: var(--brand-text);
 }
 
 .topbar__end {
@@ -209,7 +209,7 @@
 
 .search__go {
   min-height: 52px;
-  background: var(--ink);
+  background: var(--inverse);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -309,7 +309,7 @@
 
 .band__more {
   font-weight: 600;
-  color: var(--brand);
+  color: var(--brand-text);
   white-space: nowrap;
 }
 
@@ -399,7 +399,7 @@
 .free__box {
   padding: clamp(28px, 5vw, 56px);
   border-radius: var(--r-card);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   display: flex;
   flex-wrap: wrap;
@@ -617,7 +617,7 @@
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
-    background: var(--ink);
+    background: var(--inverse);
   }
   .tabbar__item {
     display: flex;
@@ -740,7 +740,7 @@
 }
 
 .latest .offer-card__avatar {
-  background: var(--ink);
+  background: var(--inverse);
 }
 
 /* ---------- Le questionnaire de 30 secondes ---------- */
@@ -917,7 +917,7 @@
 }
 
 .matcher__chip[aria-pressed='true'] {
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
 }
 
@@ -1130,7 +1130,7 @@
 .ticker {
   margin-top: 0;
   overflow: hidden;
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
 }
 
@@ -1152,7 +1152,7 @@
 .ticker__track li:not(:last-child)::after {
   content: '/';
   margin-left: 32px;
-  color: #5f7a6f;
+  color: var(--muted);
 }
 
 
@@ -1264,7 +1264,7 @@
   margin-top: 36px;
   padding: 8px;
   border-radius: var(--r-card);
-  background: #fff;
+  background: var(--card);
   color: var(--ink);
   text-align: left;
   box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.45);
@@ -1288,7 +1288,7 @@
 .hero2__label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .hero2__field input,
