@@ -8,7 +8,7 @@ import { crawlCareerSite } from './connectors/job-posting';
 import { isLbaConfigured } from './connectors/la-bonne-alternance';
 import { harvestLba, type LbaHarvestReport } from './connectors/lba-harvest';
 import { discover, SEED_COMPANIES } from './ats-discovery';
-import { fetchAtsBoard } from './connectors/ats';
+import { BoardMismatchError, fetchAtsBoard } from './connectors/ats';
 import { sleep } from './connectors/http';
 import { companiesToProbe, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
 
@@ -42,7 +42,7 @@ async function ingestAts(log: (line: string) => void, probeLimit: number): Promi
       offers += found.length;
     } catch (error) {
       failed += 1;
-      await markAtsBoard(board, { error: true });
+      await markAtsBoard(board, { error: true, disable: error instanceof BoardMismatchError });
       log(`${board.provider}/${board.slug} : échec (${(error as Error).message})`);
     }
     await sleep(400);

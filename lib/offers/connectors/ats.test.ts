@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { slugCandidates, sameCompany } from '../ats-discovery';
-import { atsJobToOffer, boardUrl, isInFrance, parseBoard } from './ats';
+import { atsJobToOffer, boardUrl, isInFrance, mentionsCompany, parseBoard } from './ats';
 
 const board = { provider: 'greenhouse' as const, slug: 'acme', company: 'Acme', size: 'grande' as const };
 
@@ -60,6 +60,13 @@ describe('logiciels de recrutement : lecture des tableaux', () => {
 });
 
 describe('logiciels de recrutement : recherche des tableaux', () => {
+  it('un tableau sans nom doit citer l’employeur dans ses annonces', () => {
+    const jobs = parseBoard('ashby', JSON.stringify({ jobs: [{ id: '1', title: 'Alternant growth', descriptionPlain: 'Chez Qonto, tu rejoins l’équipe growth.', location: 'Paris' }] }));
+    expect(mentionsCompany(jobs, 'Qonto')).toBe(true);
+    expect(mentionsCompany(jobs, 'Vinci')).toBe(false);
+    expect(mentionsCompany(jobs, 'Back Market SAS')).toBe(false);
+  });
+
   it('tire des identifiants plausibles du nom', () => {
     expect(slugCandidates("L'Oréal")).toEqual(['loreal', 'l-oreal']);
     expect(slugCandidates('BNP Paribas SA')).toEqual(['bnpparibas', 'bnp-paribas', 'bnpparibassa']);

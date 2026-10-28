@@ -1,10 +1,11 @@
 // Trouver le tableau d'offres d'un employeur : on essaie, pour chaque logiciel de recrutement, les
 // identifiants qu'on peut tirer de son nom (« L'Oréal » : « loreal », « l-oreal »). Un tableau n'est
-// retenu que s'il répond, et soit porte un nom qui correspond, soit a au moins une offre en France.
+// retenu que s'il répond, et soit porte un nom qui correspond, soit a des offres en France dont une
+// au moins cite l'employeur.
 // Les noms à essayer viennent des employeurs déjà en base et d'une courte liste de départ.
 
 import { CAC40 } from './companies';
-import { type AtsBoard, type AtsProvider, ATS_PROVIDERS, boardUrl, isInFrance, parseBoard } from './connectors/ats';
+import { type AtsBoard, type AtsProvider, ATS_PROVIDERS, boardUrl, isInFrance, mentionsCompany, parseBoard } from './connectors/ats';
 import { fetchText, sleep } from './connectors/http';
 import { normalizeText } from './normalize';
 
@@ -75,7 +76,8 @@ export async function probe(provider: AtsProvider, company: string): Promise<Ats
     const name = await boardName(provider, slug, res.text);
     // Un nom qui ne correspond pas : c'est une autre entreprise qui porte le même identifiant.
     if (name && !sameCompany(name, company)) continue;
-    if (!name && !jobs.some(isInFrance)) continue;
+    // Sans nom : des offres en France, et au moins une annonce qui cite l'employeur.
+    if (!name && (!jobs.some(isInFrance) || !mentionsCompany(jobs, company))) continue;
     return { provider, slug, company: name ?? company };
   }
   return null;

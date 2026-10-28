@@ -273,9 +273,11 @@ export async function saveAtsBoard(board: AtsBoard): Promise<void> {
     on conflict (provider, slug) do update set company = excluded.company, failures = 0`;
 }
 
-export async function markAtsBoard(board: AtsBoard, result: { offers: number } | { error: true }): Promise<void> {
+export async function markAtsBoard(board: AtsBoard, result: { offers: number } | { error: true; disable?: boolean }): Promise<void> {
   const s = db();
-  if ('error' in result) await s`update ats_boards set failures = failures + 1, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
+  // Un tableau qui n'est pas celui de l'employeur est écarté tout de suite (cinq échecs d'un coup).
+  if ('error' in result && result.disable) await s`update ats_boards set failures = 5, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
+  else if ('error' in result) await s`update ats_boards set failures = failures + 1, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
   else await s`update ats_boards set failures = 0, offers = ${result.offers}, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
 }
 

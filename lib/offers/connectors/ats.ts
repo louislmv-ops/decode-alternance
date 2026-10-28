@@ -17,6 +17,7 @@ import {
   fingerprint,
   htmlToText,
   isAlternance,
+  normalizeText,
   salaryRangeFromDescription,
   schoolBaitFlags,
 } from '../normalize';
@@ -256,11 +257,30 @@ async function smartRecruitersDetails(board: AtsBoard, jobs: AtsJob[]): Promise<
   return out;
 }
 
+/** Ces fournisseurs ne donnent pas le nom de l'entreprise : il faut le retrouver dans ses annonces. */
+export const NAMELESS: AtsProvider[] = ['lever', 'ashby', 'recruitee', 'personio'];
+
+/**
+ * Une annonce au moins cite l'employeur. Sinon, le tableau est celui d'une autre entreprise qui porte le même
+ * identifiant (« vinci » chez un fournisseur peut être une start-up, pas le groupe).
+ */
+export function mentionsCompany(jobs: AtsJob[], company: string): boolean {
+  const name = normalizeText(company).replace(/\b(sas|sasu|sa|se|group|groupe|france)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  if (name.length < 2) return false;
+  return jobs.some((j) => ` ${normalizeText(`${j.title} ${j.description}`)} `.includes(` ${name} `));
+}
+
+/** Le tableau n'est pas celui de l'employeur attendu : on arrête de le lire. */
+export class BoardMismatchError extends Error {}
+
 /** Toutes les offres d'alternance en France d'un tableau. Lève une erreur si le tableau ne répond pas. */
 export async function fetchAtsBoard(board: AtsBoard): Promise<Offer[]> {
   const res = await fetchText(boardUrl(board.provider, board.slug), { headers: { Accept: board.provider === 'personio' ? 'application/xml' : 'application/json' } });
   if (res.status !== 200) throw new Error(`${board.provider}/${board.slug} : HTTP ${res.status}`);
   let jobs = parseBoard(board.provider, res.text);
+  if (NAMELESS.includes(board.provider) && jobs.length > 0 && !mentionsCompany(jobs, board.company)) {
+    throw new BoardMismatchError(`${board.provider}/${board.slug} : aucune annonce ne cite ${board.company}`);
+  }
   if (board.provider === 'smartrecruiters') jobs = await smartRecruitersDetails(board, jobs);
   return jobs.map((j) => atsJobToOffer(j, board)).filter((o): o is Offer => o !== null);
 }
