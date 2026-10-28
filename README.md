@@ -85,9 +85,14 @@ Chaque traduction appelle `claude-opus-5-5` (4 $ par million de jetons en entré
 
 ## Design
 
-Direction tirée avec le skill tasteskill (« One motif », graine 1214231901) : le motif est le trait de surligneur, un parallélogramme à bout biseauté, qui porte la menthe `#a1ffcb`. Police Bricolage Grotesque, auto-hébergée (la police tirée au départ, General Sans, n’était pas disponible hors ligne). L’appli suit le style « Achromatic ledger » : pas de couleur dans l’habillage, la menthe seulement sur ce qui compte.
+Direction Apple (Human Interface Guidelines et verre liquide d'iOS 26, transposés au web) avec la palette « Ultraviolet » : bleu électrique `#3A1CFF`, violet `#8A2BFF`, rose `#FF3EC8`, cyan `#5CE1FF`. Le bleu-violet `#5B21FF` porte les actions ; le rose et le cyan ne servent qu'aux lueurs vues à travers le verre (l'aura cannelée sous la recherche de l'accueil, la carte du swipe), jamais au texte. Le jaune reste le surligneur des pépites. Les tokens sont dans `app/globals.css`, l'aura dans `app/ultraviolet.css`, chargé en dernier.
 
-Pas encore de vraies photos : l’environnement de développement n’avait pas accès aux banques d’images libres. Les images de l’accueil sont des morceaux de la vraie interface.
+## Référencement
+
+- Pages « alternance + métier + ville » (`/alternance/marketing-lyon`, `/alternance/paris`…) : 12 métiers × 29 villes, construites à la première visite puis gardées une heure (ISR). Sans vraies offres ou avec moins de 3 offres, elles ne sont pas indexées. Liste dans `lib/landing.ts`.
+- Données structurées : JobPosting, fil d'Ariane, FAQ, liste d'offres (`lib/seo.ts`).
+- `llms.txt` pour les assistants IA, avec la grille des salaires minimums calculée depuis `lib/rules/reference.ts`.
+- Image de partage générée (`app/opengraph-image.tsx`, police Inter sous licence SIL OFL).
 
 ## Structure
 

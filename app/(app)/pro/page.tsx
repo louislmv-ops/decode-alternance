@@ -4,6 +4,7 @@ import { ProView } from '@/components/pro/ProView';
 export const metadata: Metadata = {
   title: 'Décode Pro',
   description: 'Alertes toutes les heures, alertes SMS et prépa entretien. Un mois offert, sans carte. La version gratuite reste complète.',
+  alternates: { canonical: '/pro' },
 };
 
 export default async function ProPage({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {

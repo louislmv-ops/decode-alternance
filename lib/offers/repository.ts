@@ -114,3 +114,8 @@ export function rememberDecode(id: string, decoded: DecodedOffer) {
   if (memoryDecodes.size > 2000) memoryDecodes.clear();
   memoryDecodes.set(id, decoded);
 }
+
+/** De vraies offres peuvent-elles s'afficher ? Sans aucune source, le site montre les exemples fictifs. */
+export function hasRealOfferSource(): boolean {
+  return isDatabaseConfigured() || isLiveConfigured() || isAggregatorsConfigured(true);
+}

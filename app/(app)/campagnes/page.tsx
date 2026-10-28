@@ -8,6 +8,7 @@ import { type Campaign, openCampaigns } from '@/lib/recruiters/campaigns';
 export const metadata: Metadata = {
   title: 'Campagnes d’alternance',
   description: 'Les entreprises qui recrutent plusieurs alternants en ce moment, avec les postes, les villes et la date limite.',
+  alternates: { canonical: '/campagnes' },
 };
 
 export default async function CampaignsPage() {

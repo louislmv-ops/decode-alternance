@@ -3,7 +3,7 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { TRIAL_DAYS } from '@/lib/pro/plan';
 
-export const metadata: Metadata = { title: 'Conditions de vente de Décode Pro' };
+export const metadata: Metadata = { title: 'Conditions de vente de Décode Pro', alternates: { canonical: '/cgv' } };
 
 const LEGAL = {
   editor: process.env.LEGAL_EDITOR || '[NOM OU RAISON SOCIALE]',

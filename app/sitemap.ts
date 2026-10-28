@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { isAccountsConfigured } from '@/lib/account/store';
+import { allLandings, landingHref } from '@/lib/landing';
+import { hasRealOfferSource } from '@/lib/offers/repository';
 import { isDatabaseConfigured, sitemapOffers } from '@/lib/offers/store';
 import { SITE_URL } from '@/lib/site';
 
@@ -14,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['/salaire', 0.8],
     ['/equipe', 0.7],
     ['/aides', 0.7],
+    ['/alternance', 0.8],
     ['/mentions-legales', 0.2],
   ];
   // Ces pages ont besoin des comptes : sans eux, elles ne montreraient qu'un « bientôt ».
@@ -22,6 +25,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
   const now = new Date();
   const entries: MetadataRoute.Sitemap = pages.map(([path, priority]) => ({ url: `${SITE_URL}${path}`, lastModified: now, changeFrequency: 'daily', priority }));
+  // Les pages « métier + ville » : seulement avec de vraies offres, sinon elles ne montrent que des exemples (et ne sont pas indexées).
+  if (hasRealOfferSource()) {
+    for (const l of allLandings()) {
+      entries.push({ url: `${SITE_URL}${landingHref(l.domain, l.city)}`, lastModified: now, changeFrequency: 'daily', priority: l.domain && l.city ? 0.6 : 0.7 });
+    }
+  }
   // Chaque offre a sa page : c'est elle que Google for Jobs et les assistants IA peuvent citer.
   const offers = isDatabaseConfigured() ? await sitemapOffers().catch(() => []) : [];
   for (const o of offers) {

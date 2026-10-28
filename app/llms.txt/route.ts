@@ -1,7 +1,24 @@
+import { DOMAINS } from '@/lib/domains';
+import { formatEuros } from '@/lib/format';
+import { CITIES, domainWord, landingHref } from '@/lib/landing';
+import { APPRENTISSAGE_RATES, PROFESSIONNALISATION_RATES, SMIC } from '@/lib/rules/reference';
 import { SITE_URL } from '@/lib/site';
 
 // llms.txt : un résumé du site pour les assistants IA (ChatGPT, Claude, Perplexity…), au format proposé sur llmstxt.org.
 export const dynamic = 'force-static';
+
+const euros = (rate: number) => formatEuros(Math.round((SMIC.monthlyCents * rate) / 100));
+
+/** La grille, en euros : les assistants citent plus volontiers un chiffre daté et sourcé qu'une page à calculer. */
+function salaryFacts(): string {
+  const appr = APPRENTISSAGE_RATES.map(
+    (b) => `- Apprentissage, ${b.label.toLowerCase()} : ${b.byYear.map((r, i) => `${i + 1}re année ${r} % du SMIC (${euros(r)})`.replace('2re', '2e').replace('3re', '3e')).join(', ')}`,
+  );
+  const pro = PROFESSIONNALISATION_RATES.map(
+    (b) => `- Contrat de professionnalisation, ${b.label.toLowerCase()} : ${b.base} % du SMIC (${euros(b.base)}), ${b.withBac} % (${euros(b.withBac)}) avec au moins un bac pro`,
+  );
+  return [...appr, ...pro].join('\n');
+}
 
 export function GET() {
   const body = `# Décode
@@ -17,6 +34,20 @@ Décode ne garantit ni contrat, ni entretien, ni réponse. Les salaires minimums
 - [Salaire minimum d'un alternant](${SITE_URL}/salaire) : calcul selon le contrat (apprentissage ou contrat pro), l'âge et l'année
 - [Trouver l'équipe](${SITE_URL}/equipe) : la méthode pour contacter le service qui recrute, pas seulement les RH
 - [Aides aux alternants](${SITE_URL}/aides) : aide au logement, APL, prime d'activité, impôts, permis, avec le lien officiel de chaque aide
+
+## Salaire minimum d'un alternant en 2026 (brut mensuel)
+
+SMIC mensuel brut : ${formatEuros(SMIC.monthlyCents)} depuis le ${SMIC.since} (${SMIC.source}).
+
+${salaryFacts()}
+
+Dès 21 ans (apprentissage) ou 26 ans (contrat pro), la convention collective peut imposer un minimum plus élevé.
+
+## Alternance par métier et par ville
+
+- [Toutes les pages](${SITE_URL}/alternance)
+${DOMAINS.map((d) => `- [Alternance ${domainWord(d)}](${SITE_URL}${landingHref(d, null)})`).join('\n')}
+${CITIES.slice(0, 12).map((c) => `- [Alternance à ${c.name}](${SITE_URL}${landingHref(null, c)})`).join('\n')}
 
 ## À savoir
 

@@ -1,0 +1,141 @@
+/* ==========================================================================
+   Ultraviolet : la palette posée sous le verre liquide.
+   Un dégradé maillé (bleu électrique, violet, rose, cyan) vu à travers un verre
+   cannelé : des bandes verticales qui adoucissent la couleur. Il vit derrière
+   les éléments en verre (la recherche de l'accueil, la carte du swipe), jamais
+   derrière du texte courant. Chargé en dernier : il prend le pas sur app.css.
+   Tout est fait de dégradés, sans filtre de flou, pour rester léger sur téléphone.
+   ========================================================================== */
+
+:root {
+  /* Le maillage : quatre lueurs, une par couleur de la palette. */
+  --uv-mesh:
+    radial-gradient(34% 58% at 22% 58%, rgb(58 28 255 / 0.9) 0%, rgb(58 28 255 / 0) 100%),
+    radial-gradient(30% 62% at 42% 46%, rgb(138 43 255 / 0.85) 0%, rgb(138 43 255 / 0) 100%),
+    radial-gradient(26% 52% at 58% 58%, rgb(255 62 200 / 0.9) 0%, rgb(255 62 200 / 0) 100%),
+    radial-gradient(22% 46% at 76% 44%, rgb(92 225 255 / 0.85) 0%, rgb(92 225 255 / 0) 100%);
+  /* Le verre cannelé : une bande claire et une bande sombre tous les 64 px. */
+  --uv-reeds: repeating-linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0.34) 0px,
+    rgb(255 255 255 / 0.04) 22px,
+    rgb(var(--shade-rgb) / 0.06) 40px,
+    rgb(255 255 255 / 0.12) 52px,
+    rgb(255 255 255 / 0.34) 64px
+  );
+}
+
+/* Le fond du site : les quatre couleurs, à peine là. */
+body::before {
+  background:
+    radial-gradient(55% 45% at 0% 0%, rgb(138 43 255 / 0.12) 0%, transparent 70%),
+    radial-gradient(45% 40% at 100% 6%, rgb(255 62 200 / 0.09) 0%, transparent 70%),
+    radial-gradient(55% 45% at 85% 100%, rgb(92 225 255 / 0.14) 0%, transparent 70%),
+    radial-gradient(45% 40% at 10% 95%, rgb(58 28 255 / 0.06) 0%, transparent 70%),
+    linear-gradient(180deg, #fbfaff 0%, #f7f7fb 100%);
+}
+
+/* --------------------------------------------------------------------------
+   L'accueil : l'aura sous la recherche. Le titre reste sur fond clair ;
+   la barre de recherche en verre flotte sur la couleur.
+   -------------------------------------------------------------------------- */
+
+.hero2::before,
+.hero2::after {
+  top: auto;
+  right: auto;
+  bottom: -6%;
+  left: 50%;
+  width: min(1180px, 150vw);
+  height: 62%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  filter: none;
+  transform: translateX(-50%);
+  -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(50% 50% at 50% 50%, #000 35%, transparent 100%);
+}
+
+.hero2::before {
+  background: var(--uv-mesh);
+  opacity: 0.5;
+}
+
+.hero2::after {
+  background: var(--uv-reeds);
+  opacity: 0.9;
+}
+
+/* Les étiquettes de domaine passent sur la couleur : un verre un peu plus dense. */
+.hero2__domains a {
+  background: rgb(255 255 255 / 0.7);
+}
+
+@keyframes uv-aura {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero2::before,
+  .hero2::after {
+    animation: uv-aura 1400ms var(--ease-out) backwards 200ms;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero2::before,
+  .hero2::after {
+    bottom: -4%;
+    height: 58%;
+    width: 220vw;
+  }
+  .hero2::before {
+    opacity: 0.42;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   La carte du swipe (téléphone) : l'aura en plein, le texte blanc reste sur le bleu-violet.
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .swipe-promo {
+    isolation: isolate;
+    background: var(--uv-gradient);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      0 16px 34px -16px rgb(var(--brand-rgb) / 0.75);
+  }
+  .swipe-promo::before,
+  .swipe-promo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  /* Le rose derrière la pile de cartes, un éclat de cyan dans l'angle : loin du texte. */
+  .swipe-promo::before {
+    background:
+      radial-gradient(42% 70% at 12% 85%, rgb(255 62 200 / 0.75) 0%, rgb(255 62 200 / 0) 100%),
+      radial-gradient(28% 45% at 100% 0%, rgb(92 225 255 / 0.45) 0%, rgb(92 225 255 / 0) 100%);
+  }
+  .swipe-promo::after {
+    background: var(--uv-reeds);
+    opacity: 0.45;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Le surlignage et la sélection : le jaune des pépites, inchangé ; le reste en bleu-violet.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-transparency: reduce) {
+  .hero2::after,
+  .swipe-promo::after {
+    display: none;
+  }
+}

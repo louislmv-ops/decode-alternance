@@ -3,7 +3,7 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { SMIC } from '@/lib/rules/reference';
 
-export const metadata: Metadata = { title: 'Mentions légales', description: 'Éditeur, hébergeur, données personnelles et sources des offres et des règles de Décode.' };
+export const metadata: Metadata = { title: 'Mentions légales', description: 'Éditeur, hébergeur, données personnelles et sources des offres et des règles de Décode.', alternates: { canonical: '/mentions-legales' } };
 
 // Les informations de l'éditeur se règlent dans les variables d'environnement, sans toucher au code.
 // Sans elles, le site est présenté comme édité par un particulier à titre non professionnel, qui peut

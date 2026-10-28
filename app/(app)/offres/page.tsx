@@ -36,6 +36,7 @@ const VIA = [
 export const metadata: Metadata = {
   title: 'Offres d’alternance',
   description: 'Les offres d’alternance avec leur paie notée en €, ton salaire minimum comparé et les offres d’écoles écartées.',
+  alternates: { canonical: '/offres' },
 };
 
 function pageHref(filters: OfferFilters, page: number): string {
