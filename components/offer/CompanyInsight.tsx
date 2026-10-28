@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatEuros } from '@/lib/format';
 import type { PayContext } from '@/lib/offers/pay-estimate';
+import { AgreementExcerpts } from '@/components/companies/AgreementExcerpts';
 
 /**
  * « Ce qui t'attend chez … » : ce qu'en disent les alternants qui y sont passés (avis, salaires déclarés) et le
@@ -11,8 +12,9 @@ export function CompanyInsight({ company, context }: { company: string; context:
   const reviews = context?.reviews ?? [];
   const jobs = context?.jobs ?? [];
   const employer = context?.employer ?? null;
+  const agreements = context?.agreements ?? [];
   const href = context?.companyHref ?? `/entreprises?q=${encodeURIComponent(company)}`;
-  const empty = reviews.length === 0 && jobs.length === 0 && !employer;
+  const empty = reviews.length === 0 && jobs.length === 0 && !employer && agreements.length === 0;
   return (
     <section className="panel insight" aria-labelledby="insight-title">
       <div className="panel__head">
@@ -51,6 +53,12 @@ export function CompanyInsight({ company, context }: { company: string; context:
             </li>
           ))}
         </ul>
+      )}
+      {agreements.length > 0 && (
+        <>
+          <p className="ui-label">Ce que dit son accord d’entreprise</p>
+          <AgreementExcerpts agreements={agreements} />
+        </>
       )}
       {employer && (
         <p className="panel__note">

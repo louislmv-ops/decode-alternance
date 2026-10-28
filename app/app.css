@@ -8448,3 +8448,17 @@ a:hover .wordmark__o,
 .table-scroll {
   overflow-x: auto;
 }
+
+.agreements {
+  display: grid;
+  gap: 14px;
+  margin: 8px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.agreements blockquote {
+  margin: 0 0 6px;
+  padding-left: 12px;
+  border-left: 3px solid var(--accent);
+}

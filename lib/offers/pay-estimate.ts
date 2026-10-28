@@ -118,4 +118,6 @@ export interface PayContext {
   conventions: { idcc: string; name: string | null }[];
   /** Le salaire écrit dans les autres annonces de l'entreprise. */
   employer?: EmployerPay | null;
+  /** Ses accords d'entreprise qui parlent de la paie des alternants (Légifrance). */
+  agreements?: { id: string; title: string; signedAt: string | null; excerpts: string[] }[];
 }

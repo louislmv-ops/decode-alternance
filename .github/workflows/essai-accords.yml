@@ -1,0 +1,21 @@
+# Temporaire : essayer la lecture des accords sur une vraie archive, sans rien écrire. À supprimer après.
+name: Essai accords
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/essai-accords.yml
+
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm accords --dry --max 1
