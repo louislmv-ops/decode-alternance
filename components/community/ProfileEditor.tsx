@@ -20,7 +20,7 @@ export function ProfileEditor({ member, onSaved, onCancel }: { member: PublicMem
         const { skillsText, ...rest } = f;
         const skills = skillsText.split(',').map((s) => s.trim()).filter(Boolean).slice(0, 8);
         try {
-          const { member: saved } = await call<{ member: PublicMember }>('/api/communaute/moi', 'PUT', { ...rest, skills, startMonth: rest.startMonth || null, visibleToCompanies: rest.seeking && rest.visibleToCompanies });
+          const { member: saved } = await call<{ member: PublicMember }>('/api/communaute/moi', 'PUT', { ...rest, skills, startMonth: rest.startMonth || null, visibleToCompanies: rest.seeking && rest.visibleToCompanies, shareLikes: rest.seeking && rest.visibleToCompanies && Boolean(rest.shareLikes) });
           onSaved(saved);
         } catch (err) {
           setError((err as Error).message);
@@ -94,6 +94,10 @@ export function ProfileEditor({ member, onSaved, onCancel }: { member: PublicMem
       <label className="ui-check">
         <input type="checkbox" checked={f.visibleToCompanies} disabled={!f.seeking} onChange={(e) => set('visibleToCompanies', e.target.checked)} />
         <span>Les entreprises vérifiées peuvent me trouver et m’écrire. Mon e-mail reste caché.</span>
+      </label>
+      <label className="ui-check">
+        <input type="checkbox" checked={Boolean(f.shareLikes)} disabled={!f.seeking || !f.visibleToCompanies} onChange={(e) => set('shareLikes', e.target.checked)} />
+        <span>Les entreprises dont j’ai aimé une offre peuvent voir mon profil et m’écrire. Elles ne voient pas mes autres likes.</span>
       </label>
       {error && (
         <p className="c-note c-note--error" role="alert">

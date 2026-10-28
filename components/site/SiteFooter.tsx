@@ -56,7 +56,7 @@ export function SiteFooter() {
         <nav aria-label="Infos" className="site-footer__col">
           <p className="site-footer__label">Infos</p>
           <Link className="link" href="/pro" data-needs="comptes">
-            Décode Pro
+            Entreprises : mettre ses offres en avant
           </Link>
           <Link className="link" href="/cgv" data-needs="comptes">
             Conditions de vente

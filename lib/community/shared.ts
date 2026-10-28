@@ -27,6 +27,8 @@ export interface Member {
   startMonth: string | null;
   seeking: boolean;
   visibleToCompanies: boolean;
+  /** Les entreprises dont la personne a aimé une offre peuvent voir son profil. */
+  shareLikes?: boolean;
   skills: string[];
   linkedin: string;
 }

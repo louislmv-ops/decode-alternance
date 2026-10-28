@@ -1,12 +1,12 @@
-import { applySubscription } from '@/lib/pro/store';
-import { periodEnd, stripe, type StripeSubscription, verifyWebhook } from '@/lib/pro/stripe';
+import { applySponsorSubscription } from '@/lib/sponsors/store';
+import { periodEnd, stripe, type StripeSubscription, verifyWebhook } from '@/lib/sponsors/stripe';
 
 interface StripeEvent {
   type: string;
   data: { object: Record<string, unknown> };
 }
 
-/** Stripe prévient ici à chaque changement d'abonnement : on recopie son état sur le compte. */
+/** Stripe prévient ici à chaque changement d'abonnement : on recopie son état sur l'entreprise. */
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const payload = await request.text();
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     accountId = sub.metadata?.account_id;
   }
   if (sub) {
-    await applySubscription({
+    await applySponsorSubscription({
       accountId,
       customerId: sub.customer,
       subscriptionId: sub.id,

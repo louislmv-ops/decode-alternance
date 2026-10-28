@@ -26,6 +26,8 @@ export const MemberInput = z.object({
   startMonth: z.string().regex(/^\d{4}-\d{2}$/).nullable().default(null),
   seeking: z.boolean().default(false),
   visibleToCompanies: z.boolean().default(false),
+  /** Les entreprises dont j'ai aimé une offre peuvent voir mon profil (accord à part, décoché par défaut). */
+  shareLikes: z.boolean().default(false),
   skills: z.array(z.string().trim().min(1).max(30)).max(8).default([]),
   linkedin: z
     .string()
@@ -63,7 +65,8 @@ function ensureSchema(): Promise<void> {
       add column if not exists seeking boolean not null default false,
       add column if not exists visible_to_companies boolean not null default false,
       add column if not exists skills text[] not null default '{}',
-      add column if not exists linkedin text not null default ''`;
+      add column if not exists linkedin text not null default '',
+      add column if not exists share_likes boolean not null default false`;
     await s`create table if not exists posts (
       id uuid primary key default gen_random_uuid(),
       author_id uuid not null references members(account_id) on delete cascade,
@@ -116,6 +119,7 @@ interface MemberRow {
   start_month: string | null;
   seeking: boolean;
   visible_to_companies: boolean;
+  share_likes?: boolean;
   skills: string[];
   linkedin: string;
   followers: number;
@@ -141,6 +145,7 @@ function toMember(r: MemberRow): Member {
     startMonth: r.start_month,
     seeking: r.seeking,
     visibleToCompanies: r.visible_to_companies,
+    shareLikes: r.share_likes ?? false,
     skills: r.skills ?? [],
     linkedin: r.linkedin,
   };
@@ -171,14 +176,17 @@ export async function saveMember(accountId: string, input: MemberInput): Promise
   await ensureSchema();
   const s = db();
   try {
-    await s`insert into members (account_id, handle, name, bio, domain, city, school, formation, level, rhythm, start_month, seeking, visible_to_companies, skills, linkedin)
+    // Partager ses likes n'a de sens que pour un profil visible des entreprises.
+    const shareLikes = input.seeking && input.visibleToCompanies && input.shareLikes;
+    await s`insert into members (account_id, handle, name, bio, domain, city, school, formation, level, rhythm, start_month, seeking, visible_to_companies, skills, linkedin, share_likes)
       values (${accountId}, ${input.handle}, ${input.name}, ${input.bio}, ${input.domain}, ${input.city}, ${input.school},
         ${input.formation}, ${input.level}, ${input.rhythm}, ${input.startMonth}, ${input.seeking}, ${input.visibleToCompanies},
-        ${input.skills}, ${input.linkedin})
+        ${input.skills}, ${input.linkedin}, ${shareLikes})
       on conflict (account_id) do update set handle = excluded.handle, name = excluded.name, bio = excluded.bio,
         domain = excluded.domain, city = excluded.city, school = excluded.school, formation = excluded.formation,
         level = excluded.level, rhythm = excluded.rhythm, start_month = excluded.start_month, seeking = excluded.seeking,
-        visible_to_companies = excluded.visible_to_companies, skills = excluded.skills, linkedin = excluded.linkedin`;
+        visible_to_companies = excluded.visible_to_companies, skills = excluded.skills, linkedin = excluded.linkedin,
+        share_likes = excluded.share_likes`;
   } catch (error) {
     if ((error as { code?: string }).code === '23505') throw new HandleTaken();
     throw error;

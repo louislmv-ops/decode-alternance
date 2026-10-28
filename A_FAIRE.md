@@ -52,7 +52,7 @@ Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les se
 
 1. Base de données gratuite : créer un projet sur neon.tech, copier la « connection string » → `DATABASE_URL`. Les tables se créent toutes seules.
 2. E-mails : compte sur resend.com, vérifier le domaine (ou tester avec l'adresse de test), créer une clé → `RESEND_API_KEY`, et `EMAIL_FROM` (ex. `Décode <bonjour@ton-domaine.fr>`).
-3. SMS (optionnel, payant à l'envoi) : compte sur brevo.com, acheter des crédits SMS, créer une clé API → `BREVO_API_KEY`.
+3. SMS (optionnel, payant à l'envoi) : compte sur brevo.com, acheter des crédits SMS, créer une clé API → `BREVO_API_KEY`. Gratuits pour les alternants, ils sont limités à un par semaine et par personne pour garder la facture sous contrôle.
 4. `AUTH_SECRET` : une longue phrase aléatoire (sert à protéger les codes et les sessions).
 5. `ADMIN_EMAILS` : ton adresse e-mail (séparées par des virgules s'il y en a plusieurs) pour accéder à la modération de la commu (`/communaute/moderation`).
    La même page liste les entreprises inscrites sur `/recruteur` : vérifie le SIRET (lien vers l'annuaire officiel) et le site avant de cliquer « Vérifier ». Sans cette étape, une entreprise ne voit aucun alternant.
@@ -60,19 +60,18 @@ Le code est prêt ; il s'allume quand ces clés sont dans Vercel (et dans les se
    `LEGAL_CONTACT` sert aussi d'adresse de signalement dans les e-mails que les entreprises envoient aux alternants.
 6. Redeploy. Pour les alertes du matin : mêmes valeurs dans GitHub, Settings, Secrets and variables, Actions.
 
-## 4. Décode Pro (Stripe)
+## 4. La mise en avant des entreprises (Stripe)
 
-Sans ces réglages, la page `/pro` affiche « Bientôt » et rien n'est vendu.
+Décode est gratuit pour les alternants. Ce qui se vend : la mise en avant, un abonnement mensuel réservé aux entreprises vérifiées (au plus deux offres en tête des recherches qui leur correspondent, toujours marquées « Sponsorisé », plus les vues, les clics et les alternants intéressés). Sans ces réglages, la page `/pro` affiche « Bientôt » et rien n'est vendu.
 
 1. Crée un compte sur stripe.com (statut micro-entreprise ou société nécessaire pour recevoir l'argent).
-2. **Catalogue de produits → Ajouter un produit** : « Décode Pro », prix **récurrent mensuel**. Suggestion : 2,99 €. Copie l'identifiant du prix (`price_...`) dans Vercel : `STRIPE_PRICE_ID`. Le site affiche toujours le prix de Stripe, jamais un prix écrit en dur.
+2. **Catalogue de produits → Ajouter un produit** : « Mise en avant Décode », prix **récurrent mensuel**, en hors taxes. Le montant est ton choix : tant que l'audience est petite, un prix d'entrée modeste (quelques dizaines d'euros HT par mois) rend la première vente plus facile ; tu le monteras avec les chiffres de vues du tableau de bord. Copie l'identifiant du prix (`price_...`) dans Vercel : `STRIPE_PRICE_ID`. Le site affiche toujours le prix de Stripe, jamais un prix écrit en dur.
 3. **Développeurs → Clés API** : la clé secrète (`sk_live_...`) dans Vercel : `STRIPE_SECRET_KEY`. Ne la colle jamais dans un chat.
-4. **Développeurs → Webhooks → Ajouter un endpoint** : `https://TON-SITE/api/pro/webhook`, événements `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Copie le secret de signature (`whsec_...`) dans Vercel : `STRIPE_WEBHOOK_SECRET`.
-5. **Paramètres → Facturation → Portail client** : active « Mettre à jour le moyen de paiement » et « Historique des factures ».
-6. Choisis un **médiateur de la consommation** (obligatoire pour vendre à des particuliers, une centaine d'euros par an) et mets son nom et son site dans `LEGAL_MEDIATOR`.
-7. Micro-entrepreneur sans TVA : ajoute la mention « TVA non applicable, art. 293 B du CGI » dans Stripe (Paramètres → Factures → Pied de page).
-8. Fais relire `/cgv` par quelqu'un de compétent avant d'encaisser le premier euro.
-9. Les alertes horaires de Pro tournent avec GitHub Actions (16 fois par jour). Sur un dépôt privé, ça consomme environ la moitié des 2 000 minutes gratuites par mois.
+4. **Développeurs → Webhooks → Ajouter un endpoint** : `https://www.decode-alternance.fr/api/pro/webhook`, événements `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`. Copie le secret de signature (`whsec_...`) dans Vercel : `STRIPE_WEBHOOK_SECRET`.
+5. **Paramètres → Facturation → Portail client** : active « Mettre à jour le moyen de paiement », « Historique des factures » et « Annuler l'abonnement » (à la fin de la période).
+6. Micro-entrepreneur sans TVA : ajoute la mention « TVA non applicable, art. 293 B du CGI » dans Stripe (Paramètres → Factures → Pied de page).
+7. Vérifie chaque entreprise dans `/communaute/moderation` (SIRET et site) : seules les entreprises vérifiées peuvent s'abonner et être mises en avant.
+8. Fais relire `/cgv` par quelqu'un de compétent avant d'encaisser le premier euro. Comme on ne vend qu'à des professionnels, pas besoin de médiateur de la consommation.
 
 ## 4 bis. Encore plus d'offres : les partenariats
 

@@ -44,6 +44,7 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       tier: payDisplay(h.estimate, h.minimumCents, h.lean).tier,
       payHint: payDisplay(h.estimate, h.minimumCents, h.lean).hint,
       pepite: h.pepite,
+      ...(offer.sponsored && offer.sponsorId ? { sponsorId: offer.sponsorId } : {}),
       easyApply: Boolean(offer.easyApply),
       taste: tasteOf(offer, offerHref(offer), extractPerks(offer.description)),
       category: categoryOf(offer),

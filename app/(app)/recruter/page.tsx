@@ -34,7 +34,14 @@ export default function RecruitPage() {
           </Link>
         </p>
         <p className="c-note">
-          Gratuit au lancement. 20 messages par jour, un par alternant et par semaine. Pas d’écoles qui recrutent des inscrits.
+          Gratuit : 20 messages par jour, un par alternant et par semaine. Pas d’écoles qui recrutent des inscrits.
+        </p>
+        <p className="c-note">
+          Pour placer tes offres en tête des recherches :{' '}
+          <Link className="link" href="/pro">
+            la mise en avant
+          </Link>
+          .
         </p>
       </div>
     </div>

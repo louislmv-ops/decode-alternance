@@ -1,20 +1,18 @@
 // La tournée des alertes, partagée par le script (GitHub Actions) et la route du cron Vercel.
 // Envoie les alertes du jour : pour chaque compte, les offres publiées depuis la dernière alerte
-// qui collent à sa recherche suivie, ou à défaut à son profil, ses likes et ses offres décodées, par e-mail, et par SMS pour les comptes Pro au numéro vérifié.
+// qui collent à sa recherche suivie, ou à défaut à son profil, ses likes et ses offres décodées, par e-mail, et par SMS
+// (une fois par semaine au plus : chaque SMS est payé) pour les comptes au numéro vérifié. Tout est gratuit pour les étudiants.
 
 import { buildAlert, pickForProfile, profileSearch } from '@/lib/account/alerts';
 import { isEmailConfigured, isSmsConfigured, sendEmail, sendSms } from '@/lib/account/senders';
-import { accountsDueForAlert, accountsDueHourly, isAccountsConfigured, markAlerted } from '@/lib/account/store';
-import { proAccountIds } from '@/lib/pro/store';
+import { accountsDueForAlert, claimWeeklySms, isAccountsConfigured, markAlerted } from '@/lib/account/store';
 import { listOffers } from '@/lib/offers/repository';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SITE_URL } from '@/lib/site';
 
-/** `fast` : la tournée horaire, pour les comptes Pro seulement. */
-export async function runAlerts(fast = false): Promise<{ checked: number; sent: number } | null> {
+export async function runAlerts(): Promise<{ checked: number; sent: number } | null> {
   if (!isAccountsConfigured()) return null;
-  const pro = await proAccountIds();
-  const accounts = fast ? (await accountsDueHourly()).filter((a) => pro.has(a.id)) : await accountsDueForAlert();
+  const accounts = await accountsDueForAlert();
   let sent = 0;
   for (const account of accounts) {
     const since = account.lastAlertAt ?? new Date(Date.now() - 86_400_000);
@@ -35,7 +33,7 @@ export async function runAlerts(fast = false): Promise<{ checked: number; sent: 
       const alert = buildAlert(fresh, search, SITE_URL);
       try {
         if (account.alertEmail && isEmailConfigured()) await sendEmail(account.email, alert.subject, alert.text);
-        if (pro.has(account.id) && account.alertSms && account.phoneVerified && account.phone && isSmsConfigured()) await sendSms(account.phone, alert.sms);
+        if (account.alertSms && account.phoneVerified && account.phone && isSmsConfigured() && (await claimWeeklySms(account.id))) await sendSms(account.phone, alert.sms);
         sent += 1;
       } catch (error) {
         console.error(`Alerte non envoyée pour un compte : ${(error as Error).message}`);

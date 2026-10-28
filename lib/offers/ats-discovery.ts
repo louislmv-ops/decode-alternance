@@ -7,7 +7,7 @@
 import { CAC40 } from './companies';
 import { type AtsBoard, type AtsProvider, ATS_PROVIDERS, boardUrl, isInFrance, mentionsCompany, parseBoard } from './connectors/ats';
 import { fetchText, sleep } from './connectors/http';
-import { normalizeText } from './normalize';
+import { companyKey, normalizeText } from './normalize';
 
 /** Grands employeurs d'alternants, en plus du CAC 40. Seulement des noms : leur tableau est cherché, jamais supposé. */
 export const SEED_COMPANIES = [
@@ -34,9 +34,8 @@ export function slugCandidates(name: string): string[] {
 
 /** Deux noms d'entreprise désignent-ils la même ? On compare sans forme juridique ni ponctuation. */
 export function sameCompany(a: string, b: string): boolean {
-  const clean = (s: string) => normalizeText(s).replace(LEGAL, ' ').replace(/\s+/g, '');
-  const x = clean(a);
-  const y = clean(b);
+  const x = companyKey(a);
+  const y = companyKey(b);
   return x.length >= 2 && y.length >= 2 && (x === y || x.startsWith(y) || y.startsWith(x));
 }
 

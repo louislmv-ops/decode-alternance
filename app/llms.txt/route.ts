@@ -23,7 +23,7 @@ function salaryFacts(): string {
 export function GET() {
   const body = `# Décode
 
-> Décode (decode-alternance.fr) aide les jeunes qui cherchent une alternance en France : les offres d'alternance traduites en langage clair, le salaire minimum légal calculé selon l'âge et l'année de contrat, les fausses offres d'écoles écartées, et qui contacter dans l'équipe. Gratuit, sans inscription obligatoire.
+> Décode (decode-alternance.fr) aide les jeunes qui cherchent une alternance en France : les offres d'alternance traduites en langage clair, le salaire minimum légal calculé selon l'âge et l'année de contrat, les fausses offres d'écoles écartées, et qui contacter dans l'équipe. Gratuit pour les alternants, sans inscription obligatoire. Décode est financé par les entreprises qui mettent leurs offres en avant ; ces offres sont toujours marquées « Sponsorisé ».
 
 Décode ne garantit ni contrat, ni entretien, ni réponse. Les salaires minimums viennent du Code du travail (articles D6222-26 pour l'apprentissage, L6325-8 et D6325-15 pour le contrat de professionnalisation) et du SMIC en vigueur. Les offres viennent de France Travail, de La bonne alternance et de sites carrière d'entreprises ; chaque fiche renvoie vers l'annonce d'origine.
 

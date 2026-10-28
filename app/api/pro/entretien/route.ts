@@ -3,18 +3,16 @@ import { currentAccount } from '@/lib/account/http';
 import { DecodeError, isClaudeConfigured } from '@/lib/decode/claude';
 import { findOffer } from '@/lib/offers/repository';
 import { prepareInterview } from '@/lib/pro/interview';
-import { isPro } from '@/lib/pro/store';
 import { allow } from '@/lib/rate-limit';
 
 export const maxDuration = 120;
 
 const Body = z.object({ offerId: z.string().min(1).max(300) });
 
-/** Prépa entretien : réservée à Pro, 20 par jour, rien n'est gardé. */
+/** Prépa entretien : gratuite, 20 par jour, rien n'est gardé. */
 export async function POST(request: Request) {
   const account = await currentAccount();
   if (!account) return Response.json({ error: 'Connecte-toi d’abord.' }, { status: 401 });
-  if (!(await isPro(account.id))) return Response.json({ error: 'La prépa entretien fait partie de Pro.', pro: true }, { status: 402 });
   if (!isClaudeConfigured()) return Response.json({ error: 'L’IA n’est pas encore activée sur ce site.' }, { status: 503 });
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: 'Offre manquante.' }, { status: 400 });

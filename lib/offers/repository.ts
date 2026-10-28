@@ -6,6 +6,9 @@ import { DEMO_DECODES, DEMO_OFFERS } from './demo';
 import { dedupe, filterOffers, matchesFilters } from './filter';
 import { diversify, sortOffers } from './rank';
 import { canonicalQuery } from './query';
+import { isAccountsConfigured } from '@/lib/account/store';
+import { injectSponsored, sponsorOf } from '@/lib/sponsors/match';
+import { activeSponsors } from '@/lib/sponsors/store';
 import { companyRatingOf } from '@/lib/companies/store';
 import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer, rememberSeen } from './aggregators';
@@ -64,11 +67,29 @@ const cachedSearch = unstable_cache(
     const page = await fetchOffers(filters);
     // En tête de la première page, des entreprises différentes : cinq offres du même groupe d'affilée lassent.
     const top = (filters.sort ?? 'top') === 'top' && page.page === 1;
-    return top ? { ...page, offers: diversify(page.offers) } : page;
+    if (!top) return page;
+    return { ...page, offers: injectSponsored(diversify(page.offers), await sponsoredFor(filters, page.offers)) };
   },
-  ['offres-v2'],
+  ['offres-v3'],
   { revalidate: 300 },
 );
+
+/**
+ * Les offres des entreprises qui paient la mise en avant et qui correspondent à la recherche : celles de la base
+ * quand il y en a une, sinon celles de la page. Jamais une offre qui ne passe pas les filtres de la personne.
+ */
+async function sponsoredFor(filters: OfferFilters, pageOffers: Offer[]): Promise<Offer[]> {
+  if (!isAccountsConfigured()) return [];
+  const sponsors = await activeSponsors().catch(() => []);
+  if (sponsors.length === 0) return [];
+  const candidates = (await hasStoredOffers())
+    ? (await searchOffers({ ...filters, companies: sponsors.map((s) => s.company), page: 1 }).catch(() => null))?.offers ?? []
+    : pageOffers;
+  return candidates.flatMap((o) => {
+    const sponsor = sponsorOf(o, sponsors);
+    return sponsor ? [{ ...o, sponsorId: sponsor.accountId }] : [];
+  });
+}
 
 export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
   const page = await cachedSearch(JSON.stringify(filters));

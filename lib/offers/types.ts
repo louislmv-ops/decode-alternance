@@ -78,6 +78,10 @@ export interface Offer {
   remote?: RemotePolicy | null;
   /** Compétences citées dans l'annonce (slugs de SKILLS). */
   skills?: string[];
+  /** Mise en avant payée par l'entreprise : toujours affichée « Sponsorisé ». */
+  sponsored?: boolean;
+  /** Le compte de l'entreprise qui paie, pour compter vues et clics. */
+  sponsorId?: string;
 }
 
 export interface OfferFilters {
@@ -102,6 +106,8 @@ export interface OfferFilters {
   minSalaryCents?: number;
   /** Une compétence citée dans l'annonce (slug de SKILLS). */
   skill?: string;
+  /** Interne : seulement les offres de ces entreprises (les entreprises mises en avant). */
+  companies?: string[];
   /** Par défaut, les plus attirantes d'abord. */
   sort?: OfferSort;
   page?: number;

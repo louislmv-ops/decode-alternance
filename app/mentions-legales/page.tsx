@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Mentions légales', description: 'É
 // Les informations de l'éditeur se règlent dans les variables d'environnement, sans toucher au code.
 // Sans elles, le site est présenté comme édité par un particulier à titre non professionnel, qui peut
 // rester anonyme en ne publiant que l'identité de l'hébergeur (LCEN, art. 6). Ce n'est plus possible
-// dès qu'il y a une activité commerciale : Décode Pro exige alors les vraies informations.
+// dès qu'il y a une activité commerciale : la mise en avant payante exige alors les vraies informations.
 const LEGAL = {
   editor: process.env.LEGAL_EDITOR || null,
   address: process.env.LEGAL_ADDRESS || null,
@@ -85,6 +85,18 @@ export default function LegalPage() {
           illicites. Il repasse en relecture après trois signalements. Les moyennes ne s’affichent qu’à partir de trois réponses. Les
           avis ne sont ni payés ni triés par les entreprises. La mention « e-mail pro vérifié » signifie qu’un code a été reçu sur une
           adresse au nom de domaine indiqué, pas que l’emploi a été contrôlé.
+        </p>
+
+        <h2 id="classement">Classement des offres</h2>
+        <p>
+          Par défaut, les offres sont classées selon des critères identiques pour toutes : salaire annoncé, niveau de diplôme, intitulé
+          du poste, taille et notoriété de l’employeur, candidature directe et date de publication. Les premières places évitent de montrer
+          plusieurs fois le même employeur. Tu peux aussi trier par date ou par salaire.
+        </p>
+        <p>
+          Les entreprises peuvent payer une mise en avant : au plus deux de leurs offres en haut de la première page, seulement quand
+          elles correspondent à ta recherche. Ces offres portent toujours la mention « Sponsorisé ». Aucun autre paiement n’influence le
+          classement, les avis ni la mention « Pépite » (article L111-7 du Code de la consommation).
         </p>
 
         <h2 id="sources">Sources des offres et des règles</h2>
