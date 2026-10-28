@@ -107,3 +107,9 @@ Les projets en double `decode-alternance-m3u6` et `decode-alternance-m3u699` ne 
 ## Sécurité
 
 Changer le mot de passe francetravail.io : il a été visible sur une capture d'écran.
+
+## 5. Les salaires des alternants dans les accords d'entreprise (gratuit, rien à créer)
+
+Le workflow GitHub « Accords d'entreprise » lit chaque mardi les accords d'entreprise publiés par l'État et garde ceux qui fixent la paie des alternants (passage recopié, lien Légifrance). Il utilise le secret `DATABASE_URL` déjà en place.
+
+Pour rattraper les 63 archives déjà publiées : onglet **Actions** → « Accords d'entreprise » → **Run workflow**, « max » à 20 (environ 1 h 30), trois fois. Il faut s'attendre à peu de résultats : environ un accord sur mille fixe la paie de ses alternants.
