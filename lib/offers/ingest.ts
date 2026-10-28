@@ -1,5 +1,5 @@
 // Une collecte : La bonne alternance et France Travail (tous les départements ou une partie), puis les sites
-// carrière renseignés dans companies.ts. Les offres sont écrites au fil de l'eau. Une offre qu'aucune collecte n'a revue depuis
+// carrière renseignés dans companies.ts et les tableaux des logiciels de recrutement (connectors/ats.ts). Les offres sont écrites au fil de l'eau. Une offre qu'aucune collecte n'a revue depuis
 // STALE_HOURS est retirée : elle a été pourvue ou dépubliée.
 
 import { careerSites } from './companies';
@@ -7,9 +7,49 @@ import { DEPARTMENTS, fetchFranceTravail } from './connectors/france-travail';
 import { crawlCareerSite } from './connectors/job-posting';
 import { isLbaConfigured } from './connectors/la-bonne-alternance';
 import { harvestLba, type LbaHarvestReport } from './connectors/lba-harvest';
-import { ensureOfferSchema, removeStale, upsertOffers } from './store';
+import { discover, SEED_COMPANIES } from './ats-discovery';
+import { fetchAtsBoard } from './connectors/ats';
+import { sleep } from './connectors/http';
+import { companiesToProbe, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
 
 export const STALE_HOURS = 36;
+
+/** Employeurs cherchés chez les logiciels de recrutement à chaque collecte : quelques minutes de requêtes. */
+export const ATS_PROBES_PER_NIGHT = 120;
+
+/**
+ * Les logiciels de recrutement : d'abord chercher les tableaux de quelques employeurs de plus, puis lire tous les
+ * tableaux connus. Une offre lue ici est publiée par l'employeur lui-même (« Direct entreprise »).
+ */
+async function ingestAts(log: (line: string) => void, probeLimit: number): Promise<IngestReport['ats']> {
+  let discovered = 0;
+  const companies = await companiesToProbe(SEED_COMPANIES, probeLimit);
+  for (const { company, size } of companies) {
+    const boards = await discover(company);
+    for (const board of boards) await saveAtsBoard({ ...board, size });
+    await markProbed(company, boards.length > 0);
+    discovered += boards.length;
+    if (boards.length) log(`Logiciels de recrutement : ${company} trouvé chez ${boards.map((b) => `${b.provider}/${b.slug}`).join(', ')}`);
+  }
+  const boards = await listAtsBoards();
+  let offers = 0;
+  let failed = 0;
+  for (const board of boards) {
+    try {
+      const found = await fetchAtsBoard(board);
+      await upsertOffers(found);
+      await markAtsBoard(board, { offers: found.length });
+      offers += found.length;
+    } catch (error) {
+      failed += 1;
+      await markAtsBoard(board, { error: true });
+      log(`${board.provider}/${board.slug} : échec (${(error as Error).message})`);
+    }
+    await sleep(400);
+  }
+  log(`Logiciels de recrutement : ${companies.length} employeurs cherchés, ${discovered} tableaux trouvés, ${boards.length} lus, ${offers} offres d'alternance`);
+  return { boards: boards.length, offers, discovered, probed: companies.length, failed };
+}
 
 /** Le cron tourne toutes les deux heures : chaque créneau traite un douzième des départements. */
 export const SLOTS = 12;
@@ -22,14 +62,15 @@ export interface IngestReport {
   laBonneAlternance: LbaHarvestReport | { skipped: string };
   franceTravail: { fetched: number; truncated: string[] } | { skipped: string };
   careerSites: { company: string; offers: number; pagesRead: number; error?: string }[];
+  ats: { boards: number; offers: number; discovered: number; probed: number; failed: number } | { skipped: string };
   removed: number;
 }
 
 export async function runIngest(
-  opts: { log?: (line: string) => void; departments?: string[]; careerSites?: boolean } = {},
+  opts: { log?: (line: string) => void; departments?: string[]; careerSites?: boolean; ats?: boolean; probeLimit?: number } = {},
 ): Promise<IngestReport> {
   const log = opts.log ?? console.log;
-  const report: IngestReport = { laBonneAlternance: { skipped: '' }, franceTravail: { skipped: '' }, careerSites: [], removed: 0 };
+  const report: IngestReport = { laBonneAlternance: { skipped: '' }, franceTravail: { skipped: '' }, careerSites: [], ats: { skipped: '' }, removed: 0 };
   await ensureOfferSchema();
 
   if (isLbaConfigured()) {
@@ -65,6 +106,8 @@ export async function runIngest(
       }
     }
   }
+
+  if (opts.careerSites !== false && opts.ats !== false) report.ats = await ingestAts(log, opts.probeLimit ?? ATS_PROBES_PER_NIGHT);
 
   const cutoff = new Date(Date.now() - STALE_HOURS * 3_600_000);
   // Une source qui n'a pas tourné ne retire rien : une panne ne doit pas vider la base. Une collecte partielle

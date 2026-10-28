@@ -74,9 +74,19 @@ Sans ces réglages, la page `/pro` affiche « Bientôt » et rien n'est vendu.
 8. Fais relire `/cgv` par quelqu'un de compétent avant d'encaisser le premier euro.
 9. Les alertes horaires de Pro tournent avec GitHub Actions (16 fois par jour). Sur un dépôt privé, ça consomme environ la moitié des 2 000 minutes gratuites par mois.
 
+## 4 bis. Encore plus d'offres : les partenariats
+
+La collecte lit déjà France Travail, La bonne alternance, les logiciels de recrutement des entreprises (Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee, Personio) et les sites carrière. Pour aller plus loin, il faut l'accord des plateformes, jamais leur aspiration :
+
+1. **Welcome to the Jungle** : leur logiciel Welcome Kit a une API pour les entreprises clientes. Proposer un partenariat de diffusion (Décode leur envoie des candidats).
+2. **JobTeaser** : partenariat écoles et entreprises ; demander un flux d'offres d'alternance.
+3. **Indeed** et **HelloWork** : programmes de partenaires éditeurs (flux XML d'offres contre trafic).
+4. **LinkedIn** : pas d'API d'offres ouverte ; seulement des partenariats pour les éditeurs de logiciels de recrutement.
+5. **Le plus efficace à terme** : que les entreprises publient leurs offres d'alternance directement sur Décode (espace entreprise `/recruteur`, gratuit au lancement). C'est ainsi que Welcome to the Jungle a construit sa base.
+
 ## 5. Ménage Vercel
 
-Supprimer les projets en double `decode-alternance-m3u6` et `decode-alternance-m3u699` (Settings, tout en bas, Delete Project).
+Les projets en double `decode-alternance-m3u6` et `decode-alternance-m3u699` ne construisent plus rien (étape de build ignorée). Pour les supprimer : Settings, tout en bas, Delete Project.
 
 ## 6. Avant de faire connaître le site
 
