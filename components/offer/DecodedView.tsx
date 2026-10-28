@@ -178,7 +178,13 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         </div>
       </div>
 
-      {offer?.isExample && <p className="notice">Exemple fictif.</p>}
+      {offer?.isExample ? (
+        <p className="notice">Exemple fictif.</p>
+      ) : (
+        <p className="notice" role="note">
+          Résumé généré par IA, peut contenir des erreurs. Vérifie dans l’annonce d’origine.
+        </p>
+      )}
 
       <OfferFacts
         payCents={offerCents}

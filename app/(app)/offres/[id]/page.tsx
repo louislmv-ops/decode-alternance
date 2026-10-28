@@ -7,12 +7,12 @@ import { offerHref } from '@/lib/offers/link';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { DecodedView, type OfferMeta } from '@/components/offer/DecodedView';
+import type { OfferMeta } from '@/components/offer/DecodedView';
 import { BackLink } from '@/components/BackLink';
 import { InterviewPrep } from '@/components/pro/InterviewPrep';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
-import { findDecode, findOffer, withEmployerPay } from '@/lib/offers/repository';
+import { findOffer, withEmployerPay } from '@/lib/offers/repository';
 import { payContext } from '@/lib/offers/pay-context';
 import { isTrustedSourceLink } from '@/lib/offers/link';
 import { SOURCE_LABELS } from '@/lib/offers/types';
@@ -45,8 +45,7 @@ export default async function OfferPage({ params, searchParams }: Props) {
   }
   // Sans salaire dans l'annonce : celui que l'entreprise écrit dans ses autres annonces, quand on le connaît.
   const [offer] = (await withEmployerPay([found])) as [typeof found];
-  const [decoded, pay, point] = await Promise.all([
-    findDecode(id),
+  const [pay, point] = await Promise.all([
     payContext(offer),
     // La position donnée par la source, sinon le centre de sa ville (cherché une fois, puis gardé en mémoire).
     offer.lat != null && offer.lon != null
@@ -114,7 +113,8 @@ export default async function OfferPage({ params, searchParams }: Props) {
           </Link>
         )}
       </div>
-      {decoded ? <DecodedView decoded={decoded} offer={meta} /> : <UndecodedOffer offer={meta} description={offer.description} />}
+      {/* La traduction par l'IA n'est jamais rendue côté serveur : chargée par le navigateur (et jamais pour un robot), elle n'est pas indexée. */}
+      <UndecodedOffer offer={meta} description={offer.description} />
       {offer.source !== 'exemple' && isAccountsConfigured() && <InterviewPrep offerId={offer.id} />}
     </>
   );

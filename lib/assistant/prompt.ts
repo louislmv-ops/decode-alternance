@@ -5,7 +5,7 @@ import { APPRENTISSAGE_RATES, NO_EMPLOYER_GRACE_MONTHS, PROFESSIONNALISATION_RAT
 const PAGES = [
   ['/offres', 'les offres d’alternance de France Travail, La bonne alternance, Adzuna, Jooble et des sites carrière, sans les fausses offres d’écoles'],
   ['/offres/swipe', 'les offres une par une, à garder ou passer'],
-  ['/decoder', 'coller n’importe quelle annonce : missions en clair, semaine type, pièges, salaire comparé au minimum, questions à poser'],
+  ['/decoder', 'coller n’importe quelle annonce : missions en clair, semaine type, points de vigilance, salaire comparé au minimum, questions à poser'],
   ['/salaire', 'le calcul du salaire minimum selon l’âge, l’année et le contrat'],
   ['/equipe', 'trouver qui contacter dans l’équipe qui recrute'],
   ['/suivi', 'le suivi des candidatures, gardé dans le navigateur'],

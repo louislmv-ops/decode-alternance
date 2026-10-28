@@ -62,7 +62,7 @@ export const DecodedOfferSchema = z.object({
   questionsAPoser: z.array(z.string()).describe('Trois à cinq questions précises à poser au recruteur'),
   alertes: z
     .array(z.object({ niveau: z.enum(['alerte', 'attention']), texte: z.string() }))
-    .describe('Signes d’offre d’école déguisée, de frais demandés, d’arnaque, de salaire sous le minimum'),
+    .describe('Points de vigilance tirés du seul texte de l’annonce : annonce publiée par une école, argent demandé au candidat, salaire écrit sous le minimum, informations floues ou absentes. Jamais un jugement sur l’entreprise.'),
   equipe: z.object({
     service: z.string().describe('Le service ou l’équipe qui accueillera l’alternant'),
     aContacter: z.array(z.string()).describe('Intitulés de postes à chercher, du plus utile au moins utile'),

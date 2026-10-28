@@ -95,7 +95,7 @@ export default async function Home() {
               </span>
               <Peek />
             </h1>
-            <p className="hero2__lead">Ce que tu feras vraiment, ce que tu vas toucher, les pièges à éviter. Gratuit.</p>
+            <p className="hero2__lead">Ce que tu feras vraiment, ce que tu vas toucher, les points de vigilance. Gratuit.</p>
 
             <form className="hero2__search" action="/offres" method="get" role="search">
               <label className="hero2__field">

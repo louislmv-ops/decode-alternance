@@ -8,7 +8,7 @@ Tu colles une offre (ou tu en ouvres une dans la liste) et Décode te dit :
 - une semaine probable et ce que tu vas apprendre ;
 - ton salaire minimum légal, calculé au centime pour ton âge et ton année, comparé au salaire annoncé ;
 - si le rythme colle avec ton école ;
-- les pièges : fausses offres d’écoles, frais demandés, salaire sous le minimum ;
+- les points de vigilance : offres publiées par des écoles, frais demandés, salaire sous le minimum, informations absentes ;
 - le service à viser, les recherches LinkedIn à lancer toi-même et un message de 300 caractères.
 
 Les offres « pépites » (grande entreprise, ou salaire au moins 20 % au-dessus de ton minimum) sont surlignées en menthe. Les alertes sont en rouge.

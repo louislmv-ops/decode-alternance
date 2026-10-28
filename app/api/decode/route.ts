@@ -2,7 +2,7 @@ import { z } from 'zod/v4';
 import { decodeOffer, DecodeError, isDecodeConfigured, MAX_OFFER_CHARS } from '@/lib/decode/ai';
 import { findDecode, findOffer, rememberDecode } from '@/lib/offers/repository';
 import { isDatabaseConfigured, saveDecode } from '@/lib/offers/store';
-import { allow, clientKey } from '@/lib/rate-limit';
+import { allowAll, clientKey } from '@/lib/rate-limit';
 
 export const maxDuration = 120;
 
@@ -16,7 +16,16 @@ const PER_HOUR = Number(process.env.DECODE_PER_HOUR || 10);
 /** Plafond par jour et par adresse, pour garder la facture de l'IA sous contrôle. */
 const PER_DAY = Number(process.env.DECODE_PER_DAY || 30);
 
+/** Une traduction n'est jamais indexée, même si un robot appelle la route directement. */
+const NOINDEX = { 'X-Robots-Tag': 'noindex, nofollow' };
+
 export async function POST(request: Request) {
+  const response = await handle(request);
+  for (const [k, v] of Object.entries(NOINDEX)) response.headers.set(k, v);
+  return response;
+}
+
+async function handle(request: Request): Promise<Response> {
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return Response.json(
@@ -34,10 +43,14 @@ export async function POST(request: Request) {
     return Response.json({ error: 'La traduction par l’IA n’est pas encore activée sur ce site.' }, { status: 503 });
   }
   const key = clientKey(request);
-  if (!allow(`jour:${key}`, PER_DAY, 86_400_000)) {
+  const blocked = allowAll([
+    { key: `jour:${key}`, limit: PER_DAY, windowMs: 86_400_000 },
+    { key, limit: PER_HOUR, windowMs: 3_600_000 },
+  ]);
+  if (blocked === 0) {
     return Response.json({ error: `Tu as décodé ${PER_DAY} offres aujourd’hui, c’est le maximum. Reviens demain.` }, { status: 429 });
   }
-  if (!allow(key, PER_HOUR, 3_600_000)) {
+  if (blocked === 1) {
     return Response.json({ error: `Tu as déjà décodé ${PER_HOUR} offres cette heure-ci. Reviens un peu plus tard.` }, { status: 429 });
   }
 
