@@ -55,7 +55,11 @@ export function replaceApplications(apps: Application[]) {
 
 export function useTracker() {
   const apps = useSyncExternalStore(subscribe, read, () => EMPTY);
-  const add = useCallback((app: Omit<Application, 'id'>) => write([{ ...app, id: crypto.randomUUID() }, ...read()]), []);
+  const add = useCallback((app: Omit<Application, 'id'>) => {
+    const id = crypto.randomUUID();
+    write([{ ...app, id }, ...read()]);
+    return id;
+  }, []);
   const update = useCallback((id: string, patch: Partial<Application>) => write(read().map((a) => (a.id === id ? { ...a, ...patch } : a))), []);
   const remove = useCallback((id: string) => write(read().filter((a) => a.id !== id)), []);
   return { apps, add, update, remove };

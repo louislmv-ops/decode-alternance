@@ -11,6 +11,7 @@ import { payDisplay } from '@/lib/offers/pay-display';
 import { extractPerks } from '@/lib/offers/perks';
 import { tasteOf } from '@/lib/taste';
 import { listOffers } from '@/lib/offers/repository';
+import { categoryOf } from '@/lib/offers/category';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/link';
 import { logoSrc } from '@/lib/offers/logo';
@@ -45,6 +46,7 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
       pepite: h.pepite,
       easyApply: Boolean(offer.easyApply),
       taste: tasteOf(offer, offerHref(offer), extractPerks(offer.description)),
+      category: categoryOf(offer),
     }));
   const next = new URLSearchParams(Object.entries(params).flatMap(([k, v]) => (typeof v === 'string' && k !== 'page' ? [[k, v]] : [])));
   const page = result?.page ?? 1;

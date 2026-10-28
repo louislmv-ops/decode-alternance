@@ -13,6 +13,7 @@ import { OfferFacts } from './OfferFacts';
 import { PayPanel } from './PayPanel';
 import { PerksPanel } from './Perks';
 import { ApplyKit } from './ApplyKit';
+import { BullshitBingo, JargonText } from './BullshitBingo';
 import { LikeButton } from './LikeButton';
 
 /** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
@@ -127,8 +128,9 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
             </a>
           )}
         </div>
-        <p className="raw-text">{description}</p>
+        <JargonText text={description} />
       </section>
+      <BullshitBingo text={description} />
     </div>
   );
 }

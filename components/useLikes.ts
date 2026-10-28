@@ -109,6 +109,11 @@ export function useLikes() {
     if (s.passes.some((p) => p.id === item.id) || s.likes.some((l) => l.id === item.id)) return;
     write({ ...s, passes: [{ ...item, at: new Date().toISOString() }, ...s.passes].slice(0, MAX_PASSES) });
   }, []);
+  /** Annule un « je passe » (le retour arrière du swipe). */
+  const unpass = useCallback((id: string) => {
+    const s = read();
+    write({ ...s, passes: s.passes.filter((p) => p.id !== id) });
+  }, []);
   const taste = useMemo(() => buildTaste(store.likes, store.passes, store.decoded), [store]);
-  return { likes: store.likes, decoded: store.decoded, isLiked, like, unlike, pass, taste };
+  return { likes: store.likes, decoded: store.decoded, isLiked, like, unlike, pass, unpass, taste };
 }
