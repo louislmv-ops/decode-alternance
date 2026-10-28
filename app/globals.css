@@ -3,8 +3,10 @@
 /* ==========================================================================
    Décode : tokens
    Direction Apple (Human Interface Guidelines, transposées au web) : clarté, le contenu d'abord,
-   la police du système, des gris neutres en couches, des angles continus, un seul violet pour agir
-   et le jaune réservé au surlignage.
+   la police du système, des gris neutres en couches, des angles continus.
+   Palette « Ultraviolet » : bleu électrique #3A1CFF, violet #8A2BFF, rose #FF3EC8, cyan #5CE1FF.
+   Le bleu-violet agit (boutons, liens, sélection) ; le rose et le cyan ne servent qu'aux lueurs
+   derrière le verre, jamais au texte. Le jaune reste réservé au surlignage des pépites.
    ========================================================================== */
 
 :root {
@@ -12,18 +14,27 @@
   --surface: #f5f5f7;
   --ink: #1d1d1f;
   --muted: #6e6e73;
-  --brand: #7c3aed;
-  --brand-dark: #6d28d9;
+  --uv-blue: #3a1cff;
+  --uv-violet: #8a2bff;
+  --uv-pink: #ff3ec8;
+  --uv-cyan: #5ce1ff;
+
+  /* 6,8:1 sur blanc : lisible en texte courant comme en fond de bouton. */
+  --brand: #5b21ff;
+  --brand-dark: #3a1cff;
+  --brand-rgb: 91 33 255;
+  /* L'ombre colorée des éléments qui flottent. */
+  --shade-rgb: 34 14 120;
   --brand-ink: #ffffff;
   --accent: #ffd60a;
   --accent-ink: #15131c;
-  --field-2: #7c3aed;
+  --field-2: #5b21ff;
   --field-2-ink: #ffffff;
 
   /* Aplats pastel : un par domaine ou par outil, jamais pour le texte courant. */
-  --mint: #ede9fe;
-  --sky: #dcf3ff;
-  --peach: #fde2e8;
+  --mint: #efebff;
+  --sky: #dff8ff;
+  --peach: #ffe3f6;
   --butter: #fff2bf;
 
   /* Les fonctions de l'appli : alerte et prudence, jamais décoratives. */
@@ -34,9 +45,9 @@
   --notice-ink: #7a4b00;
   --positive: #1f7a4d;
 
-  --tint-1: #5b21b6;
-  --tint-2: #7c3aed;
-  --tint-3: #a78bfa;
+  --tint-1: #3a1cff;
+  --tint-2: #5b21ff;
+  --tint-3: #8a2bff;
   --tint-4: #f5c400;
   --tint-5: #ffd60a;
   --tint-6: #fff4bf;
@@ -71,6 +82,11 @@
   --max: 1240px;
   --gutter: 16px;
   --section-gap: clamp(88px, 10vw, 160px);
+
+  /* Les dégradés de la palette. Texte blanc : au moins 5,4:1 sur chaque teinte. */
+  --uv-gradient: linear-gradient(135deg, #8a2bff 0%, #5b21ff 52%, #3a1cff 100%);
+  --uv-button: linear-gradient(180deg, #7b2bff 0%, #5b21ff 55%, #3a1cff 100%);
+  --uv-button-hover: linear-gradient(180deg, #8a2bff 0%, #6a24ff 55%, #4a1eff 100%);
 
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);

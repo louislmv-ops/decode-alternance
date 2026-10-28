@@ -4,6 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Recruter un alternant',
   description: 'Trouve des alternants qui cherchent dans ton domaine et ta ville, et écris-leur directement. Entreprises vérifiées uniquement.',
+  alternates: { canonical: '/recruter' },
 };
 
 const STEPS = [

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Wordmark } from '@/components/Wordmark';
+import { CITIES, landingHref } from '@/lib/landing';
 
 export function SiteFooter() {
   return (
@@ -39,6 +40,17 @@ export function SiteFooter() {
           </Link>
           <Link className="link" href="/recruter" data-needs="comptes">
             Recruter un alternant
+          </Link>
+        </nav>
+        <nav aria-label="Alternance par ville" className="site-footer__col">
+          <p className="site-footer__label">Par ville</p>
+          {CITIES.slice(0, 6).map((c) => (
+            <Link key={c.slug} className="link" href={landingHref(null, c)}>
+              Alternance à {c.name}
+            </Link>
+          ))}
+          <Link className="link" href="/alternance">
+            Tous les métiers et villes
           </Link>
         </nav>
         <nav aria-label="Infos" className="site-footer__col">

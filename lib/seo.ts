@@ -89,3 +89,23 @@ export function jobPostingJsonLd(offer: Offer, url: string) {
     url,
   };
 }
+
+/** Le fil d'Ariane : Google l'affiche à la place de l'adresse, les assistants IA y lisent la place de la page. */
+export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: item.name, item: `${SITE_URL}${item.path}` })),
+  };
+}
+
+/** Une liste d'offres, dans l'ordre de la page. */
+export function itemListJsonLd(name: string, paths: string[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name,
+    numberOfItems: paths.length,
+    itemListElement: paths.map((path, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE_URL}${path}` })),
+  };
+}

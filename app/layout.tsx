@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import './site.css';
 import './app.css';
+import './ultraviolet.css';
 import { AccountSync } from '@/components/account/AccountSync';
 import { Assistant } from '@/components/Assistant';
 import { isChatConfigured } from '@/lib/assistant/chat';

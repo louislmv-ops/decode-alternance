@@ -4,6 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Les aides pour les alternants',
   description: 'Logement, impôts, permis, réductions : les aides auxquelles un alternant peut avoir droit, en clair, avec le lien officiel pour chacune.',
+  alternates: { canonical: '/aides' },
 };
 
 /** Vérifié en octobre 2026. Les montants changent : chaque aide renvoie vers sa source officielle. */

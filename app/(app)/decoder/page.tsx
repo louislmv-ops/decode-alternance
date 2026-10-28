@@ -6,6 +6,7 @@ import { DEMO_OFFERS } from '@/lib/offers/demo';
 export const metadata: Metadata = {
   title: 'Décoder une offre d’alternance',
   description: 'Colle une offre d’alternance : missions en clair, semaine type, pièges, salaire comparé à ton minimum et questions à poser.',
+  alternates: { canonical: '/decoder' },
 };
 
 export default function DecoderPage() {

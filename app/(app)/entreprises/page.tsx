@@ -9,6 +9,7 @@ import { isCommunityOpen } from '@/lib/community/http';
 export const metadata: Metadata = {
   title: 'Avis et salaires des alternants, par entreprise',
   description: 'Ce que les alternants gagnent vraiment, comparé au minimum légal, et ce qu’ils pensent de leur entreprise : tuteur, missions, rythme école.',
+  alternates: { canonical: '/entreprises' },
 };
 
 export default async function CompaniesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {

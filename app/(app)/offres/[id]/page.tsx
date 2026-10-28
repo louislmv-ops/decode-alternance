@@ -1,5 +1,5 @@
 import { JsonLd } from '@/components/JsonLd';
-import { jobPostingJsonLd } from '@/lib/seo';
+import { breadcrumbJsonLd, jobPostingJsonLd } from '@/lib/seo';
 import { SITE_URL } from '@/lib/site';
 import { paySignals } from '@/lib/offers/pay-signals';
 import { extractPerks } from '@/lib/offers/perks';
@@ -74,6 +74,15 @@ export default async function OfferPage({ params, searchParams }: Props) {
   return (
     <>
       {posting && <JsonLd data={posting} />}
+      {offer.source !== 'exemple' && (
+        <JsonLd
+          data={breadcrumbJsonLd([
+            { name: 'Accueil', path: '/' },
+            { name: 'Offres', path: '/offres' },
+            { name: offer.title, path: `/offres/${encodeURIComponent(offer.id)}` },
+          ])}
+        />
+      )}
       <div className="back-row">
         <BackLink fallback="/offres" label="Offres" />
         {offer.company && offer.source !== 'exemple' && (
