@@ -8,7 +8,13 @@ import { departmentFromPostalCode } from '@/lib/offers/normalize';
 import type { CvGuess } from './extract';
 
 const CvSchema = z.object({
-  metier: z.string().nullable().describe('Le métier ou domaine visé en alternance, en 1 à 3 mots simples pour une recherche (ex. « marketing », « développeur web »)'),
+  metier: z
+    .string()
+    .nullable()
+    .describe('Le poste précis visé en alternance, comme on le taperait dans un moteur d’offres, 1 à 4 mots (ex. « chargé de marketing digital », « développeur full stack »). Pas un ancien job d’été.'),
+  autresMetiers: z.array(z.string()).describe('Deux ou trois autres postes proches qui conviendraient, mêmes règles'),
+  formation: z.string().nullable().describe('La formation préparée en alternance, telle qu’écrite (ex. « BTS MCO », « Bachelor marketing digital »)'),
+  competences: z.array(z.string()).describe('Jusqu’à 8 compétences et outils cités (logiciels, langages, langues, permis)'),
   codePostal: z.string().nullable().describe('Code postal de l’adresse du candidat, 5 chiffres'),
   ville: z.string().nullable(),
   niveauVise: z.number().nullable().describe('Niveau du diplôme préparé en alternance : 3 = CAP, 4 = bac, 5 = bac+2, 6 = bac+3, 7 = bac+5'),
@@ -44,8 +50,12 @@ export async function readCvWithClaude(input: string | { mediaType: 'image/jpeg'
   if (!cv) throw new Error('CV illisible');
   const cp = cv.codePostal?.replace(/\s/g, '') ?? '';
   const level = cv.niveauVise !== null && cv.niveauVise >= 3 && cv.niveauVise <= 7 ? (cv.niveauVise as CvGuess['level']) : null;
+  const job = cv.metier?.slice(0, 60) || null;
   return {
-    job: cv.metier?.slice(0, 60) || null,
+    job,
+    jobs: [...new Set([job, ...cv.autresMetiers.map((m) => m.slice(0, 60))].filter((m): m is string => Boolean(m)))].slice(0, 4),
+    formation: cv.formation?.slice(0, 60) || null,
+    skills: cv.competences.map((c) => c.slice(0, 40)).slice(0, 8),
     department: departmentFromPostalCode(cp),
     city: cv.ville?.slice(0, 60) || null,
     level,

@@ -51,6 +51,9 @@ interface OfferRow {
   easy_apply?: boolean;
   remote?: RemotePolicy | null;
   skills?: string[] | null;
+  logo_url?: string | null;
+  company_site?: string | null;
+  company_siren?: string | null;
   also_on?: OfferSource[];
 }
 
@@ -82,6 +85,9 @@ function toOffer(row: OfferRow): Offer {
     easyApply: row.easy_apply ?? false,
     // Une base pas encore migrée n'a pas ces colonnes : le texte sera relu au besoin.
     ...(row.skills !== undefined ? { remote: row.remote ?? null, skills: row.skills ?? [] } : {}),
+    logoUrl: row.logo_url ?? null,
+    companySite: row.company_site ?? null,
+    companySiren: row.company_siren ?? null,
   };
 }
 
@@ -114,6 +120,9 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
     // Toujours relus dans le texte : l'annonce a pu changer depuis la dernière collecte.
     remote: remoteOf(`${o.title}\n${o.description}`),
     skills: skillsOf(`${o.title}\n${o.description}`),
+    logo_url: o.logoUrl ?? null,
+    company_site: o.companySite ?? null,
+    company_siren: o.companySiren ?? null,
   }));
   const s = db();
   await s`
@@ -125,7 +134,9 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
       salary_text = excluded.salary_text, salary_monthly_cents = excluded.salary_monthly_cents, salary_max_cents = excluded.salary_max_cents,
       description = excluded.description, fingerprint = excluded.fingerprint,
       school_flags = excluded.school_flags, rome_code = excluded.rome_code, easy_apply = excluded.easy_apply,
-      remote = excluded.remote, skills = excluded.skills, seen_at = now()`;
+      remote = excluded.remote, skills = excluded.skills,
+      logo_url = coalesce(excluded.logo_url, offers.logo_url), company_site = coalesce(excluded.company_site, offers.company_site),
+      company_siren = coalesce(excluded.company_siren, offers.company_siren), seen_at = now()`;
 }
 
 /** Retire les offres d'une source qu'aucune collecte n'a revues depuis `cutoff`. */

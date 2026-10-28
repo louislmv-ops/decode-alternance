@@ -59,7 +59,7 @@ export default async function Home() {
   const departments = filtersWithPlace({}, placeCookie).departments ?? [];
   const page = await latestOffers(departments);
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
-  const offers = (page?.offers ?? []).slice(0, 5);
+  const offers = (page?.offers ?? []).slice(0, 10);
   const community = await communityPayFor(offers);
   const latest = offers.map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }));
 

@@ -102,6 +102,27 @@ async function fromGuessedDomain(name: string): Promise<LogoTarget> {
   return null;
 }
 
+/** Mots qui commencent un nom sans désigner une marque : « Boulangerie Dupont » n'a pas le logo de « boulangerie ». */
+const GENERIC = new Set(
+  'agence association atelier banque boulangerie boutique cabinet caisse centre clinique college commune credit ecole entreprise etude garage hotel institut laboratoire lycee mairie maison pharmacie restaurant salon service services studio transports universite ville'.split(' '),
+);
+
+/**
+ * Les noms à essayer, du plus précis au plus court : une filiale porte souvent le logo de son groupe.
+ * « VINCI ENERGIES FRANCE TERTIAIRE NORD EST » donne « vinci energies tertiaire nord est », …, « vinci energies », puis « vinci ».
+ */
+export function nameCandidates(name: string): string[] {
+  const words = coreName(name).split(' ').filter(Boolean);
+  const out: string[] = [];
+  for (let n = Math.min(words.length, 4); n >= 1; n--) {
+    const candidate = words.slice(0, n).join(' ');
+    // Un seul mot : seulement s'il ressemble à une marque, pas à un nom commun.
+    if (n === 1 && words.length > 1 && (candidate.length < 4 || GENERIC.has(candidate))) continue;
+    if (candidate.length >= 2 && !out.includes(candidate)) out.push(candidate);
+  }
+  return out;
+}
+
 export async function resolveLogo(name: string): Promise<LogoTarget> {
   const key = coreName(name);
   if (key.length < 2) return null;
@@ -110,6 +131,13 @@ export async function resolveLogo(name: string): Promise<LogoTarget> {
   let value: LogoTarget = null;
   try {
     value = (await fromWikidata(name)) ?? (await fromGuessedDomain(name));
+    // Sinon, le nom du groupe : les premiers mots, de plus en plus courts. Sur Wikidata seulement, avec un logo :
+    // un nom raccourci est moins sûr, on ne se contente pas d'un site deviné.
+    for (const candidate of nameCandidates(name).slice(1)) {
+      if (value) break;
+      const found = await fromWikidata(candidate);
+      if (found?.kind === 'image') value = found;
+    }
   } catch {
     value = null;
   }
