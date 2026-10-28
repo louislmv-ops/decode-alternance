@@ -1,5 +1,5 @@
 import type { PayProfile } from '@/lib/profile';
-import { comparePay, contractForOffer, minimumSalary, type PayComparison } from '@/lib/rules/salary';
+import { comparePay, contractForOffer, conventionMinimum, minimumSalary, type PayComparison } from '@/lib/rules/salary';
 import { type CommunityPay, mentionsLegalGrid, type PayEstimate, payEstimate } from './pay-estimate';
 import { isCac40 } from './companies';
 import { isQualifiedRole } from './rank';
@@ -25,11 +25,14 @@ export interface Highlights {
 
 export function highlights(
   offer: Pick<Offer, 'companySize' | 'salaryMonthlyCents' | 'schoolFlags'> &
-    Partial<Pick<Offer, 'salaryText' | 'description' | 'company' | 'contract' | 'title' | 'diplomaLevel' | 'department' | 'romeCode' | 'employerPay'>>,
+    Partial<Pick<Offer, 'salaryText' | 'description' | 'company' | 'contract' | 'title' | 'diplomaLevel' | 'department' | 'romeCode' | 'employerPay' | 'idcc'>>,
   profile: PayProfile,
   community: CommunityPay | null = null,
 ): Highlights {
-  const minimum = minimumSalary({ contract: contractForOffer(offer.contract, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const input = { contract: contractForOffer(offer.contract, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro };
+  // La convention collective donnée par la source, quand elle paie plus que la loi, relève le plancher.
+  const conv = conventionMinimum(input, offer.idcc ? [offer.idcc] : [], offer.diplomaLevel ?? null);
+  const minimum = conv ? { ...minimumSalary(input), cents: conv.cents } : minimumSalary(input);
   const pay = offer.salaryMonthlyCents !== null ? comparePay(offer.salaryMonthlyCents, minimum.cents) : null;
   const estimate = payEstimate(offer.salaryMonthlyCents, minimum.cents, community, mentionsLegalGrid(offer.salaryText, offer.description), offer.employerPay ?? null);
   const bigCompany = offer.companySize === 'grande';

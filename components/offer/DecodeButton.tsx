@@ -8,7 +8,8 @@ import type { DecodedOffer } from '@/lib/decode/schema';
 import { Emoji } from '@/components/Emoji';
 import { useProfile } from '@/components/useProfile';
 import { relativeDays } from '@/lib/format';
-import { contractForOffer, minimumSalary } from '@/lib/rules/salary';
+import { contractForOffer, conventionMinimum, minimumSalary } from '@/lib/rules/salary';
+import { ConventionPay } from './ConventionPay';
 import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
@@ -37,7 +38,10 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (state.status === 'done') return <DecodedView decoded={state.decoded} offer={offer} />;
-  const minimum = minimumSalary({ contract: contractForOffer(offer.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const salaryInput = { contract: contractForOffer(offer.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro };
+  const legalMinimum = minimumSalary(salaryInput);
+  const conv = conventionMinimum(salaryInput, offer.pay?.conventions.map((c) => c.idcc) ?? [], offer.diplomaLevel ?? null);
+  const minimum = conv ? { ...legalMinimum, cents: conv.cents } : legalMinimum;
 
   async function decode(auto = false) {
     setState({ status: 'loading' });
@@ -88,6 +92,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         rhythm={null}
         contract={offer.contract}
       />
+      {conv && <ConventionPay conv={conv} legalCents={legalMinimum.cents} />}
       {!offer.isExample && offer.company && <CompanyInsight company={offer.company} context={offer.pay ?? null} />}
       {offer.place && <OfferMap place={offer.place} />}
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />

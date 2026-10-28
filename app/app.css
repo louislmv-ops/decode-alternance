@@ -8418,3 +8418,12 @@ a:hover .wordmark__o,
 .pro__free p {
   margin-top: 10px;
 }
+
+/* « Ta convention paie plus que la loi » : une bonne nouvelle, mise en avant sans crier. */
+.conv-pay {
+  border-color: var(--accent);
+}
+
+.conv-pay p + p {
+  margin-top: 8px;
+}

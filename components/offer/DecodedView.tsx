@@ -18,7 +18,8 @@ import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
 import { formatEuros, relativeDays } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
 import { RHYTHMS } from '@/lib/profile';
-import { comparePay, contractForOffer, minimumSalary } from '@/lib/rules/salary';
+import { comparePay, contractForOffer, conventionMinimum, minimumSalary } from '@/lib/rules/salary';
+import { ConventionPay } from './ConventionPay';
 import { IconOut } from '@/components/app/Icons';
 import { CopyButton } from './CopyButton';
 import { MatchPanel } from './Match';
@@ -96,7 +97,11 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
     if (taste) recordDecoded(taste);
   }, [taste]);
 
-  const minimum = minimumSalary({ contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const salaryInput = { contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro };
+  const legalMinimum = minimumSalary(salaryInput);
+  // La convention collective de l'employeur, quand elle paie plus que la loi, fixe le vrai plancher.
+  const conv = conventionMinimum(salaryInput, offer?.pay?.conventions.map((c) => c.idcc) ?? [], offer?.diplomaLevel ?? null);
+  const minimum = conv ? { ...legalMinimum, cents: conv.cents } : legalMinimum;
   // Pour une offre de la base, seul le montant lu dans l'annonce compte ; l'IA ne chiffre qu'une offre collée à la main.
   const aiMin = decoded.salaire.mensuelBrutEuros !== null ? Math.round(decoded.salaire.mensuelBrutEuros * 100) : null;
   const aiMax = decoded.salaire.maxBrutEuros ? Math.round(decoded.salaire.maxBrutEuros * 100) : null;
@@ -106,7 +111,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const big = decoded.entreprise.taille === 'grande';
   const alerts = [
     ...decoded.alertes,
-    ...(pay?.verdict === 'sous-le-minimum' ? [{ niveau: 'alerte' as const, texte: `Le salaire annoncé est sous ton minimum légal (${formatEuros(minimum.cents)}).` }] : []),
+    ...(pay?.verdict === 'sous-le-minimum' ? [{ niveau: 'alerte' as const, texte: `${conv ? `Le salaire annoncé est sous le minimum de la convention ${conv.name}` : 'Le salaire annoncé est sous ton minimum légal'} (${formatEuros(minimum.cents)}).` }] : []),
   ];
   const schoolBait = alerts.some((a) => a.niveau === 'alerte') || (offer?.schoolFlags.length ?? 0) > 0;
   const company = decoded.entreprise.nom ?? offer?.company ?? '';
@@ -185,6 +190,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         rhythm={decoded.contrat.rythme}
         contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
       />
+      {conv && <ConventionPay conv={conv} legalCents={legalMinimum.cents} />}
       {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
       {offer && !offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
 
