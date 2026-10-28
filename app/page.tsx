@@ -17,6 +17,7 @@ import { DOMAINS } from '@/lib/domains';
 import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
 import { listOffers } from '@/lib/offers/repository';
+import { onePerEmployer } from '@/lib/offers/rank';
 import type { OfferPage } from '@/lib/offers/types';
 import { decodePayCookie, PROFILE_COOKIE } from '@/lib/profile';
 
@@ -59,7 +60,8 @@ export default async function Home() {
   const departments = filtersWithPlace({}, placeCookie).departments ?? [];
   const page = await latestOffers(departments);
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
-  const offers = (page?.offers ?? []).slice(0, 10);
+  // « Les meilleures offres du moment » : une seule par employeur (EMPLOYER_CAP.home).
+  const offers = onePerEmployer(page?.offers ?? []).slice(0, 10);
   const community = await communityPayFor(offers);
   const latest = offers.map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }));
 

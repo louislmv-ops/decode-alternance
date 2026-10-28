@@ -134,8 +134,10 @@ export default function LegalPage() {
         <h2 id="classement">Classement des offres</h2>
         <p>
           Par défaut, les offres sont classées selon des critères identiques pour toutes : salaire annoncé, niveau de diplôme, intitulé
-          du poste, taille et notoriété de l’employeur, candidature directe et date de publication. Les premières places évitent de montrer
-          plusieurs fois le même employeur. Tu peux aussi trier par date ou par salaire.
+          du poste, taille et notoriété de l’employeur, candidature directe et date de publication. Dans ce tri, un même employeur (un
+          groupe et ses filiales comptent pour un) a au plus deux offres par page de 20 : ses offres suivantes passent après les
+          meilleures des autres employeurs, sauf en fin de liste, quand il ne reste plus assez d’employeurs différents. Sur l’accueil,
+          une seule offre par employeur. Tu peux aussi trier par date ou par salaire, sans ce plafond.
         </p>
         <p>
           Les entreprises peuvent payer une mise en avant : au plus deux de leurs offres en haut de la première page, seulement quand
