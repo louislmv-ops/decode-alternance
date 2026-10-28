@@ -5,15 +5,9 @@ import { AgeInput } from '@/components/AgeInput';
 import { CopyButton } from '@/components/offer/CopyButton';
 import { useProfile } from '@/components/useProfile';
 import { formatEuros } from '@/lib/format';
-import {
-  APPRENTISSAGE_RATES,
-  APPRENTI_EXEMPTION_SOURCE,
-  EMPLOYER_AID_2026,
-  EMPLOYER_PARTICIPATION,
-  PROFESSIONNALISATION_RATES,
-  SMIC,
-} from '@/lib/rules/reference';
-import { DIPLOMA_LEVELS, employerFigures, type CompanySize, type DiplomaLevel } from '@/lib/rules/employer';
+import { APPRENTISSAGE_RATES, APPRENTI_EXEMPTION_SOURCE, PROFESSIONNALISATION_RATES, SMIC } from '@/lib/rules/reference';
+import { DIPLOMA_LEVELS, employerFigures, employerPitch, type CompanySize, type DiplomaLevel } from '@/lib/rules/employer';
+import { EMPLOYER_AIDS, EMPLOYER_PARTICIPATION, frenchDate } from '@/lib/rules/employer-aids';
 import { apprenticeNetThresholdCents, clampYear, minimumSalary, type ContractKind } from '@/lib/rules/salary';
 
 const smicDate = new Date(SMIC.since).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -40,10 +34,16 @@ export function SalaryView() {
   const remaining = yearly - employer.aidCents + employer.participationCents;
   const levelLabel = DIPLOMA_LEVELS.find((l) => l.level === lvl)?.label ?? '';
 
-  const pitch =
-    input.contract === 'apprentissage'
-      ? `En m’embauchant en apprentissage (${levelLabel.toLowerCase()}), votre entreprise peut recevoir jusqu’à ${formatEuros(employer.aidCents, 0)} d’aide de l’État la première année (${size === 'moins-de-250' ? 'entreprise de moins de 250 salariés' : 'entreprise de 250 salariés et plus'}, décret n° 2026-168 du 6 mars 2026). Mon salaire minimum légal est de ${formatEuros(m.cents)} brut par mois.${employer.participationCents ? ` Une participation de ${formatEuros(employer.participationCents, 0)} à la formation est due pour ce niveau de diplôme.` : ''} Ma formation est financée par l’OPCO de l’entreprise.`
-      : `En contrat de professionnalisation, mon salaire minimum légal est de ${formatEuros(m.cents)} brut par mois et ma formation est prise en charge par l’OPCO de l’entreprise.`;
+  const pitch = employerPitch({
+    contract: input.contract,
+    size,
+    level: lvl,
+    disabledWorker: disabled,
+    minimumLabel: formatEuros(m.cents),
+    levelLabel,
+    formatCents: (cents) => formatEuros(cents, 0),
+  });
+  const aid = employer.aid;
 
   return (
     <div className="screen">
@@ -258,7 +258,10 @@ export function SalaryView() {
                 <td className="num">{formatEuros(yearly, 0)}</td>
               </tr>
               <tr>
-                <th scope="row">{employer.aidLabel}</th>
+                <th scope="row">
+                  {employer.aidLabel}
+                  {aid && !aid.verified && <span className="employer__hint"> (estimation, à confirmer auprès de l’ASP)</span>}
+                </th>
                 <td className="num">{employer.aidCents > 0 ? `−${formatEuros(employer.aidCents, 0)}` : '0 €'}</td>
               </tr>
               <tr>
@@ -276,7 +279,9 @@ export function SalaryView() {
           <p className="ui-label">À glisser dans ta candidature spontanée</p>
           <p className="message__text">{pitch}</p>
           <div className="message__foot">
-            <span>Montants maximaux : l’aide réelle dépend du contrat signé.</span>
+            <span>
+              {aid?.verified ? 'Montant maximal : l’aide réelle dépend du contrat signé.' : 'Sans montant : il n’a pas encore été vérifié dans le texte officiel.'}
+            </span>
             <CopyButton text={pitch} label="Copier" />
           </div>
         </div>
@@ -290,11 +295,24 @@ export function SalaryView() {
           <li>SMIC : {SMIC.source}.</li>
           <li>Apprentissage : article D6222-26 du Code du travail. Contrat pro : articles L6325-8 et D6325-15.</li>
           <li>Net d’un apprenti : {APPRENTI_EXEMPTION_SOURCE}.</li>
+          {aid && (
+            <li>
+              {aid.label} (le cas choisi) : {aid.legalRef}. Contrats conclus du {frenchDate(aid.concludedFrom)} au {frenchDate(aid.concludedUntil)}.
+              Conditions : {aid.conditions.join(' ; ')}.{!aid.verified && ' Montant relevé dans des synthèses du texte, à confirmer auprès de l’ASP.'}{' '}
+              <a className="link" href={aid.sourceUrl} target="_blank" rel="noopener noreferrer">
+                Voir la source
+              </a>
+            </li>
+          )}
           <li>
-            Aides à l’employeur : {EMPLOYER_AID_2026.source}. Montants pour les contrats conclus du 8 mars au 31 décembre 2026, sous
-            réserve des conditions de l’ASP.
+            Toutes les aides du calculateur :{' '}
+            {[...new Set(EMPLOYER_AIDS.map((r) => r.legalRef))].join(' ; ')}. L’aide unique concerne les niveaux 3 et 4 (CAP, bac) dans les
+            entreprises de moins de 250 salariés ; l’aide exceptionnelle couvre les autres cas.
           </li>
-          <li>Participation de {formatEuros(EMPLOYER_PARTICIPATION.cents, 0)} : {EMPLOYER_PARTICIPATION.source}.</li>
+          <li>
+            Participation de {formatEuros(EMPLOYER_PARTICIPATION.cents, 0)} (niveaux 6 et 7) : {EMPLOYER_PARTICIPATION.legalRef}.
+            {!EMPLOYER_PARTICIPATION.verified && ' À confirmer auprès de l’OPCO.'}
+          </li>
         </ul>
       </details>
     </div>
