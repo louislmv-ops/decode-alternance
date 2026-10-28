@@ -4,7 +4,8 @@ import { unstable_cache } from 'next/cache';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { DEMO_DECODES, DEMO_OFFERS } from './demo';
 import { dedupe, filterOffers, matchesFilters } from './filter';
-import { sortOffers } from './rank';
+import { diversify, sortOffers } from './rank';
+import { canonicalQuery } from './query';
 import { companyRatingOf } from '@/lib/companies/store';
 import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer, rememberSeen } from './aggregators';
@@ -43,9 +44,12 @@ async function hasStoredLba(): Promise<boolean> {
   return value;
 }
 
+/** Les API ne connaissent pas nos synonymes : elles reçoivent la forme la plus courante (« compta » : « comptable »). */
+const forApis = (filters: OfferFilters): OfferFilters => ({ ...filters, q: canonicalQuery(filters.q) });
+
 async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
-  if (isLiveConfigured()) return liveSearch(filters);
+  if (isLiveConfigured()) return liveSearch(forApis(filters));
   return null;
 }
 
@@ -54,7 +58,17 @@ async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
  * le résultat est gardé cinq minutes dans le cache partagé du serveur, au lieu d'interroger
  * France Travail et les agrégateurs à chaque visite.
  */
-const cachedSearch = unstable_cache(async (key: string) => fetchOffers(JSON.parse(key) as OfferFilters), ['offres-v1'], { revalidate: 300 });
+const cachedSearch = unstable_cache(
+  async (key: string) => {
+    const filters = JSON.parse(key) as OfferFilters;
+    const page = await fetchOffers(filters);
+    // En tête de la première page, des entreprises différentes : cinq offres du même groupe d'affilée lassent.
+    const top = (filters.sort ?? 'top') === 'top' && page.page === 1;
+    return top ? { ...page, offers: diversify(page.offers) } : page;
+  },
+  ['offres-v2'],
+  { revalidate: 300 },
+);
 
 export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
   const page = await cachedSearch(JSON.stringify(filters));
@@ -75,7 +89,7 @@ async function fetchOffers(filters: OfferFilters): Promise<OfferPage> {
   if (!aggregators) return primary ?? filterOffers(DEMO_OFFERS, filters, 'exemples');
 
   const pageSize = primary?.pageSize ?? 20;
-  const extra = await aggregatorSearch(filters, primary ? Math.ceil(pageSize / 2) : pageSize, withLba);
+  const extra = await aggregatorSearch(forApis(filters), primary ? Math.ceil(pageSize / 2) : pageSize, withLba);
   // Les agrégateurs ne savent filtrer ni la taille, ni le secteur, ni le salaire : on le fait ici.
   const kept = extra.offers.filter((o) => matchesFilters(o, filters));
   const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort, filters.sort === 'reviews' ? await companyRatingOf() : undefined);

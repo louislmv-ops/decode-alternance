@@ -87,6 +87,14 @@ Chaque traduction appelle `claude-opus-5-5` (4 $ par million de jetons en entré
 
 Direction Apple (Human Interface Guidelines et verre liquide d'iOS 26, transposés au web) avec la palette « Ultraviolet » : bleu électrique `#3A1CFF`, violet `#8A2BFF`, rose `#FF3EC8`, cyan `#5CE1FF`. Le bleu-violet `#5B21FF` porte les actions ; le rose et le cyan ne servent qu'aux lueurs vues à travers le verre (l'aura cannelée sous la recherche de l'accueil, la carte du swipe), jamais au texte. Le jaune reste le surligneur des pépites. Les tokens sont dans `app/globals.css`, l'aura dans `app/ultraviolet.css`, chargé en dernier.
 
+## Recherche, filtres et tri
+
+- Recherche sans accents (« developpeur » trouve « Développeur ») et avec les mots des annonces : « dev », « RH », « compta », « cyber »… (`lib/offers/query.ts`). En base, la fonction `decode_fold` et l'index `offers_search_folded` (`db/schema.sql`).
+- Télétravail et compétences lus dans le texte de l'annonce (`lib/offers/details.ts`), rangés en base à chaque collecte. Une annonce qui n'en dit rien ne passe pas un filtre qui le demande.
+- Filtres : télétravail, salaire annoncé minimum, compétence, en plus des précédents.
+- Tri « les plus attirantes » : en tête de la première page, cinq entreprises différentes.
+- Si le site est déployé avant la collecte de nuit, la première recherche applique `db/schema.sql` elle-même (ajouts seulement, rien n'est effacé).
+
 ## Référencement
 
 - Pages « alternance + métier + ville » (`/alternance/marketing-lyon`, `/alternance/paris`…) : 12 métiers × 29 villes, construites à la première visite puis gardées une heure (ISR). Sans vraies offres ou avec moins de 3 offres, elles ne sont pas indexées. Liste dans `lib/landing.ts`.

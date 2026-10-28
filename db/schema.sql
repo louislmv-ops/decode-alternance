@@ -37,12 +37,24 @@ create table if not exists offers (
 alter table offers add column if not exists rome_code text;
 alter table offers add column if not exists easy_apply boolean not null default false;
 alter table offers add column if not exists salary_max_cents integer;
+-- Télétravail et compétences lus dans l'annonce (lib/offers/details.ts), remplis à chaque collecte.
+alter table offers add column if not exists remote text check (remote in ('aucun', 'partiel', 'total'));
+alter table offers add column if not exists skills text[] not null default '{}';
+
+-- Minuscules sans accents : « developpeur » trouve « Développeur ». Une fonction simple et immuable,
+-- sans extension, pour pouvoir l'indexer. Les deux chaînes ont la même longueur (une lettre pour une lettre).
+create or replace function decode_fold(t text) returns text
+language sql immutable parallel safe strict
+as $$ select translate(lower(t), 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿœæ', 'aaaaaaceeeeiiiinooooouuuuyyoa') $$;
 
 create index if not exists offers_fingerprint on offers (fingerprint);
 create index if not exists offers_department on offers (department);
 create index if not exists offers_published on offers (published_at desc);
-create index if not exists offers_search on offers
-  using gin (to_tsvector('french', title || ' ' || coalesce(company, '') || ' ' || coalesce(city, '')));
+-- Remplacé par offers_search_folded, qui ignore les accents.
+drop index if exists offers_search;
+create index if not exists offers_search_folded on offers
+  using gin (to_tsvector('french', decode_fold(title || ' ' || coalesce(company, '') || ' ' || coalesce(city, ''))));
+create index if not exists offers_skills on offers using gin (skills);
 
 -- Traductions déjà faites, pour ne payer l'IA qu'une fois par offre.
 create table if not exists offer_decodes (

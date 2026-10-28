@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEMO_OFFERS } from './demo';
-import { attractiveness, sortOffers } from './rank';
+import { attractiveness, diversify, sortOffers } from './rank';
 
 const now = Date.parse('2026-10-20T12:00:00Z');
 const base = { ...DEMO_OFFERS[0]!, schoolFlags: [], direct: false, companySize: null, diplomaLevel: null, salaryMonthlyCents: null, title: 'Vendeur', publishedAt: '2026-10-20T08:00:00Z' };
@@ -43,5 +43,17 @@ describe('tri par salaire et par avis', () => {
     const c = { ...base, id: 'c', company: 'Gamma' };
     const notes: Record<string, number> = { Alpha: 3.2, Beta: 4.6 };
     expect(sortOffers([c, a, b], 'reviews', (o) => notes[o.company ?? ''] ?? null).map((o) => o.id)).toEqual(['b', 'a', 'c']);
+  });
+});
+
+describe('diversify', () => {
+  const o = (company: string | null, n: number) => ({ company, n });
+  it('met des entreprises différentes en tête, sans perdre d’offre', () => {
+    const list = [o('Alpha', 1), o('ALPHA', 2), o('Alpha', 3), o('Beta', 4), o(null, 5), o('Gamma', 6), o('Delta', 7)];
+    expect(diversify(list, 4).map((x) => x.n)).toEqual([1, 4, 5, 6, 2, 3, 7]);
+  });
+  it('ne change rien quand les entreprises sont déjà variées', () => {
+    const list = [o('A', 1), o('B', 2), o('C', 3)];
+    expect(diversify(list)).toEqual(list);
   });
 });

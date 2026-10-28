@@ -57,7 +57,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
   const askPlace = !placeCookie && params.dep === undefined;
   const profile = decodePayCookie(jar.get(PROFILE_COOKIE)?.value);
   const more = moreFiltersCount(filters);
-  const anyFilter = Boolean(filters.q || filters.level || filters.contract || filters.sinceDays || filters.easyApply || more > 0);
+  const anyFilter = Boolean(filters.q || filters.level || filters.contract || filters.sinceDays || filters.easyApply || filters.remote || more > 0);
   const result = await listOffers(filters);
   const community = await communityPayFor(result.offers);
   const rows = result.offers.map((offer) => ({ offer, h: highlights(offer, profile, community.get(offer.id)) }));
@@ -122,6 +122,10 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
             </select>
           </label>
           <label className="chip chip--check">
+            <input type="checkbox" name="teletravail" value={filters.remote === 'total' ? 'total' : '1'} defaultChecked={Boolean(filters.remote)} />
+            <span>Télétravail</span>
+          </label>
+          <label className="chip chip--check">
             <input type="checkbox" name="simple" value="1" defaultChecked={filters.easyApply} />
             <span><Emoji name="eclair" /> Candidature simplifiée</span>
           </label>
@@ -135,11 +139,7 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
       </form>
       <AutoSubmit formId="osearch" />
 
-      <SwipePromo href={`/offres/swipe${pageHref(filters, 1).replace('/offres', '')}`} />
-
       {askPlace ? <LocationPrompt /> : <ForYou />}
-
-      {(filters.page ?? 1) <= 1 && <CampaignStrip />}
 
       <ForYouLikes candidates={rows.map(({ offer }) => tasteOf(offer, offerHref(offer), extractPerks(offer.description)))} />
 
@@ -166,11 +166,23 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
             </p>
           </div>
         ) : (
-          <ul className="orows" role="list">
-            {rows.map(({ offer, h }) => (
-              <OfferRow key={offer.id} offer={offer} h={h} />
-            ))}
-          </ul>
+          <>
+            {/* Les offres d'abord : le swipe et les campagnes viennent après les cinq premières. */}
+            <ul className="orows" role="list">
+              {rows.slice(0, 5).map(({ offer, h }) => (
+                <OfferRow key={offer.id} offer={offer} h={h} />
+              ))}
+            </ul>
+            <SwipePromo href={`/offres/swipe${pageHref(filters, 1).replace('/offres', '')}`} />
+            {(filters.page ?? 1) <= 1 && <CampaignStrip />}
+            {rows.length > 5 && (
+              <ul className="orows" role="list">
+                {rows.slice(5).map(({ offer, h }) => (
+                  <OfferRow key={offer.id} offer={offer} h={h} />
+                ))}
+              </ul>
+            )}
+          </>
         )}
 
         {(() => {

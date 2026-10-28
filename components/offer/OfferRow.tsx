@@ -4,6 +4,7 @@ import { DEPARTMENT_NAMES } from '@/lib/departments';
 import { relativeDays } from '@/lib/format';
 import type { Highlights } from '@/lib/offers/highlights';
 import { payDisplay } from '@/lib/offers/pay-display';
+import { detailsOf, REMOTE_LABELS } from '@/lib/offers/details';
 import { extractPerks } from '@/lib/offers/perks';
 import { cleanTitle } from '@/lib/offers/title';
 import { offerHref } from '@/lib/offers/link';
@@ -23,7 +24,10 @@ const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 
 /** Une offre, une ligne : l'entreprise, le poste en grand, une ligne d'infos, la paie. Rien d'autre. */
 export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
   const pay = payDisplay(h.estimate, h.minimumCents, h.lean);
-  const perks = extractPerks(offer.description);
+  const { remote } = detailsOf(offer);
+  // Le télétravail est déjà dans la ligne d'infos : pas besoin de le répéter en étiquette.
+  const allPerks = extractPerks(offer.description);
+  const perks = allPerks.filter((p) => !(remote && remote !== 'aucun' && /t[ée]l[ée]travail/i.test(p)));
   const place = offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null);
   return (
     <li className={`orow${h.pepite ? ' is-pepite' : ''}`}>
@@ -39,15 +43,17 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
         </Link>
         <p className="orow__meta">
           {isNew(offer.publishedAt) && <span className="orow__new">Nouveau</span>}
-          {[place, CONTRACT_LABELS[offer.contract], offer.direct ? 'Direct entreprise' : null, relativeDays(offer.publishedAt)].filter(Boolean).join(' · ')}
+          {[place, CONTRACT_LABELS[offer.contract], remote && remote !== 'aucun' ? REMOTE_LABELS[remote] : null, offer.direct ? 'Direct entreprise' : null, relativeDays(offer.publishedAt)]
+            .filter(Boolean)
+            .join(' · ')}
           {offer.easyApply && <span className="orow__easy"> · <Emoji name="eclair" /> Candidature simplifiée</span>}
         </p>
         {perks.length > 0 && (
           <ul className="orow__perks" aria-label="Avantages cités dans l’annonce">
-            {perks.slice(0, 3).map((p) => (
+            {perks.slice(0, 2).map((p) => (
               <li key={p}>{p}</li>
             ))}
-            {perks.length > 3 && <li className="orow__perks-more">+{perks.length - 3}</li>}
+            {perks.length > 2 && <li className="orow__perks-more">+{perks.length - 2}</li>}
           </ul>
         )}
         {(h.schoolBait || h.pay?.verdict === 'sous-le-minimum') && (
@@ -66,7 +72,7 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
           {pay.word}
         </span>
       </div>
-      <LikeButton className="orow__like" item={tasteOf(offer, offerHref(offer), perks)} />
+      <LikeButton className="orow__like" item={tasteOf(offer, offerHref(offer), allPerks)} />
       <svg className="orow__arrow" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
         <path d="M4 10h11M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

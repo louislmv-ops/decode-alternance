@@ -1,4 +1,6 @@
-import { normalizeText } from './normalize';
+import { detailsOf } from './details';
+import { MIN_SALARIES, SKILL_OPTIONS } from './filter-options';
+import { matchesQuery } from './query';
 import { MAX_DEPARTMENTS } from '@/lib/place';
 import { type OfferSort, SORT_OPTIONS, sortOffers } from './rank';
 import { SECTOR_CODES, sectorOf } from './sectors';
@@ -45,21 +47,23 @@ export function matchesFilters(o: Offer, filters: OfferFilters, now = Date.now()
   if (filters.sinceDays && now - Date.parse(o.publishedAt) > filters.sinceDays * 86_400_000) return false;
   if (filters.direct && !o.direct) return false;
   if (filters.easyApply && !o.easyApply) return false;
+  if (filters.minSalaryCents && (o.salaryMonthlyCents === null || o.salaryMonthlyCents < filters.minSalaryCents)) return false;
+  if (filters.remote || filters.skill) {
+    const details = detailsOf(o);
+    if (filters.remote === 'total' && details.remote !== 'total') return false;
+    if (filters.remote === 'partiel' && details.remote !== 'partiel' && details.remote !== 'total') return false;
+    if (filters.skill && !details.skills.includes(filters.skill)) return false;
+  }
   return true;
 }
 
 /** Le même filtrage que la requête SQL, pour les offres d'exemple. */
 export function filterOffers(offers: Offer[], filters: OfferFilters, mode: OfferPage['mode']): OfferPage {
-  const words = normalizeText(filters.q ?? '').split(' ').filter(Boolean);
   const matching = sortOffers(
     dedupe(offers).filter((o) => {
       if (!matchesFilters(o, filters)) return false;
       if (filters.departments?.length && (!o.department || !filters.departments.includes(o.department))) return false;
-      if (words.length > 0) {
-        const hay = normalizeText(`${o.title} ${o.company ?? ''} ${o.city ?? ''}`);
-        if (!words.every((w) => hay.includes(w))) return false;
-      }
-      return true;
+      return matchesQuery(`${o.title} ${o.company ?? ''} ${o.city ?? ''}`, filters.q);
     }),
     filters.sort,
   );
@@ -75,6 +79,7 @@ export function filterOffers(offers: Offer[], filters: OfferFilters, mode: Offer
 }
 
 const SIZES: CompanySizeTag[] = ['tpe', 'pme', 'eti', 'grande'];
+
 const SINCE = [1, 7, 30];
 
 type Params = Record<string, string | string[] | undefined>;
@@ -109,6 +114,9 @@ export function parseFilters(params: Params): OfferFilters {
     sinceDays: SINCE.includes(since) ? since : undefined,
     direct: one('direct') === '1',
     easyApply: one('simple') === '1',
+    remote: one('teletravail') === 'total' ? 'total' : one('teletravail') === '1' ? 'partiel' : undefined,
+    minSalaryCents: MIN_SALARIES.includes(Number(one('salairemin'))) ? Number(one('salairemin')) * 100 : undefined,
+    skill: SKILL_OPTIONS.some((x) => x.slug === one('competence')) ? one('competence') : undefined,
     sort: SORT_OPTIONS.some((o) => o.value === one('tri')) ? (one('tri') as OfferSort) : 'top',
     page: Math.max(1, Number(one('page')) || 1),
   };
@@ -138,6 +146,9 @@ export function filtersQuery(f: OfferFilters, page = 1): URLSearchParams {
   if (f.sinceDays) p.set('depuis', String(f.sinceDays));
   if (f.direct) p.set('direct', '1');
   if (f.easyApply) p.set('simple', '1');
+  if (f.remote) p.set('teletravail', f.remote === 'total' ? 'total' : '1');
+  if (f.minSalaryCents) p.set('salairemin', String(f.minSalaryCents / 100));
+  if (f.skill) p.set('competence', f.skill);
   if (f.sort && f.sort !== 'top') p.set('tri', f.sort);
   if (page > 1) p.set('page', String(page));
   return p;
@@ -145,5 +156,15 @@ export function filtersQuery(f: OfferFilters, page = 1): URLSearchParams {
 
 /** Nombre de filtres rangés dans « Plus de filtres », pour l'afficher sur le bouton. */
 export function moreFiltersCount(f: OfferFilters): number {
-  return (f.contract ? 1 : 0) + (f.sizes?.length ?? 0) + (f.sectors?.length ?? 0) + (f.withSalary ? 1 : 0) + (f.sinceDays ? 1 : 0) + (f.direct ? 1 : 0) + (f.easyApply ? 1 : 0);
+  return (
+    (f.contract ? 1 : 0) +
+    (f.sizes?.length ?? 0) +
+    (f.sectors?.length ?? 0) +
+    (f.withSalary ? 1 : 0) +
+    (f.minSalaryCents ? 1 : 0) +
+    (f.skill ? 1 : 0) +
+    (f.sinceDays ? 1 : 0) +
+    (f.direct ? 1 : 0) +
+    (f.easyApply ? 1 : 0)
+  );
 }

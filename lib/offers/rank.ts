@@ -87,6 +87,24 @@ export function sortOffers<T extends Offer>(offers: T[], sort: OfferSort = 'top'
     .map((x) => x.o);
 }
 
+/**
+ * Les `head` premières offres viennent d'entreprises différentes : une offre d'une entreprise déjà présente
+ * cède sa place à la suivante d'une autre entreprise, puis revient juste après. L'ordre reste sinon le même.
+ */
+export function diversify<T extends Pick<Offer, 'company'>>(offers: T[], head = 5): T[] {
+  const top: T[] = [];
+  const later: T[] = [];
+  const seen = new Set<string>();
+  for (const o of offers) {
+    const key = o.company ? normalizeText(o.company) : null;
+    if (top.length < head && (!key || !seen.has(key))) {
+      top.push(o);
+      if (key) seen.add(key);
+    } else later.push(o);
+  }
+  return [...top, ...later];
+}
+
 /** Postgres ne replie pas toujours la casse des lettres accentuées : « SÉCURITÉ » doit aussi correspondre. */
 function withUpperAccents(pattern: string): string {
   return pattern.replace(/\[([^\]]*)\]/g, (_, chars: string) => `[${chars}${chars.toUpperCase().replace(/[A-Z-]/g, '')}]`);

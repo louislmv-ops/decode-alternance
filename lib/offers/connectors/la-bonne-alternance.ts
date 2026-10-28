@@ -3,7 +3,8 @@
 // réutilisables gratuitement. Jeton personnel : LBA_API_TOKEN. Limite : 60 appels par minute.
 // La route ne cherche ni par mot-clé ni par page : on filtre par département, puis ici par mots.
 
-import { normalizeText, departmentFromPostalCode, fingerprint, salaryRangeFromDescription, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
+import { matchesQuery } from '../query';
+import { departmentFromPostalCode, fingerprint, salaryRangeFromDescription, schoolBaitFlags, sizeFromHeadcount } from '../normalize';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { type OfferSort, type RatingOf, sortOffers } from '../rank';
 import type { Offer, OfferContract } from '../types';
@@ -151,13 +152,7 @@ export function pageOf(
   sort: OfferSort = 'recent',
   ratingOf?: RatingOf,
 ): { offers: Offer[]; total: number } {
-  const words = normalizeText(q ?? '').split(' ').filter(Boolean);
-  const matching = words.length
-    ? offers.filter((o) => {
-        const hay = normalizeText(`${o.title} ${o.company ?? ''} ${o.city ?? ''} ${o.description.slice(0, 600)}`);
-        return words.every((w) => hay.includes(w));
-      })
-    : offers;
+  const matching = q ? offers.filter((o) => matchesQuery(`${o.title} ${o.company ?? ''} ${o.city ?? ''} ${o.description.slice(0, 600)}`, q)) : offers;
   const sorted = sortOffers(matching, sort, ratingOf);
   return { offers: sorted.slice((page - 1) * perPage, page * perPage), total: sorted.length };
 }

@@ -24,3 +24,23 @@ export function PerksPanel({ perks }: { perks: string[] }) {
     </section>
   );
 }
+
+/** Télétravail et compétences lus dans l'annonce : rien quand elle n'en dit rien. */
+export function AskedPanel({ remote, skills }: { remote: string | null; skills: string[] }) {
+  if (!remote && skills.length === 0) return null;
+  return (
+    <section className="panel asked" aria-labelledby="asked-title">
+      <div className="panel__head">
+        <h2 id="asked-title">Ce que dit l’annonce</h2>
+      </div>
+      {remote && <p className="asked__remote">{remote}</p>}
+      {skills.length > 0 && (
+        <ul className="asked__skills" aria-label="Compétences citées">
+          {skills.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

@@ -7777,3 +7777,64 @@ a:hover .wordmark__o,
     display: none;
   }
 }
+
+/* ==========================================================================
+   Filtres du panneau : salaire minimum et compétence. Fiche : ce que dit l'annonce.
+   ========================================================================== */
+
+.sheet__select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sheet__select select {
+  min-height: 40px;
+  max-width: 60%;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-control);
+  background: var(--card);
+}
+
+.sheet__select:has(.sr-only:first-child) select {
+  max-width: none;
+  width: 100%;
+}
+
+/* Les offres viennent d'abord ; le swipe et les campagnes s'intercalent après la cinquième. */
+.results .orows + .swipe-promo,
+.results .orows + .k-strip {
+  margin-top: 16px;
+}
+
+.results .swipe-promo + .orows,
+.results .k-strip + .orows,
+.results .swipe-promo + .k-strip {
+  margin-top: 16px;
+}
+
+.asked__remote {
+  font-weight: 600;
+}
+
+.asked__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.asked__skills li {
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--sky);
+  font-size: 14px;
+  font-weight: 600;
+}
