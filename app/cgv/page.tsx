@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
+import { contactEmail, legalAddress, legalEditor, legalSiren } from '@/lib/legal';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 
 export const metadata: Metadata = { title: 'Conditions de vente de la mise en avant', alternates: { canonical: '/cgv' } };
 
 const LEGAL = {
-  editor: process.env.LEGAL_EDITOR || '[NOM OU RAISON SOCIALE]',
-  address: process.env.LEGAL_ADDRESS || '[ADRESSE]',
-  siren: process.env.LEGAL_SIREN || '[NUMÉRO SIREN]',
-  contact: process.env.LEGAL_CONTACT || process.env.NEXT_PUBLIC_CONTACT_EMAIL || '[ADRESSE E-MAIL]',
+  editor: legalEditor() ?? '[NOM OU RAISON SOCIALE]',
+  address: legalAddress() ?? '[ADRESSE]',
+  siren: legalSiren() ?? '[NUMÉRO SIREN]',
+  contact: contactEmail() ?? '[ADRESSE E-MAIL]',
 };
 
 export default function SalesTermsPage() {

@@ -2,47 +2,28 @@ import type { Metadata } from 'next';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { SMIC } from '@/lib/rules/reference';
+import { aiProvider, contactEmail, databaseHost, legalAddress, legalEditor, legalSiren } from '@/lib/legal';
 
 export const metadata: Metadata = { title: 'Mentions légales', description: 'Éditeur, hébergeur, données personnelles et sources des offres et des règles de Décode.', alternates: { canonical: '/mentions-legales' } };
 
-// Les informations de l'éditeur se règlent dans les variables d'environnement, sans toucher au code.
-// Sans elles, le site est présenté comme édité par un particulier à titre non professionnel, qui peut
-// rester anonyme en ne publiant que l'identité de l'hébergeur (LCEN, art. 6). Ce n'est plus possible
-// dès qu'il y a une activité commerciale : la mise en avant payante exige alors les vraies informations.
-const LEGAL = {
-  editor: process.env.LEGAL_EDITOR || null,
-  address: process.env.LEGAL_ADDRESS || null,
-  siren: process.env.LEGAL_SIREN || null,
-  director: process.env.LEGAL_DIRECTOR || process.env.LEGAL_EDITOR || null,
-  contact: process.env.LEGAL_CONTACT || process.env.NEXT_PUBLIC_CONTACT_EMAIL || null,
-};
-
-const AI_PROVIDER_NAMES: Record<string, string> = { gemini: 'Google', mistral: 'Mistral AI', groq: 'Groq' };
-
-/** Le fournisseur réellement branché : Anthropic si sa clé est là, sinon l'IA gratuite choisie. */
-function aiProvider(): string {
-  if (process.env.ANTHROPIC_API_KEY) return 'Anthropic';
-  return AI_PROVIDER_NAMES[(process.env.AI_PROVIDER || 'gemini').toLowerCase()] ?? 'Anthropic';
-}
+const TODO = (label: string) => `[${label} À COMPLÉTER]`;
 
 export default function LegalPage() {
+  const editor = legalEditor();
+  const director = process.env.LEGAL_DIRECTOR?.trim() || editor;
+  const contact = contactEmail();
+  const ai = aiProvider();
+  const db = databaseHost();
+  const contactText = contact ?? TODO('E-MAIL');
   return (
     <>
       <SiteNav />
       <main className="prose-page">
         <h1>Mentions légales</h1>
-        {LEGAL.editor ? (
-          <p>
-            Éditeur du site : {[LEGAL.editor, LEGAL.address, LEGAL.siren ? `SIREN ${LEGAL.siren}` : null].filter(Boolean).join(', ')}. Directeur de la
-            publication : {LEGAL.director}.{LEGAL.contact && ` Contact : ${LEGAL.contact}.`}
-          </p>
-        ) : (
-          <p>
-            Ce site est édité par un particulier, à titre non professionnel. Conformément à l’article 6 de la loi n° 2004-575 du 21 juin
-            2004 pour la confiance dans l’économie numérique, ses éléments d’identification ont été communiqués à l’hébergeur, qui peut les
-            transmettre à l’autorité judiciaire.{LEGAL.contact && ` Contact : ${LEGAL.contact}.`}
-          </p>
-        )}
+        <p>
+          Éditeur du site : {editor ?? TODO('NOM')}, entrepreneur individuel, {legalAddress() ?? TODO('ADRESSE')}, SIREN {legalSiren() ?? TODO('SIREN')}.
+          Directeur de la publication : {director ?? TODO('NOM')}. Contact : {contactText}.
+        </p>
         <p>Hébergeur : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis (vercel.com).</p>
 
         <h2>Ce que Décode fait, et ne fait pas</h2>
@@ -53,28 +34,91 @@ export default function LegalPage() {
 
         <h2 id="donnees">Données personnelles</h2>
         <p>
-          Sans compte, ton profil, ton suivi de candidatures et tes likes sont enregistrés dans ton navigateur (stockage local) et ne
-          sont pas envoyés à Décode. Un cookie technique garde ton âge, ton année et ton type de contrat pour afficher les salaires
-          comparés à ton minimum.
+          Responsable du traitement : l’éditeur du site, joignable à {contactText}. Cette section décrit ce que le code du site fait
+          réellement de tes données.
         </p>
+
+        <h3>Sans compte</h3>
         <p>
-          Avec un compte, Décode garde sur ses serveurs ton adresse e-mail, ton profil, ton suivi, tes likes et, si tu les ajoutes,
-          ton dossier de candidature (coordonnées, pitch) et ton CV, pour les retrouver sur tous tes appareils et préparer tes
-          candidatures. Ils ne sont ni vendus ni transmis à des recruteurs : c’est toi qui postules, sur le site de l’offre. Tu peux
-          supprimer ton CV ou tout ton compte à tout moment depuis la page Mon compte : tout est effacé.
+          Ton profil, ton suivi de candidatures et tes likes restent dans ton navigateur (stockage local) et ne sont pas envoyés à
+          Décode. Un cookie technique garde ton âge, ton année et ton type de contrat pour comparer les salaires à ton minimum, un autre
+          ton département si tu le choisis. Le site n’utilise ni cookie publicitaire ni outil de mesure d’audience ; les vues et clics des offres sponsorisées sont comptés en total par jour, sans rien qui t’identifie.
         </p>
+
+        <h3>Ce que Décode traite, pourquoi, et combien de temps</h3>
+        <ul className="bullets">
+          <li>
+            <strong>Ton compte</strong> (adresse e-mail, profil, suivi, likes, dossier de candidature, numéro de portable si tu
+            l’ajoutes) : pour te retrouver sur tous tes appareils et t’envoyer les alertes que tu as choisies. Base légale : l’exécution
+            du service que tu demandes en créant ton compte ; pour les alertes par e-mail ou SMS, ton accord, que tu retires depuis Mon
+            compte. Conservation : tant que ton compte existe. Le code de connexion expire après 10 minutes, la session après 90 jours.
+          </li>
+          <li>
+            <strong>Ton CV</strong>, si tu l’enregistres dans ton compte : pour préparer tes candidatures. Base légale : l’exécution du
+            service. Conservation : jusqu’à ce que tu le supprimes, ou ton compte. Un CV envoyé seulement pour remplir ton profil est lu
+            puis oublié, sans être enregistré.
+          </li>
+          <li>
+            <strong>Le décodeur</strong> : le texte que tu colles est envoyé au fournisseur d’IA pour être traduit, puis Décode ne le
+            conserve pas, ni en base ni dans ses journaux. Les traductions des offres de la liste (des annonces publiques) sont gardées
+            pour les visiteurs suivants. Base légale : l’exécution du service que tu demandes.
+          </li>
+          <li>
+            <strong>Les avis et salaires</strong> : publiés sans nom, rattachés à ton compte pour qu’il n’y en ait qu’un par entreprise.
+            Base légale : l’intérêt légitime d’informer les autres alternants. Conservation : tant que ton compte existe, ou jusqu’à ce
+            que tu les retires.
+          </li>
+          <li>
+            <strong>La commu</strong> (pseudo, messages, likes, abonnements, signalements) : pour faire vivre les échanges. Base légale :
+            l’exécution du service. Conservation : jusqu’à ce que tu supprimes tes messages ou ton compte.
+          </li>
+          <li>
+            <strong>L’assistant</strong> : la conversation est envoyée au fournisseur d’IA pour obtenir la réponse. Décode ne la conserve
+            pas sur ses serveurs : elle reste dans ton navigateur le temps de ta visite.
+          </li>
+          <li>
+            <strong>La sécurité</strong> : ton adresse IP sert à limiter le nombre de demandes (décodeur, CV), en mémoire du serveur seulement,
+            jamais en base, et elle est effacée à son redémarrage. L’hébergeur tient ses propres journaux techniques. Base légale : l’intérêt légitime de protéger le service.
+          </li>
+          <li>
+            <strong>Décode Pro</strong>, si tu t’abonnes : le paiement est traité par Stripe ; Décode ne voit jamais ton numéro de carte.
+            Les factures sont gardées le temps imposé par la loi.
+          </li>
+        </ul>
+        <p>Supprimer ton compte depuis Mon compte efface aussi ton CV, tes avis, tes salaires déposés, ton profil de la commu et tes messages.</p>
+
+        <h3>Qui reçoit tes données</h3>
+        <ul className="bullets">
+          <li>Vercel (hébergement du site), États-Unis.</li>
+          <li>La base de données{db ? ` : ${db}` : ''}.</li>
+          <li>
+            Le fournisseur d’IA{ai ? ` (${ai.name})` : ''}, pour le décodeur, l’assistant et, avec Anthropic seulement, la lecture des CV.
+            {ai?.freeTier &&
+              ' Avec l’offre gratuite de ce fournisseur, le texte envoyé peut servir à améliorer ses modèles : n’y colle jamais tes coordonnées. Ton CV n’est jamais envoyé à une IA gratuite.'}
+          </li>
+          <li>Resend (envoi des e-mails) et Brevo (envoi des SMS), seulement si tu actives ces alertes.</li>
+          <li>Stripe (paiement de Décode Pro), seulement si tu t’abonnes.</li>
+        </ul>
         <p>
-          Quand tu fais traduire une offre, son texte est envoyé à notre fournisseur d’intelligence artificielle ({aiProvider()}) pour
-          être traité, puis Décode ne conserve pas le texte que tu as collé. Avec une offre gratuite, ce fournisseur peut se servir du
-          texte pour améliorer ses modèles : n’y colle jamais tes coordonnées. Ton CV n’est jamais envoyé à une IA gratuite.
+          Tes données ne sont ni vendues ni transmises à des recruteurs : c’est toi qui postules, sur le site de l’offre. Plusieurs de ces
+          prestataires sont établis aux États-Unis : les transferts reposent sur les garanties prévues par le RGPD que chacun propose
+          (décision d’adéquation UE-États-Unis pour les entreprises certifiées, ou clauses contractuelles types de la Commission
+          européenne).
         </p>
-        <p>Quand tu poses une question à l’assistant, la conversation est envoyée au même fournisseur d’IA pour obtenir la réponse. Décode ne la conserve pas sur ses serveurs : elle reste dans ton navigateur le temps de ta visite.</p>
+
+        <h3>Tes droits</h3>
+        <p>
+          Tu peux accéder à tes données, les corriger, les supprimer, t’opposer à un traitement fondé sur l’intérêt légitime, en limiter
+          l’usage et en recevoir une copie dans un format lisible par une machine (portabilité). Pour supprimer ton CV ou tout ton compte,
+          le bouton est dans Mon compte. Pour tout le reste, écris à {contactText} : réponse sous un mois. Si tu estimes que tes droits ne
+          sont pas respectés, tu peux adresser une réclamation à la CNIL (cnil.fr).
+        </p>
         <p>Décode ne lit aucune donnée sur LinkedIn et ne contacte personne à ta place.</p>
 
         <h2 id="communaute">La commu</h2>
         <p>
           Les messages sont publiés par leurs auteurs, sous leur responsabilité, dans le respect de la charte. Pour signaler un contenu
-          illicite : bouton « Signaler » sous le message, {LEGAL.contact ? `ou écris à ${LEGAL.contact}.` : 'ou signale-le à l’hébergeur.'} Le contenu signalé est examiné et retiré s’il
+          illicite : bouton « Signaler » sous le message, {contact ? `ou écris à ${contact}.` : 'ou signale-le à l’hébergeur.'} Le contenu signalé est examiné et retiré s’il
           enfreint la loi ou la charte. Tu peux supprimer tes messages et ton compte à tout moment.
         </p>
 
@@ -122,7 +166,7 @@ export default function LegalPage() {
           <li>Secteurs : codes ROME du métier, donnés par France Travail et La bonne alternance.</li>
           <li>SMIC : {SMIC.source}.</li>
           <li>Rémunération : articles D6222-26, L6325-8 et D6325-15 du Code du travail.</li>
-          <li>Aides à l’employeur : décret n° 2026-168 du 6 mars 2026.</li>
+          <li>Aides à l’employeur : décret n° 2026-168 du 6 mars 2026 (aide exceptionnelle) et aide unique aux employeurs d’apprentis.</li>
           <li>Délai de 3 mois sans employeur : article L6222-12-1 du Code du travail.</li>
           <li>Emoji 3D : Fluent Emoji de Microsoft, © Microsoft Corporation, licence MIT.</li>
         </ul>
