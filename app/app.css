@@ -8210,3 +8210,119 @@ a:hover .wordmark__o,
 .bingo__list q {
   quotes: '« ' ' »';
 }
+
+/* ==========================================================================
+   Offres mises en avant par une entreprise abonnée : toujours « Sponsorisé », bien lisible.
+   ========================================================================== */
+
+.orow__sponsored {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.orow.is-sponsored {
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--brand-rgb) / 0.25),
+    0 6px 20px -14px rgb(var(--shade-rgb) / 0.25);
+}
+
+/* Mise en avant : page entreprises et tableau de bord */
+.pro__faq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro__faq h2,
+.sdash__stats h2,
+.sdash__people h2 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.pro__faq details {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  background: var(--card);
+}
+
+.pro__faq summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pro__faq details p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.sdash__stats,
+.sdash__people {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sdash__kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.sdash__kpis div {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  background: var(--card);
+}
+
+.sdash__kpis dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sdash__kpis dd {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.sdash__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 80px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sdash__bars li {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.sdash__bars span {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--brand);
+}
+
+/* Sur le fond encre, le verre dépoli passe au gris : un bouton blanc plein. */
+.pro__box .ui-btn:not(.ui-btn--primary):not(.ui-btn--ghost) {
+  background: #fff;
+  backdrop-filter: none;
+}
+
+.pro__free p {
+  margin-top: 10px;
+}

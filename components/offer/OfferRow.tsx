@@ -14,6 +14,7 @@ import { CompanyLogo } from './CompanyLogo';
 import { MatchBadge } from './Match';
 import { PayEuros } from './PayTier';
 import { LikeButton } from './LikeButton';
+import { SponsorBeacon } from './SponsorBeacon';
 import { tasteOf } from '@/lib/taste';
 
 /** Publiée depuis moins de 48 heures. */
@@ -30,11 +31,13 @@ export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
   const perks = allPerks.filter((p) => !(remote && remote !== 'aucun' && /t[ée]l[ée]travail/i.test(p)));
   const place = offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null);
   return (
-    <li className={`orow${h.pepite ? ' is-pepite' : ''}`}>
+    <li className={`orow${h.pepite ? ' is-pepite' : ''}${offer.sponsored ? ' is-sponsored' : ''}`}>
+      {offer.sponsored && offer.sponsorId && <SponsorBeacon id={offer.sponsorId} />}
       <CompanyLogo src={logoSrc(offer)} name={offer.company} />
       <div className="orow__body">
         <p className="orow__company">
           <span>{offer.company ?? 'Entreprise non nommée'}</span>
+          {offer.sponsored && <span className="orow__sponsored">Sponsorisé</span>}
           {h.pepite && <span className="orow__flag"><Emoji name="feu" /> Pépite</span>}
           <MatchBadge offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
         </p>

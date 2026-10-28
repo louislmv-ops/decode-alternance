@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/site';
 
-const PRIVATE = ['/api/', '/profil', '/suivi', '/compte', '/recruteur', '/likes'];
+const PRIVATE = ['/api/', '/profil', '/suivi', '/compte', '/recruteur', '/likes', '/pro/tableau'];
 
 /** Les robots des moteurs de recherche et des assistants IA (ChatGPT, Claude, Perplexity, Gemini, Apple) sont les bienvenus. */
 const AI_BOTS = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended', 'Bingbot'];

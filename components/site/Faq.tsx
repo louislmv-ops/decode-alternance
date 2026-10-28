@@ -28,7 +28,7 @@ const CARDS = [
   {
     tab: 'Prix',
     q: 'C’est vraiment gratuit ?',
-    a: 'Oui. Offres, décodage et alertes. Un Pass optionnel pourra ajouter des extras plus tard.',
+    a: 'Oui, entièrement et pour toujours : offres, décodage, alertes, suivi, prépa entretien. Ce sont les entreprises qui financent Décode en mettant certaines offres en avant, toujours marquées « Sponsorisé ».',
   },
 ];
 

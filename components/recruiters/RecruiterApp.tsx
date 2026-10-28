@@ -164,7 +164,8 @@ function Search() {
   );
 }
 
-function Candidate({ member: m }: { member: PublicMember }) {
+/** Un alternant visible des entreprises ; `liked` : les offres de l'entreprise qu'il a aimées (tableau de la mise en avant). */
+export function Candidate({ member: m, liked }: { member: PublicMember; liked?: string[] }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [note, setNote] = useState<string | null>(null);
@@ -178,6 +179,7 @@ function Candidate({ member: m }: { member: PublicMember }) {
           <span className="c-member__meta">{[m.domain, m.city, m.school].filter(Boolean).join(' · ')}</span>
         </span>
       </Link>
+      {liked && liked.length > 0 && <p className="c-note">A aimé : {liked.join(' · ')}</p>}
       {m.bio && <p className="c-profile__bio">{m.bio}</p>}
       <AlternantCard member={m} />
       {sent ? (

@@ -1,5 +1,6 @@
 import 'server-only';
 // Stripe sans SDK : quatre appels REST et la vérification de signature des webhooks.
+// STRIPE_PRICE_ID est le prix mensuel de la mise en avant des entreprises.
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 

@@ -3,6 +3,14 @@ import { CFA_COMPANY_NAMES } from './cfa-list';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import type { CompanySizeTag, OfferContract } from './types';
 
+/** Formes juridiques et mots génériques qu'on ignore pour reconnaître une entreprise. */
+const LEGAL_WORDS = /\b(sas|sasu|sa|sarl|se|group|groupe|france|holding|international|services)\b/g;
+
+/** Le nom d'une entreprise réduit à l'essentiel : « L'Oréal SA » et « L’OREAL » donnent « loreal ». */
+export function companyKey(name: string | null | undefined): string {
+  return normalizeText(name ?? '').replace(LEGAL_WORDS, ' ').replace(/\s+/g, '');
+}
+
 export function stripAccents(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '');
 }

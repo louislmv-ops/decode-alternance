@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import type { Interview } from '@/lib/pro/interview-types';
 
-/** Prépa entretien (Pro) : six questions probables, quoi répondre, quoi demander, quoi préparer. */
+/** Prépa entretien (gratuite) : six questions probables, quoi répondre, quoi demander, quoi préparer. */
 export function InterviewPrep({ offerId }: { offerId: string }) {
-  const [state, setState] = useState<{ kind: 'idle' | 'busy' } | { kind: 'done'; interview: Interview } | { kind: 'error'; text: string; pro?: boolean; login?: boolean }>({
+  const [state, setState] = useState<{ kind: 'idle' | 'busy' } | { kind: 'done'; interview: Interview } | { kind: 'error'; text: string; login?: boolean }>({
     kind: 'idle',
   });
 
@@ -15,14 +15,13 @@ export function InterviewPrep({ offerId }: { offerId: string }) {
     const res = await fetch('/api/pro/entretien', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offerId }) });
     const data = (await res.json().catch(() => ({}))) as { interview?: Interview; error?: string };
     if (res.ok && data.interview) setState({ kind: 'done', interview: data.interview });
-    else setState({ kind: 'error', text: data.error ?? 'La préparation a échoué.', pro: res.status === 402, login: res.status === 401 });
+    else setState({ kind: 'error', text: data.error ?? 'La préparation a échoué.', login: res.status === 401 });
   }
 
   return (
     <section className="prep" aria-labelledby="prep-title">
       <div className="prep__head">
         <h2 id="prep-title">Prépa entretien</h2>
-        <span className="prep__tag">Pro</span>
       </div>
       {state.kind === 'idle' && (
         <>
@@ -36,7 +35,6 @@ export function InterviewPrep({ offerId }: { offerId: string }) {
       {state.kind === 'error' && (
         <p className="c-note">
           {state.text}{' '}
-          {state.pro && <Link href="/pro">Essayer Pro gratuitement</Link>}
           {state.login && <Link href="/compte">Se connecter</Link>}
         </p>
       )}

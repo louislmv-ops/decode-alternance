@@ -43,6 +43,8 @@ export function ensureSchema(): Promise<void> {
     await s`alter table accounts add column if not exists likes jsonb`;
     // Les offres pour toi : choisies d'après le profil, les likes et les offres décodées. À activer soi-même.
     await s`alter table accounts add column if not exists alert_match boolean not null default false`;
+    // Le dernier SMS envoyé : un par semaine au plus, chaque SMS est payé.
+    await s`alter table accounts add column if not exists last_sms_at timestamptz`;
     // Le CV à part : un fichier de quelques Mo n'a rien à faire dans chaque lecture du compte.
     await s`create table if not exists account_cvs (
       account_id uuid primary key references accounts(id) on delete cascade,
@@ -287,16 +289,15 @@ export async function accountsDueForAlert(): Promise<(Account & { lastAlertAt: D
   return rows.map((r) => ({ ...toAccount(r), lastAlertAt: r.last_alert_at }));
 }
 
-/** Pour les alertes horaires de Pro : tous les comptes qui suivent une recherche et n'ont rien reçu depuis 50 minutes. */
-export async function accountsDueHourly(): Promise<(Account & { lastAlertAt: Date | null })[]> {
-  await ensureSchema();
-  const rows = await db()<AccountRow[]>`select * from accounts
-    where (alert_email or (alert_sms and phone_verified))
-      and (saved_search <> '{}'::jsonb or alert_match)
-      and (last_alert_at is null or last_alert_at < now() - interval '50 minutes')`;
-  return rows.map((r) => ({ ...toAccount(r), lastAlertAt: r.last_alert_at }));
-}
 
 export async function markAlerted(id: string): Promise<void> {
   await db()`update accounts set last_alert_at = now() where id = ${id}`;
+}
+
+/** Réserve le SMS de la semaine : vrai si aucun SMS n'est parti depuis six jours et demi. */
+export async function claimWeeklySms(id: string): Promise<boolean> {
+  await ensureSchema();
+  const rows = await db()`update accounts set last_sms_at = now()
+    where id = ${id} and (last_sms_at is null or last_sms_at < now() - interval '6 days 12 hours') returning id`;
+  return rows.length > 0;
 }

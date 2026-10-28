@@ -4,7 +4,7 @@ import postgres from 'postgres';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import type { AtsBoard, AtsProvider } from './connectors/ats';
 import { type RemotePolicy, remoteOf, skillsOf } from './details';
-import { normalizeText } from './normalize';
+import { companyKey, normalizeText } from './normalize';
 import { expandQuery } from './query';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SMIC } from '@/lib/rules/reference';
@@ -191,6 +191,11 @@ async function runSearch(filters: OfferFilters): Promise<OfferPage> {
   if (filters.remote === 'total') conditions.push(s`remote = 'total'`);
   else if (filters.remote === 'partiel') conditions.push(s`remote in ('partiel', 'total')`);
   if (filters.skill) conditions.push(s`skills @> ${[filters.skill]}::text[]`);
+  if (filters.companies?.length) {
+    // Un premier tri large (le nom contient celui de l'entreprise) ; la correspondance exacte se fait ensuite (lib/sponsors).
+    const keys = filters.companies.map((c) => `%${companyKey(c)}%`);
+    conditions.push(s`regexp_replace(decode_fold(coalesce(company, '')), '[^a-z0-9]', '', 'g') like any(${keys})`);
+  }
   const variants = expandQuery(filters.q);
   if (variants.length > 0) {
     // La saisie ou un de ses synonymes (« dev » : « développeur »), sans tenir compte des accents.
