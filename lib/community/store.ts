@@ -5,6 +5,7 @@ import { z } from 'zod/v4';
 import { ensureSchema as ensureAccounts } from '@/lib/account/store';
 import { db } from '@/lib/offers/store';
 import { FEED_PAGE, REPORTS_TO_HIDE, type Member, type Post, type PostKind } from './shared';
+import { ensureOnce } from '@/lib/offers/schema-once';
 
 export { KIND_LABELS, KINDS, POST_MAX, type Member, type Post, type PostKind } from './shared';
 export { ensureSchema as ensureCommunitySchema };
@@ -42,7 +43,7 @@ export type MemberInput = z.infer<typeof MemberInput>;
 let ready: Promise<void> | null = null;
 
 function ensureSchema(): Promise<void> {
-  ready ??= (async () => {
+  ready ??= ensureOnce('community', async () => {
     await ensureAccounts();
     const s = db();
     await s`create table if not exists members (
@@ -97,7 +98,7 @@ function ensureSchema(): Promise<void> {
       created_at timestamptz not null default now(),
       primary key (post_id, reporter_id)
     )`;
-  })().catch((error) => {
+  }).catch((error) => {
     ready = null;
     throw error;
   });

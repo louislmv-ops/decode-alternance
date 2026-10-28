@@ -106,7 +106,7 @@
 }
 
 .ui-chip--inconnu {
-  background: #fff;
+  background: var(--card);
   color: var(--muted);
   box-shadow: inset 0 0 0 1px var(--control);
 }
@@ -146,7 +146,7 @@
 }
 
 .ui-segmented button[aria-pressed='true'] {
-  background: #fff;
+  background: var(--card);
   color: var(--ink);
 }
 
@@ -155,7 +155,7 @@
   align-items: center;
   border: 1px solid var(--control);
   border-radius: var(--r-card);
-  background: #fff;
+  background: var(--card);
 }
 
 .ui-stepper button {
@@ -194,13 +194,13 @@
   padding: 7px 12px;
   border: 1px solid var(--control);
   border-radius: var(--r-card);
-  background: #fff;
+  background: var(--card);
   font-size: 15px;
 }
 
 .ui-input::placeholder,
 .ui-textarea::placeholder {
-  color: #6b6b6b;
+  color: var(--muted);
 }
 
 .ui-input--short {
@@ -242,7 +242,7 @@
   padding: 0 16px;
   border: 1px solid var(--control);
   border-radius: var(--r-card);
-  background: #fff;
+  background: var(--card);
   color: var(--ink);
   font-size: 14px;
   font-weight: 500;
@@ -281,7 +281,7 @@
   cursor: not-allowed;
   background: var(--active);
   border-color: var(--active);
-  color: #555;
+  color: var(--muted);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -356,7 +356,7 @@
   margin-top: 20px;
   font-size: 15px;
   line-height: 1.7;
-  color: #3a3a3a;
+  color: var(--ink);
 }
 
 .ui-kv {
@@ -444,7 +444,7 @@
 }
 
 .ui-weekstrip .is-company {
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
 }
 
@@ -498,7 +498,7 @@
 .ui-message {
   margin-top: 12px;
   font-size: 14px;
-  color: #3a3a3a;
+  color: var(--ink);
 }
 
 /* ==========================================================================
@@ -571,13 +571,13 @@
   background: var(--notice-bg);
   color: var(--notice-ink);
   font-size: 14px;
-  border: 1px solid #f6dd8c;
+  border: 1px solid rgb(255 214 10 / 0.3);
 }
 
 .notice--error {
   background: var(--alert-bg);
   color: var(--alert-ink);
-  border-color: #f6c9c3;
+  border-color: rgb(255 107 94 / 0.35);
 }
 
 .panel {
@@ -752,7 +752,7 @@
   font-stretch: var(--display-stretch);
   font-size: 22px;
   font-weight: 800;
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
 }
 
@@ -839,7 +839,7 @@
     border-color: var(--brand);
   }
   .offer-card:hover .offer-card__title {
-    color: var(--brand);
+    color: var(--brand-text);
   }
 }
 
@@ -1015,12 +1015,12 @@
 
 .glossary dd {
   margin: 2px 0 0;
-  color: #3a3a3a;
+  color: var(--ink);
 }
 
 .panel--alert {
   background: var(--alert-bg);
-  border-color: #f6c9c3;
+  border-color: rgb(255 107 94 / 0.35);
   color: var(--alert-ink);
 }
 
@@ -1078,7 +1078,7 @@
 }
 
 .pay__figure--3 {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .pay__figure--none {
@@ -1202,7 +1202,7 @@
   bottom: -4px;
   width: 2px;
   margin-left: -1px;
-  background: var(--ink);
+  background: var(--inverse);
 }
 
 .kv {
@@ -1485,7 +1485,7 @@
   margin: 0;
   padding-left: 18px;
   font-size: 14px;
-  color: #3a3a3a;
+  color: var(--ink);
 }
 
 .sources li + li {
@@ -1667,7 +1667,7 @@
 .method p {
   margin-top: 6px;
   font-size: 14px;
-  color: #3a3a3a;
+  color: var(--ink);
 }
 
 /* ---------- Profil ---------- */
@@ -1882,7 +1882,7 @@
 }
 
 .euros__on {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .euros__off,
@@ -1900,7 +1900,7 @@
   flex-wrap: wrap;
   padding: 14px 14px 14px 20px;
   border-radius: var(--r-card);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
 }
 
@@ -1952,14 +1952,14 @@
 }
 
 .facts__item--pay {
-  background: var(--ink);
+  background: var(--inverse);
   border-color: var(--ink);
   color: #fff;
 }
 
 .facts__item--pay .euros__off,
 .facts__item--pay .euros--none {
-  color: #43554d;
+  color: var(--muted);
 }
 
 .facts__item--pay .euros__on {
@@ -1996,13 +1996,13 @@
 .facts__link {
   font-size: 14px;
   font-weight: 600;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .brief-title {
   font-size: 13px !important;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--brand-text);
   margin-bottom: 8px;
 }
 
@@ -2030,7 +2030,7 @@
   left: 14px;
   top: 10px;
   font-weight: 800;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .decode-pitch {
@@ -2135,7 +2135,7 @@
   padding: 6px 0;
   border: 0;
   background: none;
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 15px;
   font-weight: 600;
   text-decoration: underline;
@@ -2258,7 +2258,7 @@
 }
 
 .acct-freq button[aria-pressed='true'] {
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
 }
 
@@ -2293,7 +2293,7 @@
   font-size: 22px;
   font-weight: 700;
   line-height: 1;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .fold[open] > summary {
@@ -2313,7 +2313,7 @@
   padding: 0;
   font-size: 15px;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--brand-text);
   cursor: pointer;
 }
 
@@ -2429,7 +2429,7 @@ label {
   gap: 10px;
   padding: 28px;
   border-radius: var(--r-card);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   max-width: 640px;
 }
@@ -2446,7 +2446,7 @@ label {
   flex-wrap: wrap;
   padding: 16px 18px;
   border-radius: var(--r-card);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
 }
 
@@ -2513,7 +2513,7 @@ label {
 
 .c-kinds button[aria-pressed='true'],
 .c-filters button[aria-pressed='true'] {
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
 }
 
@@ -2603,7 +2603,7 @@ label {
   justify-content: center;
   flex: none;
   border-radius: var(--r-control);
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
   font-family: var(--font-display);
   font-stretch: var(--display-stretch);
@@ -2802,7 +2802,7 @@ label {
   padding: 0 14px;
   border: 0;
   border-radius: var(--r-control);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   font-weight: 700;
   font-size: 14px;
@@ -2908,7 +2908,7 @@ label {
   padding: 16px;
   border: 1px solid var(--border);
   border-radius: var(--r-card);
-  background: #fff;
+  background: var(--card);
 }
 
 .c-card__flag {
@@ -3026,7 +3026,7 @@ label {
 .k-card__company {
   font-size: 13px;
   font-weight: 600;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .k-card__title {
@@ -3444,7 +3444,7 @@ label {
   gap: 10px;
   padding: 20px;
   border-radius: var(--r-card);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
 }
 
@@ -3496,7 +3496,7 @@ label {
 .pro__free li::before {
   content: '✓';
   margin-right: 8px;
-  color: var(--brand);
+  color: var(--brand-text);
   font-weight: 700;
 }
 
@@ -3569,7 +3569,7 @@ label {
 }
 
 .offers__head h1 span {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .offers__count {
@@ -3631,7 +3631,7 @@ label {
 .osearch__go {
   padding: 0 26px;
   border: 0;
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
   font-size: 16px;
   font-weight: 700;
@@ -3685,7 +3685,7 @@ label {
 .chip.is-on,
 .chip--check:has(input:checked) {
   border-color: var(--ink);
-  background: var(--ink);
+  background: var(--inverse);
 }
 
 .chip.is-on select {
@@ -3795,7 +3795,7 @@ label {
   gap: 6px 10px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .emoji {
@@ -3841,7 +3841,7 @@ label {
   padding: 1px 7px;
   border-radius: 999px;
   background: var(--mint);
-  color: var(--brand-dark);
+  color: var(--brand-text);
   font-size: 12px;
   font-weight: 600;
 }
@@ -3893,7 +3893,7 @@ label {
 }
 
 .orow.is-pepite .orow__sub {
-  color: var(--brand);
+  color: var(--brand-text);
   font-weight: 600;
 }
 
@@ -4150,7 +4150,7 @@ label {
   align-items: center;
   padding: 2px 9px;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
   font-size: 12px;
   font-weight: 800;
@@ -4202,7 +4202,7 @@ label {
   place-items: center;
   width: 100%;
   height: 100%;
-  background: var(--ink);
+  background: var(--inverse);
   color: var(--accent);
   font-family: var(--font-display);
   font-stretch: var(--display-stretch);
@@ -4216,7 +4216,7 @@ label {
   margin: 16px 0;
   padding: 16px 18px;
   border-radius: var(--r-card);
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
 }
 
@@ -4364,7 +4364,7 @@ label {
   padding: 2px 10px;
   border: 0;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   font: inherit;
   font-size: 13px;
@@ -4514,7 +4514,7 @@ label {
 }
 
 .orow__payword--3 {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .orow__payword--none {
@@ -4587,7 +4587,7 @@ label {
 }
 
 .hero2__match {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .hero2__domains a {
@@ -4598,7 +4598,7 @@ label {
 
 .hero2__domains a:hover {
   border-color: var(--brand);
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 @media (min-width: 960px) {
@@ -4643,7 +4643,7 @@ label {
 
 .offers__swipe:hover {
   border-color: var(--brand);
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 /* La pépite reste repérable sans tout repeindre : un liseré et son étiquette. */
@@ -4781,7 +4781,7 @@ label {
 
   /* L'étiquette Pépite brille une fois à l'arrivée, puis au survol. */
   .orow__flag {
-    background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.75) 50%, transparent 65%);
+    background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.08) 50%, transparent 65%);
     background-size: 220% 100%;
     background-repeat: no-repeat;
     background-position: 160% 0;
@@ -4915,7 +4915,7 @@ label {
 }
 
 .site-footer {
-  background: var(--ink);
+  background: var(--inverse);
 }
 
 .site-footer__note,
@@ -5343,7 +5343,7 @@ a:hover .wordmark__mascotte,
   padding: 0 18px 0 6px;
   border: 0;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   font-weight: 700;
   font-size: 15px;
@@ -5495,7 +5495,7 @@ a:hover .wordmark__mascotte,
 .assistant__msg--me {
   align-self: flex-end;
   border-bottom-right-radius: 6px;
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
 }
 
@@ -5517,8 +5517,8 @@ a:hover .wordmark__mascotte,
   align-self: stretch;
   padding: 8px 12px;
   border-radius: 12px;
-  background: #fde8ec;
-  color: #8a1c33;
+  background: var(--alert-bg);
+  color: var(--alert-ink);
   font-size: 14px;
 }
 
@@ -5534,7 +5534,7 @@ a:hover .wordmark__mascotte,
   border: 1px solid var(--brand);
   border-radius: 999px;
   background: transparent;
-  color: var(--brand-dark);
+  color: var(--brand-text);
   font-size: 14px;
   font-weight: 600;
   text-align: left;
@@ -5714,7 +5714,7 @@ a:hover .wordmark__mascotte,
 
 /* Barre du haut : verre dépoli et filet fin, le contenu passe dessous. */
 .topbar {
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(var(--glass-rgb) / 0.72);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid rgb(0 0 0 / 0.08);
@@ -5777,13 +5777,13 @@ a:hover .wordmark__mascotte,
   }
   .tabbar__item {
     min-height: 49px;
-    color: #6e6e73;
+    color: var(--muted);
     font-size: 10px;
     font-weight: 500;
     border-radius: 0;
   }
   .tabbar__item[aria-current='page'] {
-    color: var(--brand);
+    color: var(--brand-text);
     background: transparent;
   }
   .tabbar__item svg {
@@ -6044,7 +6044,7 @@ a:hover .wordmark__mascotte,
 
 @media (max-width: 760px) {
   .tabbar__item--swipe {
-    color: var(--brand);
+    color: var(--brand-text);
   }
   .tabbar__swipe-icon {
     display: grid;
@@ -6098,7 +6098,7 @@ a:hover .wordmark__mascotte,
     position: absolute;
     inset: 0;
     border-radius: 12px;
-    background: #fff;
+    background: var(--card);
     box-shadow: 0 4px 10px rgb(var(--shade-rgb) / 0.25);
   }
   .swipe-promo__card--back {
@@ -6125,7 +6125,7 @@ a:hover .wordmark__mascotte,
   .swipe-promo__line--title {
     height: 8px;
     width: 80%;
-    background: var(--ink);
+    background: var(--inverse);
   }
   .swipe-promo__line--short {
     width: 55%;
@@ -6137,7 +6137,7 @@ a:hover .wordmark__mascotte,
     padding: 2px 6px;
     border: 2px solid #1f9d55;
     border-radius: 6px;
-    color: #1f9d55;
+    color: var(--positive);
     font-size: 10px;
     font-weight: 800;
     transform: rotate(-12deg);
@@ -6170,8 +6170,8 @@ a:hover .wordmark__mascotte,
     min-height: 36px;
     padding: 0 16px;
     border-radius: var(--r-pill);
-    background: #fff;
-    color: var(--brand-dark);
+    background: var(--card);
+    color: var(--brand-text);
     font-size: 15px;
     font-weight: 600;
   }
@@ -6380,7 +6380,10 @@ a:hover .wordmark__mascotte,
   .assistant__mascot-wink {
     animation: assistant-wink 7s linear 3s infinite;
   }
-  .assistant__launcher:hover .assistant__mascot {
+  /* Le saut se joue sur l'image, pas sur Décode entier : remplacer son animation relancerait son arrivée
+     (invisible pendant une seconde) à chaque fois que la souris repart. */
+  .assistant__launcher:hover .assistant__mascot img {
+    transform-origin: 50% 100%;
     animation: mascotte-hop 560ms var(--ease-ui);
   }
   .assistant__launcher:hover .assistant__mascot-wink {
@@ -6450,7 +6453,7 @@ a:hover .wordmark__mascotte,
 
 .perks__item svg {
   flex: none;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 /* ==========================================================================
@@ -6545,8 +6548,8 @@ a:hover .wordmark__mascotte,
   margin: 8px 0 24px;
   padding: 18px;
   border-radius: var(--r-card);
-  background: linear-gradient(135deg, var(--mint) 0%, #fff 70%);
-  border: 1px solid #e9ddff;
+  background: linear-gradient(135deg, var(--mint) 0%, var(--card) 70%);
+  border: 1px solid var(--border);
 }
 
 .foryou-likes__head {
@@ -6593,7 +6596,7 @@ a:hover .wordmark__mascotte,
 }
 
 .foryou-likes__company {
-  color: var(--brand);
+  color: var(--brand-text);
   font-size: 13px;
   font-weight: 600;
 }
@@ -6739,7 +6742,7 @@ a:hover .wordmark__mascotte,
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  background: linear-gradient(135deg, var(--mint) 0%, #fff 70%);
+  background: linear-gradient(135deg, var(--mint) 0%, var(--card) 70%);
 }
 
 /* ==========================================================================
@@ -6751,9 +6754,9 @@ a:hover .wordmark__mascotte,
    ========================================================================== */
 
 :root {
-  --glass-bg: rgb(255 255 255 / 0.58);
-  --glass-bg-strong: rgb(255 255 255 / 0.74);
-  --glass-edge: rgb(255 255 255 / 0.7);
+  --glass-bg: rgb(var(--glass-rgb) / 0.72);
+  --glass-bg-strong: rgb(var(--glass-rgb) / 0.88);
+  --glass-edge: rgb(255 255 255 / 0.1);
   --glass-line: rgb(var(--shade-rgb) / 0.1);
   --glass-blur: blur(22px) saturate(185%);
   --glass-shadow:
@@ -6761,7 +6764,7 @@ a:hover .wordmark__mascotte,
     inset 0 -1px 0 rgb(255 255 255 / 0.25),
     0 0 0 0.5px var(--glass-line),
     0 10px 30px -12px rgb(var(--shade-rgb) / 0.22);
-  --glass-sheen: linear-gradient(135deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0) 42%, rgb(255 255 255 / 0) 70%, rgb(255 255 255 / 0.22) 100%);
+  --glass-sheen: linear-gradient(135deg, rgb(255 255 255 / 0.08) 0%, rgb(255 255 255 / 0) 42%, rgb(255 255 255 / 0) 70%, rgb(255 255 255 / 0.04) 100%);
 }
 
 /* Le fond : trois lueurs très pâles, fixes, derrière tout le site. */
@@ -6792,8 +6795,8 @@ body::before {
 .orow,
 .foryou-likes__item,
 .likes-list__item {
-  background: rgb(255 255 255 / 0.82);
-  border-color: rgb(255 255 255 / 0.9);
+  background: rgb(var(--glass-rgb) / 0.82);
+  border-color: var(--border);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.9),
     0 0 0 0.5px var(--glass-line),
@@ -6814,7 +6817,7 @@ body::before {
 }
 
 .topbar {
-  background: rgb(255 255 255 / 0.55);
+  background: rgb(var(--glass-rgb) / 0.55);
   border-bottom: 0;
   box-shadow:
     inset 0 -0.5px 0 var(--glass-line),
@@ -6878,7 +6881,7 @@ body::before {
 }
 
 .assistant__msg--bot {
-  background: rgb(255 255 255 / 0.75);
+  background: rgb(var(--glass-rgb) / 0.75);
   box-shadow: 0 0 0 0.5px var(--glass-line);
 }
 
@@ -6903,7 +6906,7 @@ body::before {
 /* Boutons secondaires : verre clair ; le principal garde son violet, avec un léger dégradé. */
 .ui-btn:not(.ui-btn--primary) {
   background: var(--glass-bg-strong);
-  border-color: rgb(255 255 255 / 0.9);
+  border-color: var(--border);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.9),
     0 0 0 0.5px var(--glass-line),
@@ -6933,7 +6936,7 @@ body::before {
     bottom: calc(8px + env(safe-area-inset-bottom));
     padding: 6px;
     border-radius: 30px;
-    background: rgb(255 255 255 / 0.62);
+    background: rgb(var(--glass-rgb) / 0.62);
     border: 1px solid var(--glass-edge);
     border-top: 1px solid var(--glass-edge);
     -webkit-backdrop-filter: var(--glass-blur);
@@ -6965,7 +6968,7 @@ body::before {
   .tabbar,
   .assistant__panel,
   .hero2__search {
-    background: rgb(255 255 255 / 0.96);
+    background: rgb(var(--glass-rgb) / 0.96);
   }
 }
 
@@ -7265,7 +7268,7 @@ a:hover .wordmark__o,
   padding: 0 4px;
   border: 0;
   background: none;
-  color: var(--brand);
+  color: var(--brand-text);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -7482,10 +7485,10 @@ a:hover .wordmark__o,
    ========================================================================== */
 
 :root {
-  --lg-edge: rgb(255 255 255 / 0.78);
-  --lg-fill: rgb(255 255 255 / 0.58);
+  --lg-edge: rgb(255 255 255 / 0.12);
+  --lg-fill: rgb(var(--glass-rgb) / 0.9);
   --lg-blur: blur(18px) saturate(185%);
-  --lg-spec: inset 0 1px 0 rgb(255 255 255 / 0.95), inset 0 -1px 0 rgb(var(--shade-rgb) / 0.05);
+  --lg-spec: inset 0 1px 0 rgb(255 255 255 / 0.08), inset 0 -1px 0 rgb(0 0 0 / 0.2);
   --lg-lift: 0 1px 2px rgb(var(--shade-rgb) / 0.06), 0 10px 24px -14px rgb(var(--shade-rgb) / 0.32);
   --lg-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -7563,7 +7566,7 @@ a:hover .wordmark__o,
 }
 
 .ui-btn:not(.ui-btn--primary):not(.ui-btn--ghost):active:not([disabled]) {
-  background: rgb(255 255 255 / 0.8);
+  background: rgb(var(--glass-rgb) / 0.8);
 }
 
 /* Barres de recherche : une capsule, le bouton dedans avec le même arrondi, en retrait égal. */
@@ -7572,7 +7575,7 @@ a:hover .wordmark__o,
   border-radius: 999px;
   align-items: center;
   overflow: visible;
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(var(--glass-rgb) / 0.72);
   border: 1px solid var(--lg-edge);
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
@@ -7667,7 +7670,7 @@ a:hover .wordmark__o,
 }
 
 .land__crumbs a:hover {
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .land__crumbs [aria-current] {
@@ -7763,7 +7766,7 @@ a:hover .wordmark__o,
 @media (hover: hover) and (pointer: fine) {
   .land__links .chip:hover {
     border-color: var(--brand);
-    color: var(--brand);
+    color: var(--brand-text);
   }
 }
 
@@ -7847,7 +7850,7 @@ a:hover .wordmark__o,
   padding: 4px 12px;
   border-radius: var(--r-pill);
   background: var(--mint);
-  color: var(--brand-dark);
+  color: var(--brand-text);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -7942,7 +7945,7 @@ a:hover .wordmark__o,
   margin: 6px 0;
   padding: 10px 12px;
   border-radius: 12px;
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   font-size: 14px;
   line-height: 1.4;
@@ -7956,7 +7959,7 @@ a:hover .wordmark__o,
   width: 52px;
   height: 52px;
   align-self: center;
-  color: var(--brand);
+  color: var(--brand-text);
 }
 
 .swipe__btn--rewind:disabled {
@@ -7984,7 +7987,7 @@ a:hover .wordmark__o,
   margin: 0 0 10px;
   padding: 10px 14px;
   border-radius: 14px;
-  background: var(--ink);
+  background: var(--inverse);
   color: #fff;
   font-size: 14px;
 }
@@ -8319,7 +8322,7 @@ a:hover .wordmark__o,
 
 /* Sur le fond encre, le verre dépoli passe au gris : un bouton blanc plein. */
 .pro__box .ui-btn:not(.ui-btn--primary):not(.ui-btn--ghost) {
-  background: #fff;
+  background: var(--card);
   backdrop-filter: none;
 }
 

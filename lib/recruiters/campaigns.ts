@@ -4,6 +4,7 @@
 import { z } from 'zod/v4';
 import { db } from '@/lib/offers/store';
 import { ensureRecruiterSchema } from './store';
+import { ensureOnce } from '@/lib/offers/schema-once';
 
 /** Une entreprise a au plus 5 campagnes ouvertes à la fois. */
 export const OPEN_CAMPAIGNS_MAX = 5;
@@ -76,7 +77,7 @@ const toCampaign = (r: Row): Campaign => ({
 let ready: Promise<void> | null = null;
 
 function ensureSchema(): Promise<void> {
-  ready ??= (async () => {
+  ready ??= ensureOnce('campaigns', async () => {
     await ensureRecruiterSchema();
     await db()`create table if not exists campaigns (
       id uuid primary key default gen_random_uuid(),
@@ -93,7 +94,7 @@ function ensureSchema(): Promise<void> {
       hidden boolean not null default false,
       created_at timestamptz not null default now()
     )`;
-  })().catch((error) => {
+  }).catch((error) => {
     ready = null;
     throw error;
   });

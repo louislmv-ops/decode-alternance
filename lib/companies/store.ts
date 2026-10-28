@@ -13,6 +13,7 @@ import type { RatingOf } from '@/lib/offers/rank';
 import type { Offer } from '@/lib/offers/types';
 import type { CompanyRef } from './search';
 import { HIRED, isTopForApprentices, MIN_TO_SHOW, type PublicReview, type ReviewStats, type SalaryStats } from './shared';
+import { ensureOnce } from '@/lib/offers/schema-once';
 
 export { CRITERIA, HIRED, HIRED_LABELS, MIN_TO_SHOW } from './shared';
 export type { PublicReview, ReviewStats, SalaryStats } from './shared';
@@ -68,7 +69,7 @@ export interface CompanyPage {
 let ready: Promise<void> | null = null;
 
 function ensureSchema(): Promise<void> {
-  ready ??= (async () => {
+  ready ??= ensureOnce('companies', async () => {
     await ensureCommunitySchema();
     const s = db();
     await s`create table if not exists companies (
@@ -121,7 +122,7 @@ function ensureSchema(): Promise<void> {
       verified_at timestamptz not null default now(),
       primary key (account_id, siren)
     )`;
-  })().catch((error) => {
+  }).catch((error) => {
     ready = null;
     throw error;
   });
