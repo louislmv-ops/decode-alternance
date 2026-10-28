@@ -40,6 +40,10 @@ alter table offers add column if not exists salary_max_cents integer;
 -- Télétravail et compétences lus dans l'annonce (lib/offers/details.ts), remplis à chaque collecte.
 alter table offers add column if not exists remote text check (remote in ('aucun', 'partiel', 'total'));
 alter table offers add column if not exists skills text[] not null default '{}';
+-- Logo, site et SIREN de l'employeur quand la source les donne (France Travail, La bonne alternance, sites carrière).
+alter table offers add column if not exists logo_url text;
+alter table offers add column if not exists company_site text;
+alter table offers add column if not exists company_siren text;
 
 -- Minuscules sans accents : « developpeur » trouve « Développeur ». Une fonction simple et immuable,
 -- sans extension, pour pouvoir l'indexer. Les deux chaînes ont la même longueur (une lettre pour une lettre).

@@ -570,3 +570,66 @@ a:hover .wordmark__o,
 .wordmark:hover .wordmark__o {
   transform: rotate(-14deg) scale(1.06);
 }
+
+/* Offres proches : quand la recherche donne moins d'une page, la suite élargie, toujours annoncée. */
+.similar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.similar__title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.similar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.similar__why {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Le questionnaire, après lecture du CV : ce qui a été compris, et les postes trouvés en premier. */
+.matcher__found {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matcher__found-line {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.matcher__found-line strong {
+  margin-right: 6px;
+  color: var(--ink);
+}
+
+.matcher__chips--cv .matcher__chip {
+  border-color: rgb(var(--brand-rgb) / 0.6);
+  color: var(--brand-text);
+}
+
+/* Les fenêtres (questionnaire, filtres, lieu) : centrées, sur un voile de nuit plutôt que l'ancien vert. */
+.matcher {
+  margin: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
+}
+
+.matcher::backdrop,
+.sheet::backdrop {
+  background: rgb(8 6 26 / 0.78);
+}

@@ -22,6 +22,8 @@ import { PLACE_COOKIE } from '@/lib/place';
 import { highlights } from '@/lib/offers/highlights';
 import { communityPayFor } from '@/lib/companies/store';
 import { listOffers } from '@/lib/offers/repository';
+import { completeWith } from '@/lib/offers/similar';
+import { PAGE_SIZE } from '@/lib/offers/filter';
 import type { OfferFilters } from '@/lib/offers/types';
 import { Mascotte } from '@/components/Mascotte';
 
@@ -65,6 +67,12 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
   const from = result.total === 0 ? 0 : (result.page - 1) * result.pageSize + 1;
   const to = Math.min(result.total, result.page * result.pageSize);
   const pages = Math.min(result.maxPage ?? Infinity, Math.max(1, Math.ceil(result.total / result.pageSize)));
+  // Moins d'une page de résultats : on complète avec des offres proches, en disant ce qui a été élargi.
+  const similar =
+    (filters.page ?? 1) <= 1 && result.total < PAGE_SIZE && (anyFilter || Boolean(filters.departments?.length))
+      ? await completeWith(filters, result.offers, PAGE_SIZE - result.offers.length, listOffers)
+      : [];
+  const similarCommunity = similar.length ? await communityPayFor(similar.flatMap((g) => g.offers)) : new Map();
 
   return (
     <div className="screen offers">
@@ -183,6 +191,24 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
               </ul>
             )}
           </>
+        )}
+
+        {similar.length > 0 && (
+          <section className="similar" aria-labelledby="similar-title">
+            <h2 id="similar-title" className="similar__title">
+              {rows.length === 0 ? 'Des offres proches de ta recherche' : 'D’autres offres qui pourraient te plaire'}
+            </h2>
+            {similar.map((group) => (
+              <div key={group.label} className="similar__group">
+                <p className="similar__why">{group.label}</p>
+                <ul className="orows" role="list">
+                  {group.offers.map((offer) => (
+                    <OfferRow key={offer.id} offer={offer} h={highlights(offer, profile, similarCommunity.get(offer.id))} />
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
         )}
 
         {(() => {

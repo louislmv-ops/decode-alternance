@@ -35,6 +35,8 @@ export function Matcher() {
   const [level, setLevel] = useState<DiplomaLevel | null>(null);
   const [age, setAge] = useState(21);
   const [cv, setCv] = useState<{ status: 'idle' | 'reading' } | { status: 'done'; city: string | null } | { status: 'error'; message: string }>({ status: 'idle' });
+  // Ce que le CV a appris : les postes proposés en premier, la formation et les compétences reconnues.
+  const [found, setFound] = useState<CvGuess | null>(null);
 
   const open = useCallback(() => {
     (window as unknown as Record<string, boolean>)[PENDING_KEY] = false;
@@ -44,6 +46,7 @@ export function Matcher() {
     setAge(profile.age);
     setStep('start');
     setCv({ status: 'idle' });
+    setFound(null);
     dialog.current?.showModal();
     try {
       window.localStorage.setItem(SEEN_KEY, '1');
@@ -74,6 +77,7 @@ export function Matcher() {
       if (g.department) setDepartment(g.department);
       if (g.level) setLevel(g.level);
       if (g.age) setAge(g.age);
+      setFound(g);
       setCv({ status: 'done', city: g.city });
       setStep('job');
     } catch (error) {
@@ -137,7 +141,21 @@ export function Matcher() {
             <div className="matcher__progress" aria-hidden="true">
               <span style={{ width: `${((index + 1) / STEPS.length) * 100}%` }} />
             </div>
-            {cv.status === 'done' && step === 'job' && <p className="matcher__note">Lu dans ton CV : vérifie et corrige si besoin.</p>}
+            {cv.status === 'done' && step === 'job' && (
+              <div className="matcher__found">
+                <p className="matcher__note">Lu dans ton CV : vérifie et corrige si besoin.</p>
+                {found?.formation && (
+                  <p className="matcher__found-line">
+                    <strong>Formation</strong> {found.formation}
+                  </p>
+                )}
+                {found?.skills && found.skills.length > 0 && (
+                  <p className="matcher__found-line">
+                    <strong>Compétences</strong> {found.skills.join(' · ')}
+                  </p>
+                )}
+              </div>
+            )}
 
             {step === 'job' && (
               <>
@@ -152,6 +170,15 @@ export function Matcher() {
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && next()}
                 />
+                {found?.jobs && found.jobs.length > 0 && (
+                  <div className="matcher__chips matcher__chips--cv" aria-label="Postes trouvés dans ton CV">
+                    {found.jobs.map((j) => (
+                      <button key={j} type="button" className="matcher__chip" aria-pressed={job === j} onClick={() => setJob(j)}>
+                        {j}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="matcher__chips">
                   {DOMAINS.map((d) => (
                     <button key={d.label} type="button" className="matcher__chip" aria-pressed={job === d.query} onClick={() => setJob(d.query)}>

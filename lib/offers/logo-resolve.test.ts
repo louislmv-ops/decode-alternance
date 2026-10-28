@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { coreName, pageNames, resolveLogo, sameName } from './logo-resolve';
+import { coreName, nameCandidates, pageNames, resolveLogo, sameName } from './logo-resolve';
 import { logoSrc } from './logo';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -46,5 +46,29 @@ describe('resolveLogo', () => {
     });
     expect(await resolveLogo('Kerlogtest')).toEqual({ kind: 'domain', domain: 'kerlogtest.fr' });
     expect(await resolveLogo('Autrenom')).toBeNull();
+  });
+
+  it('prend le logo du groupe quand la filiale n’est pas connue', async () => {
+    vi.stubGlobal('fetch', async (url: string) => {
+      if (url.includes('wbsearchentities')) {
+        return Response.json({ search: decodeURIComponent(url).includes('search=vinci energies&') || decodeURIComponent(url).endsWith('search=vinci energies') ? [{ id: 'Q9' }] : [] });
+      }
+      if (url.includes('wbgetentities')) {
+        return Response.json({ entities: { Q9: { labels: { fr: { value: 'Vinci Energies' } }, claims: { P154: [{ mainsnak: { datavalue: { value: 'Vinci Energies.svg' } } }] } } } });
+      }
+      throw new Error('introuvable');
+    });
+    expect(await resolveLogo('VINCI ENERGIES FRANCE TERTIAIRE NORD EST')).toEqual({
+      kind: 'image',
+      url: 'https://commons.wikimedia.org/wiki/Special:FilePath/Vinci_Energies.svg?width=256',
+    });
+  });
+});
+
+describe('nameCandidates', () => {
+  it('raccourcit vers le nom du groupe, sans s’arrêter sur un nom commun', () => {
+    expect(nameCandidates('VINCI ENERGIES FRANCE TERTIAIRE NORD EST')).toEqual(['vinci energies tertiaire nord', 'vinci energies tertiaire', 'vinci energies', 'vinci']);
+    expect(nameCandidates('Boulangerie Dupont')).toEqual(['boulangerie dupont']);
+    expect(nameCandidates('Safran')).toEqual(['safran']);
   });
 });
