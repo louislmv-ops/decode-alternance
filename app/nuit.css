@@ -633,3 +633,24 @@ a:hover .wordmark__o,
 .sheet::backdrop {
   background: rgb(8 6 26 / 0.78);
 }
+
+/* Accueil : un titre à la bonne taille par rapport à la phrase d'accroche, des lignes qui ne se touchent plus,
+   et « En clair. » aligné sur les autres lignes (le trait jaune déborde des deux côtés, pas seulement à gauche). */
+.hero2__content .hero2__title {
+  font-size: clamp(38px, 5vw, 68px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
+
+@media (min-width: 700px) {
+  .hero2__content .hero2__mark {
+    margin-left: -0.12em;
+  }
+}
+
+.hero2__content .hero2__lead {
+  max-width: 30em;
+  margin-top: 0.9em;
+  font-size: clamp(17px, 1.45vw, 21px);
+  line-height: 1.45;
+}

@@ -3,6 +3,7 @@
 //   pnpm ingest --dep 35,56        seulement ces départements pour France Travail
 //   pnpm ingest --site <url>       teste un site carrière sans rien écrire en base
 //   pnpm ingest --ats lever:qonto  lit un tableau d'un logiciel de recrutement, sans rien écrire en base
+//                                  (Workday : --ats workday:thales.wd3/Careers)
 //   pnpm ingest --discover Qonto   cherche les tableaux d'un employeur, sans rien écrire en base
 //   pnpm ingest --no-ats           collecte sans les logiciels de recrutement
 

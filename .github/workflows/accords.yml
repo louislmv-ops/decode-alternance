@@ -1,0 +1,32 @@
+# Accords d'entreprise : chaque semaine, les nouvelles archives ACCO de la DILA (accords publiés par l'État), dont on
+# garde les passages sur la paie des alternants. Le rattrapage se fait à la main : Run workflow, « max » à 10 ou plus.
+# Secret nécessaire : DATABASE_URL (le même que pour la collecte des offres).
+name: Accords d'entreprise
+
+on:
+  schedule:
+    - cron: '43 5 * * 2'
+  workflow_dispatch:
+    inputs:
+      max:
+        description: Nombre d'archives à lire (une archive ≈ 5 minutes)
+        default: '4'
+
+jobs:
+  accords:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lecture des accords
+        if: ${{ env.DATABASE_URL != '' }}
+        run: pnpm accords --max ${{ github.event.inputs.max || '4' }}

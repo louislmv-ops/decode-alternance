@@ -82,12 +82,36 @@ export interface Offer {
   sponsored?: boolean;
   /** Le compte de l'entreprise qui paie, pour compter vues et clics. */
   sponsorId?: string;
+  /** Position du lieu de travail, quand on la connaît. */
+  lat?: number | null;
+  lon?: number | null;
+  /** « adresse » : l'adresse donnée par l'annonce ; « ville » : le centre de la ville, faute de mieux. */
+  geoPrecision?: GeoPrecision | null;
+  /** Distance au centre d'une recherche « autour de », en kilomètres. */
+  distanceKm?: number | null;
+  /** Le salaire que l'entreprise écrit dans ses autres annonces, quand celle-ci n'en donne pas. */
+  employerPay?: { count: number; medianCents: number } | null;
+}
+
+export type GeoPrecision = 'adresse' | 'ville';
+
+/** Une recherche autour d'un point : une ville choisie ou la position de la personne. */
+export interface NearFilter {
+  lat: number;
+  lon: number;
+  km: number;
+  /** Le nom affiché (« Nanterre », « Autour de moi »). */
+  label: string;
+  /** Le département du centre : les offres sans position y sont gardées. */
+  department: string;
 }
 
 export interface OfferFilters {
   q?: string;
-  /** Un ou plusieurs départements ; vide pour toute la France. */
+  /** Un ou plusieurs départements ; vide pour toute la France. Ignorés si `near` est donné. */
   departments?: string[];
+  /** Autour d'une ville, dans un rayon en kilomètres. */
+  near?: NearFilter;
   contract?: OfferContract;
   level?: DiplomaLevel;
   sizes?: CompanySizeTag[];
@@ -122,6 +146,8 @@ export interface OfferPage {
   mode: 'base' | 'direct' | 'exemples';
   /** Dernière page qu'on peut demander, quand la source limite la pagination. */
   maxPage?: number;
+  /** Aucune offre n'avait tous les mots cherchés : ce sont celles qui en ont le plus. */
+  relaxed?: boolean;
 }
 
 /** Hôtes vers lesquels une fiche d'agrégateur oubliée peut renvoyer : jamais une adresse quelconque. */

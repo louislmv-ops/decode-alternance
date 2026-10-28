@@ -51,13 +51,34 @@ create or replace function decode_fold(t text) returns text
 language sql immutable parallel safe strict
 as $$ select translate(lower(t), 'àâäáãåçéèêëíìîïñóòôöõúùûüýÿœæ', 'aaaaaaceeeeiiiinooooouuuuyyoa') $$;
 
+-- Position du lieu de travail : donnée par la source, ou le centre de la ville (géocodage, lib/offers/geocode.ts).
+alter table offers add column if not exists lat double precision;
+alter table offers add column if not exists lon double precision;
+alter table offers add column if not exists geo_precision text check (geo_precision in ('adresse', 'ville'));
+create index if not exists offers_geo on offers (lat, lon);
+
+-- Ce que la recherche lit : l'intitulé d'abord (poids A), l'entreprise et la ville (B), puis le texte de l'annonce (C).
+alter table offers add column if not exists search_doc tsvector generated always as (
+  setweight(to_tsvector('french', decode_fold(title)), 'A')
+  || setweight(to_tsvector('french', decode_fold(coalesce(company, '') || ' ' || coalesce(city, ''))), 'B')
+  || setweight(to_tsvector('french', decode_fold(left(description, 4000))), 'C')
+) stored;
+create index if not exists offers_search_doc on offers using gin (search_doc);
+
+-- Les villes déjà placées sur la carte : chaque ville n'est cherchée qu'une fois.
+create table if not exists geo_places (
+  key text primary key,
+  lat double precision,
+  lon double precision,
+  checked_at timestamptz not null default now()
+);
+
 create index if not exists offers_fingerprint on offers (fingerprint);
 create index if not exists offers_department on offers (department);
 create index if not exists offers_published on offers (published_at desc);
--- Remplacé par offers_search_folded, qui ignore les accents.
+-- Remplacés par offers_search_doc, qui lit aussi le texte de l'annonce.
 drop index if exists offers_search;
-create index if not exists offers_search_folded on offers
-  using gin (to_tsvector('french', decode_fold(title || ' ' || coalesce(company, '') || ' ' || coalesce(city, ''))));
+drop index if exists offers_search_folded;
 create index if not exists offers_skills on offers using gin (skills);
 
 -- Les tableaux d'offres des logiciels de recrutement (Greenhouse, Lever…) trouvés pour chaque employeur.

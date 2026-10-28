@@ -4,6 +4,8 @@ import {
   PROFESSIONNALISATION_RATES,
   SMIC,
 } from './reference';
+import { type GridSource, gridFor } from './convention-grids';
+import type { DiplomaLevel } from './employer';
 
 export type ContractKind = 'apprentissage' | 'professionnalisation';
 
@@ -91,4 +93,54 @@ export function comparePay(offerCents: number, minimumCents: number): PayCompari
   else if (diffPercent < WELL_PAID_THRESHOLD_PERCENT) verdict = 'au-dessus';
   else verdict = 'bien-paye';
   return { verdict, diffCents, diffPercent };
+}
+
+export interface ConventionMinimum {
+  /** Minimum mensuel brut prévu par la convention, en centimes (un treizième mois compris si la convention le prévoit). */
+  cents: number;
+  /** Pourcentage du SMIC du texte, avant le treizième mois. */
+  rate: number;
+  idcc: string;
+  name: string;
+  months: 12 | 13;
+  /** Le texte prévoit aussi un pourcentage du minimum conventionnel du poste : le chiffre est un plancher. */
+  orConventionMinimum: boolean;
+  source: GridSource;
+}
+
+/**
+ * Le minimum prévu par la convention collective de l'employeur, s'il est plus élevé que le minimum légal. Parmi
+ * plusieurs conventions, la plus favorable. Rien quand aucune convention connue ne fait mieux que la loi.
+ */
+export function conventionMinimum(input: SalaryInput, idccs: readonly string[], diplomaLevel: DiplomaLevel | null = null): ConventionMinimum | null {
+  const legal = minimumSalary(input).cents;
+  const age = Math.max(15, Math.floor(input.age));
+  let best: ConventionMinimum | null = null;
+  for (const idcc of idccs) {
+    const grid = gridFor(idcc);
+    if (!grid) continue;
+    const months = grid.months ?? 12;
+    let rate: number | null = null;
+    let source: GridSource | null = null;
+    if (input.contract === 'apprentissage' && grid.apprentissage) {
+      const bracket = grid.apprentissage.brackets.find(
+        (b) => age >= b.minAge && age <= b.maxAge && (!b.levels || (diplomaLevel !== null && b.levels.includes(diplomaLevel))),
+      );
+      if (bracket) {
+        rate = bracket.byYear[clampYear(input.year) - 1]!;
+        source = grid.apprentissage.source;
+      }
+    } else if (input.contract === 'professionnalisation' && grid.professionnalisation) {
+      const bracket = grid.professionnalisation.brackets.find((b) => age >= b.minAge && age <= b.maxAge);
+      if (bracket) {
+        rate = input.hasBacPro ? bracket.withBac : bracket.base;
+        source = grid.professionnalisation.source;
+      }
+    }
+    if (rate === null || !source) continue;
+    const cents = Math.round((SMIC.monthlyCents * rate * months) / 12 / 100);
+    if (cents <= legal || (best && cents <= best.cents)) continue;
+    best = { cents, rate, idcc: grid.idcc, name: grid.name, months, orConventionMinimum: Boolean(grid.orConventionMinimum), source };
+  }
+  return best;
 }

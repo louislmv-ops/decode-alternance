@@ -5,7 +5,6 @@ import { useProfile } from '@/components/useProfile';
 import { formatEuros, formatPay } from '@/lib/format';
 import { type PayContext, payEstimate } from '@/lib/offers/pay-estimate';
 import { payDisplay } from '@/lib/offers/pay-display';
-import type { PayLean } from '@/lib/offers/pay-signals';
 import { SMIC } from '@/lib/rules/reference';
 import { apprenticeNetThresholdCents, comparePay, CONTRACT_NAMES, contractForOffer, minimumSalary } from '@/lib/rules/salary';
 import { conventionLink } from '@/lib/rules/conventions';
@@ -18,44 +17,39 @@ export function PayPanel({
   announcedCents,
   announcedMaxCents = null,
   context,
-  company,
   sourceLabel,
   perks = [],
   offerContract = null,
-  lean = null,
+  folded = false,
 }: {
   announcedCents: number | null;
   /** Haut de la fourchette annoncée, ou plafond d'un « jusqu'à » : jamais présenté comme le salaire. */
   announcedMaxCents?: number | null;
   context: PayContext | null;
-  company: string | null;
   sourceLabel: string;
   perks?: string[];
   /** Le contrat de l'offre quand elle le précise : c'est lui qui fixe le minimum légal. */
   offerContract?: 'apprentissage' | 'professionnalisation' | 'alternance' | null;
-  /** Tendance tirée d'indices quand l'annonce ne chiffre rien. */
-  lean?: PayLean | null;
+  /** Replié derrière son titre : la fiche montre déjà la paie en haut. */
+  folded?: boolean;
 }) {
   const [profile] = useProfile();
   const contract = contractForOffer(offerContract, profile.contract);
   const fromOffer = offerContract === 'apprentissage' || offerContract === 'professionnalisation';
   const minimum = minimumSalary({ contract, age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
-  const e = payEstimate(announcedCents, minimum.cents, context?.community ?? null, context?.legalGrid ?? false);
-  const shown = payDisplay(e, minimum.cents, lean);
+  const e = payEstimate(announcedCents, minimum.cents, context?.community ?? null, context?.legalGrid ?? false, context?.employer ?? null);
+  const shown = payDisplay(e, minimum.cents);
   const pay = announcedCents !== null ? comparePay(announcedCents, minimum.cents) : null;
   const years = ([1, 2, 3] as const).map((year) => minimumSalary({ contract: 'apprentissage', age: profile.age, year, hasBacPro: profile.hasBacPro }));
-  const jobs = context?.jobs ?? [];
-  const reviews = context?.reviews ?? [];
 
-  return (
-    <section className="panel" aria-labelledby="pay-title">
-      <div className="panel__head">
-        <h2 id="pay-title">Salaire</h2>
-        <Link href="/profil" className="panel__link">
-          {profile.age} ans, {profile.year}
-          {profile.year === 1 ? 're' : 'e'} année, {CONTRACT_NAMES[contract]}
-        </Link>
-      </div>
+  const link = (
+    <Link href="/profil" className="panel__link">
+      {profile.age} ans, {profile.year}
+      {profile.year === 1 ? 're' : 'e'} année, {CONTRACT_NAMES[contract]}
+    </Link>
+  );
+  const content = (
+    <>
 
       <div className="pay">
         <div>
@@ -74,10 +68,10 @@ export function PayPanel({
                 ? `l’annonce dit « jusqu’à ${formatEuros(announcedMaxCents, 0)} » sans montant garanti : compte sur ton minimum légal`
               : e.source === 'alternants'
                 ? `tendance d’après ${e.count} alternants de cette entreprise`
-                : e.legalGrid
-                  ? 'l’annonce renvoie à la grille légale'
-                  : lean
-                    ? `pas de montant dans l’annonce ; tendance d’après : ${lean.reasons.join(', ')}`
+                : e.source === 'entreprise'
+                  ? `pas de montant ici, mais ${e.count} autres offres de cette entreprise affichent ${formatEuros(e.cents, 0)} en médiane`
+                  : e.legalGrid
+                    ? 'l’annonce renvoie à la grille légale'
                     : 'pas de montant dans l’annonce : c’est ton minimum légal'}
           </p>
         </div>
@@ -101,7 +95,7 @@ export function PayPanel({
             : pay.diffPercent > 0
               ? `${announcedMaxCents ? 'Au moins ' : ''}${formatEuros(pay.diffCents, 0)} de plus que ton minimum, soit +${pay.diffPercent} %.`
               : 'Payé au minimum légal.'
-          : e.source === 'alternants'
+          : e.source === 'alternants' || e.source === 'entreprise'
             ? 'Une tendance, pas un montant. Jamais sous ton minimum.'
             : 'Jamais moins. Demande le montant exact en entretien.'}{' '}
         {contract === 'apprentissage' && `En apprentissage, sous ${formatEuros(apprenticeNetThresholdCents(), 0)} brut, ton net est égal à ton brut.`}
@@ -140,55 +134,6 @@ export function PayPanel({
 
       </details>
 
-      <h3 className="pay__h">Ce qu’en disent les alternants</h3>
-      {jobs.length > 0 && (
-        <ul className="pay__jobs">
-          {jobs.map((j) => (
-            <li key={j.jobTitle}>
-              <span>{j.jobTitle}</span>
-              <span className="num">
-                {j.medianCents !== null ? formatEuros(j.medianCents, 0) : '–'} <small>médiane, {j.count} déclarations</small>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {reviews.length > 0 && (
-        <ul className="pay__reviews">
-          {reviews.map((r) => (
-            <li key={r.id}>
-              <p className="pay__review-head">
-                <strong>{r.title}</strong> <span className="num">{r.overall}/5</span>
-              </p>
-              <p className="pay__review-meta">
-                {r.jobTitle}, contrat commencé en {r.startYear}
-                {r.verified ? ' · e-mail pro vérifié' : ''}
-              </p>
-              <p>
-                <b>Plus :</b> {r.pros}
-              </p>
-              <p>
-                <b>Moins :</b> {r.cons}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-      {jobs.length === 0 && reviews.length === 0 && (
-        <p className="panel__note">
-          {e.source === 'alternants'
-            ? 'Les déclarations existent mais aucun poste n’en a encore assez pour être détaillé.'
-            : 'Aucun alternant n’a encore déclaré son salaire ni laissé d’avis sur cette entreprise.'}
-        </p>
-      )}
-      {company && (
-        <p className="panel__note" data-needs="comptes">
-          <Link className="link" href={context?.companyHref ?? `/entreprises?q=${encodeURIComponent(company)}`}>
-            {context?.companyHref ? `Tous les avis et salaires (${context.reviewCount} avis)` : 'Tu y es passé ? Déclare ton salaire, anonymement'}
-          </Link>
-        </p>
-      )}
-
       <details className="fold pay__more">
         <summary className="fold__head">
           <span className="pay__h">Convention collective et sources</span>
@@ -224,6 +169,26 @@ export function PayPanel({
         )}
       </ul>
       </details>
+    </>
+  );
+  if (folded) {
+    return (
+      <details className="panel fold" aria-labelledby="pay-title">
+        <summary className="panel__head fold__head">
+          <h2 id="pay-title">Salaire en détail</h2>
+        </summary>
+        <p className="panel__note">{link}</p>
+        {content}
+      </details>
+    );
+  }
+  return (
+    <section className="panel" aria-labelledby="pay-title">
+      <div className="panel__head">
+        <h2 id="pay-title">Salaire</h2>
+        {link}
+      </div>
+      {content}
     </section>
   );
 }

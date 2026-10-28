@@ -46,6 +46,8 @@ export function aggregatorOffer(input: {
   salaryMonthlyCents: number | null;
   salaryMaxCents?: number | null;
   publishedAt: string;
+  lat?: number | null;
+  lon?: number | null;
 }): Offer | null {
   if (!input.title || !input.sourceUrl || !isAlternance(input.title, input.description)) return null;
   const published = new Date(input.publishedAt);
@@ -60,6 +62,9 @@ export function aggregatorOffer(input: {
     city: input.city,
     postalCode: null,
     department: input.department,
+    lat: input.lat ?? null,
+    lon: input.lon ?? null,
+    geoPrecision: input.lat != null ? 'ville' : null,
     contract: detectContract(`${input.title} ${input.description}`),
     diplomaLevel: detectDiplomaLevel(`${input.title} ${input.description}`),
     salaryText: input.salaryText,

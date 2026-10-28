@@ -93,6 +93,8 @@ Personne n'a 100 % des offres, ni Welcome to the Jungle, ni LinkedIn : chacun a 
 
 1. **France Travail** et **La bonne alternance** : la très grande majorité des offres d'alternance publiées en France.
 2. **Les logiciels de recrutement des entreprises** (`lib/offers/connectors/ats.ts`) : Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee et Personio publient les offres de leurs clients par une API publique, faite pour être affichée ailleurs. C'est là que les start-up et beaucoup de grands groupes publient d'abord. Chaque nuit, la collecte cherche les tableaux de 120 employeurs de plus (`ats-discovery.ts` : ceux de la liste de départ, puis ceux qui ont le plus d'offres en base), les vérifie (nom ou offres en France), puis lit tous les tableaux connus. Un tableau qui échoue cinq nuits de suite n'est plus lu. Tester à la main : `pnpm ingest --discover Qonto` ou `pnpm ingest --ats lever:qonto`.
+
+   **Workday** (`connectors/workday.ts`), le logiciel de la plupart des grands groupes, n'a pas d'API publique documentée : on lit le flux JSON que leur propre page carrière appelle, en respectant robots.txt, une requête à la fois, avec le lien pour postuler chez l'employeur. Le serveur (wd1, wd3, wd103…) et le site se trouvent dans le robots.txt du groupe ; un site n'est gardé que si ses annonces sont publiées par l'employeur cherché. 60 employeurs par nuit. Tester : `pnpm ingest --discover Thales` puis `pnpm ingest --ats workday:<groupe>.<serveur>/<site>`.
 3. **Les sites carrière** qui publient le balisage `JobPosting` (`companies.ts`).
 4. **Adzuna et Jooble**, agrégateurs avec API officielle.
 

@@ -1,8 +1,8 @@
 'use client';
 
-import type { PayLean } from '@/lib/offers/pay-signals';
+import { OfferMap, type OfferPlace } from './OfferMap';
+import { CompanyInsight } from './CompanyInsight';
 import { mergePerks } from '@/lib/offers/perks';
-import { AskedPanel, PerksPanel } from './Perks';
 import { BullshitBingo, JargonText } from './BullshitBingo';
 import { ApplyKit } from './ApplyKit';
 import { LikeButton } from './LikeButton';
@@ -18,7 +18,8 @@ import type { Certitude, DecodedOffer } from '@/lib/decode/schema';
 import { formatEuros, relativeDays } from '@/lib/format';
 import { connectionMessage, teamSearches } from '@/lib/linkedin';
 import { RHYTHMS } from '@/lib/profile';
-import { comparePay, contractForOffer, minimumSalary } from '@/lib/rules/salary';
+import { comparePay, contractForOffer, conventionMinimum, minimumSalary } from '@/lib/rules/salary';
+import { ConventionPay } from './ConventionPay';
 import { IconOut } from '@/components/app/Icons';
 import { CopyButton } from './CopyButton';
 import { MatchPanel } from './Match';
@@ -48,8 +49,6 @@ export interface OfferMeta {
   easyApply?: boolean;
   /** Salaires déclarés, avis et convention collective de l'entreprise, rassemblés côté serveur. */
   pay?: PayContext | null;
-  /** Tendance de salaire tirée d'indices (région, taille, siège, métier), quand l'annonce ne chiffre rien. */
-  lean?: PayLean | null;
   /** Avantages repérés dans le texte de l'annonce. */
   perks?: string[];
   /** Télétravail en clair (« Télétravail partiel »), lu dans l'annonce. */
@@ -58,6 +57,8 @@ export interface OfferMeta {
   skills?: string[];
   /** Le résumé gardé quand on like l'offre. */
   taste?: Omit<TasteItem, 'at'>;
+  /** Le lieu sur la carte, quand on le connaît. */
+  place?: OfferPlace | null;
   /** Le texte de l'annonce tel que la source le donne, mot pour mot. */
   description?: string;
   /** La source ne donne qu'un extrait (Adzuna, Jooble) : le texte complet est sur son site. */
@@ -96,7 +97,11 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
     if (taste) recordDecoded(taste);
   }, [taste]);
 
-  const minimum = minimumSalary({ contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const salaryInput = { contract: contractForOffer(offer?.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro };
+  const legalMinimum = minimumSalary(salaryInput);
+  // La convention collective de l'employeur, quand elle paie plus que la loi, fixe le vrai plancher.
+  const conv = conventionMinimum(salaryInput, offer?.pay?.conventions.map((c) => c.idcc) ?? [], offer?.diplomaLevel ?? null);
+  const minimum = conv ? { ...legalMinimum, cents: conv.cents } : legalMinimum;
   // Pour une offre de la base, seul le montant lu dans l'annonce compte ; l'IA ne chiffre qu'une offre collée à la main.
   const aiMin = decoded.salaire.mensuelBrutEuros !== null ? Math.round(decoded.salaire.mensuelBrutEuros * 100) : null;
   const aiMax = decoded.salaire.maxBrutEuros ? Math.round(decoded.salaire.maxBrutEuros * 100) : null;
@@ -106,7 +111,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
   const big = decoded.entreprise.taille === 'grande';
   const alerts = [
     ...decoded.alertes,
-    ...(pay?.verdict === 'sous-le-minimum' ? [{ niveau: 'alerte' as const, texte: `Le salaire annoncé est sous ton minimum légal (${formatEuros(minimum.cents)}).` }] : []),
+    ...(pay?.verdict === 'sous-le-minimum' ? [{ niveau: 'alerte' as const, texte: `${conv ? `Le salaire annoncé est sous le minimum de la convention ${conv.name}` : 'Le salaire annoncé est sous ton minimum légal'} (${formatEuros(minimum.cents)}).` }] : []),
   ];
   const schoolBait = alerts.some((a) => a.niveau === 'alerte') || (offer?.schoolFlags.length ?? 0) > 0;
   const company = decoded.entreprise.nom ?? offer?.company ?? '';
@@ -182,14 +187,11 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
         community={offer?.pay ?? null}
         company={company || null}
         place={[decoded.lieu.ville ?? offer?.city, decoded.lieu.precision].filter(Boolean).join(', ') || null}
-        lean={offer?.lean ?? null}
         rhythm={decoded.contrat.rythme}
         contract={[decoded.contrat.type === 'apprentissage' ? 'Apprentissage' : decoded.contrat.type === 'professionnalisation' ? 'Contrat pro' : offer?.contract, decoded.contrat.duree].filter(Boolean).join(' · ') || null}
       />
+      {conv && <ConventionPay conv={conv} legalCents={legalMinimum.cents} />}
       {offer && <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />}
-      <PerksPanel perks={perks} />
-      {/* Le télétravail n'est redit ici que si les avantages n'en parlent pas déjà. */}
-      <AskedPanel remote={perks.some((p) => /t[ée]l[ée]travail/i.test(p)) ? null : (offer?.remote ?? null)} skills={offer?.skills ?? []} />
       {offer && !offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
 
       <div className="detail">
@@ -219,9 +221,52 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               </div>
             )}
             {decoded.entreprise.ceQuElleFait && <p className="lead-sub">{decoded.entreprise.ceQuElleFait}</p>}
+            {perks.length > 0 && (
+              <p className="lead-sub">
+                {/* « Transport remboursé » ne se répète pas à côté de « Transport remboursé à 75 % ». */}
+                🎁 En plus : {perks.filter((p) => !perks.some((q) => q !== p && q.startsWith(p))).join(' · ')}
+              </p>
+            )}
           </section>
 
-          <BullshitBingo text={offer?.description ?? ''} ai={decoded.jargon} />
+          {decoded.profil && (
+            <section className="panel" aria-labelledby="profil-title">
+              <div className="panel__head">
+                <h2 id="profil-title">Le profil qu’ils cherchent</h2>
+              </div>
+              <p className="lead-sub lead-sub--first">{decoded.profil.enClair}</p>
+              {(decoded.profil.exige.length > 0 || decoded.profil.bonus.length > 0) && (
+                <div className="split">
+                  {decoded.profil.exige.length > 0 && (
+                    <div>
+                      <p className="ui-label">Obligatoire</p>
+                      <ul className="ebullets" role="list">
+                        {decoded.profil.exige.slice(0, 4).map((x, i) => (
+                          <li key={i}>
+                            <span className="ebullets__e" aria-hidden="true">✔️</span>
+                            <span>{x}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {decoded.profil.bonus.length > 0 && (
+                    <div>
+                      <p className="ui-label">Un plus, pas obligatoire</p>
+                      <ul className="ebullets" role="list">
+                        {decoded.profil.bonus.slice(0, 3).map((x, i) => (
+                          <li key={i}>
+                            <span className="ebullets__e" aria-hidden="true">➕</span>
+                            <span>{x}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
 
           {(decoded.pointsForts.length > 0 || decoded.limites.length > 0) && (
             <section className="panel" aria-labelledby="proscons-title">
@@ -264,6 +309,12 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               </div>
             </section>
           )}
+
+          {offer && !offer.isExample && company && <CompanyInsight company={company} context={offer.pay ?? null} />}
+
+          {offer?.place && <OfferMap place={offer.place} />}
+
+          <BullshitBingo text={offer?.description ?? ''} ai={decoded.jargon} />
 
           <details className="panel fold" aria-labelledby="missions-title">
             <summary className="panel__head fold__head">
@@ -321,10 +372,10 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
           )}
 
           {company && decoded.equipe.aContacter.length > 0 && (
-            <section className="panel" aria-labelledby="team-title">
-              <div className="panel__head">
+            <details className="panel fold" aria-labelledby="team-title">
+              <summary className="panel__head fold__head">
                 <h2 id="team-title">Sors du lot</h2>
-              </div>
+              </summary>
               {decoded.aMettreEnAvant.length > 0 && (
                 <ul className="ebullets" role="list">
                   {decoded.aMettreEnAvant.slice(0, 3).map((x, i) => {
@@ -366,17 +417,16 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               >
                 Toute la méthode pour cette entreprise
               </Link>
-            </section>
+            </details>
           )}
 
           <PayPanel
             announcedCents={offerCents}
             announcedMaxCents={offerMaxCents}
             context={offer?.pay ?? null}
-            company={company || null}
             sourceLabel={offer?.sourceLabel ?? 'l’annonce'}
             offerContract={offer?.contractKind ?? null}
-            lean={offer?.lean ?? null}
+            folded
           />
 
           <details className="panel fold" aria-labelledby="contract-title">

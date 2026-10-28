@@ -32,7 +32,7 @@ export interface FtOffer {
   intitule: string;
   description?: string;
   dateCreation: string;
-  lieuTravail?: { libelle?: string; codePostal?: string; commune?: string };
+  lieuTravail?: { libelle?: string; codePostal?: string; commune?: string; latitude?: number; longitude?: number };
   entreprise?: { nom?: string; url?: string; logo?: string };
   natureContrat?: string;
   salaire?: { libelle?: string; commentaire?: string };
@@ -96,6 +96,10 @@ export function toOffer(o: FtOffer): Offer {
     companySize: sizeFromHeadcount(o.trancheEffectifEtab),
     city,
     postalCode: o.lieuTravail?.codePostal ?? null,
+    // France Travail place l'offre au centre de la commune.
+    lat: typeof o.lieuTravail?.latitude === 'number' ? o.lieuTravail.latitude : null,
+    lon: typeof o.lieuTravail?.longitude === 'number' ? o.lieuTravail.longitude : null,
+    geoPrecision: typeof o.lieuTravail?.latitude === 'number' ? 'ville' : null,
     department: departmentFromPostalCode(o.lieuTravail?.codePostal) ?? o.lieuTravail?.libelle?.match(/^(\d{2,3}|2[AB])\s*-/)?.[1] ?? null,
     contract,
     diplomaLevel: detectDiplomaLevel(`${levelText} ${o.intitule} ${description.slice(0, 1500)}`),

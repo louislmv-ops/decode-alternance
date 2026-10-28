@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "ingest": "tsx --env-file-if-exists=.env.local scripts/ingest.ts",
+    "accords": "tsx --env-file-if-exists=.env.local scripts/accords.ts",
     "alerts": "tsx --env-file-if-exists=.env.local scripts/alerts.ts",
     "analyze": "next analyze"
   },

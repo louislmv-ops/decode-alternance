@@ -7,15 +7,20 @@ import { DEPARTMENTS, fetchFranceTravail } from './connectors/france-travail';
 import { crawlCareerSite } from './connectors/job-posting';
 import { isLbaConfigured } from './connectors/la-bonne-alternance';
 import { harvestLba, type LbaHarvestReport } from './connectors/lba-harvest';
-import { discover, SEED_COMPANIES } from './ats-discovery';
+import { discoverAts, discoverWorkday, SEED_COMPANIES } from './ats-discovery';
 import { BoardMismatchError, fetchAtsBoard } from './connectors/ats';
 import { sleep } from './connectors/http';
-import { companiesToProbe, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
+import { geocodePlace, placeKey } from './geocode';
+import { companiesToProbe, geocodeStoredOffers, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
 
 export const STALE_HOURS = 36;
 
 /** Employeurs cherchés chez les logiciels de recrutement à chaque collecte : quelques minutes de requêtes. */
 export const ATS_PROBES_PER_NIGHT = 120;
+/** Lieux nouveaux placés sur la carte par nuit : l'API Géo est gratuite, on la ménage. */
+export const GEOCODE_PER_NIGHT = 4000;
+/** Workday demande plus d'appels par employeur (un par serveur possible) : moins d'employeurs par nuit. */
+export const WORKDAY_PROBES_PER_NIGHT = 60;
 
 /**
  * Les logiciels de recrutement : d'abord chercher les tableaux de quelques employeurs de plus, puis lire tous les
@@ -23,20 +28,33 @@ export const ATS_PROBES_PER_NIGHT = 120;
  */
 async function ingestAts(log: (line: string) => void, probeLimit: number): Promise<IngestReport['ats']> {
   let discovered = 0;
-  const companies = await companiesToProbe(SEED_COMPANIES, probeLimit);
-  for (const { company, size } of companies) {
-    const boards = await discover(company);
-    for (const board of boards) await saveAtsBoard({ ...board, size });
-    await markProbed(company, boards.length > 0);
-    discovered += boards.length;
-    if (boards.length) log(`Logiciels de recrutement : ${company} trouvé chez ${boards.map((b) => `${b.provider}/${b.slug}`).join(', ')}`);
+  let probed = 0;
+  const searches = [
+    { scope: '', limit: probeLimit, find: discoverAts },
+    { scope: 'workday', limit: Math.min(probeLimit, WORKDAY_PROBES_PER_NIGHT), find: discoverWorkday },
+  ];
+  for (const { scope, limit, find } of searches) {
+    const companies = await companiesToProbe(SEED_COMPANIES, limit, scope);
+    for (const { company, size } of companies) {
+      const boards = await find(company);
+      for (const board of boards) await saveAtsBoard({ ...board, size });
+      await markProbed(company, boards.length > 0, scope);
+      discovered += boards.length;
+      if (boards.length) log(`Logiciels de recrutement : ${company} trouvé chez ${boards.map((b) => `${b.provider}/${b.slug}`).join(', ')}`);
+    }
+    probed += companies.length;
   }
   const boards = await listAtsBoards();
   let offers = 0;
   let failed = 0;
   for (const board of boards) {
     try {
-      const found = await fetchAtsBoard(board);
+      // Un tableau qui met trop de temps à répondre a droit à un second essai, la nuit même.
+      const found = await fetchAtsBoard(board).catch(async (error: unknown) => {
+        if (!(error instanceof Error) || error.name !== 'TimeoutError') throw error;
+        await sleep(5_000);
+        return fetchAtsBoard(board);
+      });
       await upsertOffers(found);
       await markAtsBoard(board, { offers: found.length });
       offers += found.length;
@@ -47,8 +65,8 @@ async function ingestAts(log: (line: string) => void, probeLimit: number): Promi
     }
     await sleep(400);
   }
-  log(`Logiciels de recrutement : ${companies.length} employeurs cherchés, ${discovered} tableaux trouvés, ${boards.length} lus, ${offers} offres d'alternance`);
-  return { boards: boards.length, offers, discovered, probed: companies.length, failed };
+  log(`Logiciels de recrutement : ${probed} recherches d'employeurs, ${discovered} tableaux trouvés, ${boards.length} lus, ${offers} offres d'alternance`);
+  return { boards: boards.length, offers, discovered, probed, failed };
 }
 
 /** Le cron tourne toutes les deux heures : chaque créneau traite un douzième des départements. */
@@ -63,6 +81,7 @@ export interface IngestReport {
   franceTravail: { fetched: number; truncated: string[] } | { skipped: string };
   careerSites: { company: string; offers: number; pagesRead: number; error?: string }[];
   ats: { boards: number; offers: number; discovered: number; probed: number; failed: number } | { skipped: string };
+  geocoded?: number;
   removed: number;
 }
 
@@ -108,6 +127,15 @@ export async function runIngest(
   }
 
   if (opts.careerSites !== false && opts.ats !== false) report.ats = await ingestAts(log, opts.probeLimit ?? ATS_PROBES_PER_NIGHT);
+
+  // Les offres sans position reçoivent le centre de leur ville : la recherche « autour de » et la carte en ont besoin.
+  try {
+    const geo = await geocodeStoredOffers(geocodePlace, placeKey, GEOCODE_PER_NIGHT);
+    report.geocoded = geo.offers;
+    log(`Carte : ${geo.places} lieux cherchés, ${geo.offers} offres placées`);
+  } catch (error) {
+    log(`Carte : échec (${(error as Error).message})`);
+  }
 
   const cutoff = new Date(Date.now() - STALE_HOURS * 3_600_000);
   // Une source qui n'a pas tourné ne retire rien : une panne ne doit pas vider la base. Une collecte partielle

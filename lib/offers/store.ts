@@ -5,12 +5,13 @@ import type { DecodedOffer } from '@/lib/decode/schema';
 import type { AtsBoard, AtsProvider } from './connectors/ats';
 import { type RemotePolicy, remoteOf, skillsOf } from './details';
 import { companyKey, normalizeText } from './normalize';
-import { expandQuery } from './query';
+import { queryTerms, tsQueryText } from './query';
+import { boundingBox } from '@/lib/geo';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SMIC } from '@/lib/rules/reference';
 import { PAGE_SIZE } from './filter';
 import { CAC40_SQL, LOW_ROLE_SQL, STRONG_ROLE_SQL } from './rank';
-import type { CompanySizeTag, Offer, OfferContract, OfferFilters, OfferPage, OfferSource } from './types';
+import type { CompanySizeTag, GeoPrecision, Offer, OfferContract, OfferFilters, OfferPage, OfferSource } from './types';
 
 let sql: postgres.Sql | null = null;
 
@@ -54,6 +55,10 @@ interface OfferRow {
   logo_url?: string | null;
   company_site?: string | null;
   company_siren?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+  geo_precision?: GeoPrecision | null;
+  distance_km?: number | null;
   also_on?: OfferSource[];
 }
 
@@ -88,6 +93,10 @@ function toOffer(row: OfferRow): Offer {
     logoUrl: row.logo_url ?? null,
     companySite: row.company_site ?? null,
     companySiren: row.company_siren ?? null,
+    lat: row.lat ?? null,
+    lon: row.lon ?? null,
+    geoPrecision: row.geo_precision ?? null,
+    distanceKm: row.distance_km == null ? null : Math.round(row.distance_km),
   };
 }
 
@@ -123,6 +132,9 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
     logo_url: o.logoUrl ?? null,
     company_site: o.companySite ?? null,
     company_siren: o.companySiren ?? null,
+    lat: o.lat ?? null,
+    lon: o.lon ?? null,
+    geo_precision: o.lat != null ? (o.geoPrecision ?? 'ville') : null,
   }));
   const s = db();
   await s`
@@ -136,7 +148,10 @@ export async function upsertOffers(offers: Offer[]): Promise<void> {
       school_flags = excluded.school_flags, rome_code = excluded.rome_code, easy_apply = excluded.easy_apply,
       remote = excluded.remote, skills = excluded.skills,
       logo_url = coalesce(excluded.logo_url, offers.logo_url), company_site = coalesce(excluded.company_site, offers.company_site),
-      company_siren = coalesce(excluded.company_siren, offers.company_siren), seen_at = now()`;
+      company_siren = coalesce(excluded.company_siren, offers.company_siren),
+      -- Une position trouvée plus tard (géocodage de la ville) reste tant que la source n'en donne pas une meilleure.
+      lat = coalesce(excluded.lat, offers.lat), lon = coalesce(excluded.lon, offers.lon),
+      geo_precision = coalesce(excluded.geo_precision, offers.geo_precision), seen_at = now()`;
 }
 
 /** Retire les offres d'une source qu'aucune collecte n'a revues depuis `cutoff`. */
@@ -179,11 +194,35 @@ export async function searchOffers(filters: OfferFilters): Promise<OfferPage> {
   }
 }
 
+/** La distance en kilomètres entre le lieu de l'offre et un point, en SQL (formule de haversine). */
+const DISTANCE = (s: ReturnType<typeof db>, near: NonNullable<OfferFilters['near']>) =>
+  s`(12742 * asin(least(1, sqrt(power(sin(radians(lat - ${near.lat}) / 2), 2) + cos(radians(${near.lat})) * cos(radians(lat)) * power(sin(radians(lon - ${near.lon}) / 2), 2)))))`;
+
 async function runSearch(filters: OfferFilters): Promise<OfferPage> {
+  const terms = queryTerms(filters.q);
+  const all = tsQueryText(terms, '&');
+  const page = await searchWith(filters, all, false);
+  // Aucune offre n'a tous les mots : celles qui en ont le plus, dans l'ordre de pertinence.
+  if (page.total === 0 && terms.length > 1) {
+    const some = tsQueryText(terms, '|');
+    if (some) return { ...(await searchWith(filters, some, true)), relaxed: true };
+  }
+  return page;
+}
+
+async function searchWith(filters: OfferFilters, tsQuery: string | null, relaxed: boolean): Promise<OfferPage> {
   const s = db();
   // Les offres d'écoles déguisées ne sont jamais listées.
   const conditions = [s`cardinality(school_flags) = 0`];
-  if (filters.departments?.length) conditions.push(s`department = any(${filters.departments})`);
+  const near = filters.near;
+  if (near) {
+    const box = boundingBox(near, near.km);
+    // Une offre sans position reste dans le département du centre : mieux vaut un peu loin que perdue.
+    conditions.push(s`(
+      (lat between ${box.minLat} and ${box.maxLat} and lon between ${box.minLon} and ${box.maxLon} and ${DISTANCE(s, near)} <= ${near.km})
+      or (lat is null and department = ${near.department})
+    )`);
+  } else if (filters.departments?.length) conditions.push(s`department = any(${filters.departments})`);
   if (filters.contract) conditions.push(s`contract = ${filters.contract}`);
   if (filters.level) conditions.push(s`(diploma_level is null or diploma_level <= ${filters.level})`);
   if (filters.sizes?.length) conditions.push(s`company_size = any(${filters.sizes})`);
@@ -207,17 +246,26 @@ async function runSearch(filters: OfferFilters): Promise<OfferPage> {
     const keys = filters.companies.map((c) => `%${companyKey(c)}%`);
     conditions.push(s`regexp_replace(decode_fold(coalesce(company, '')), '[^a-z0-9]', '', 'g') like any(${keys})`);
   }
-  const variants = expandQuery(filters.q);
-  if (variants.length > 0) {
-    // La saisie ou un de ses synonymes (« dev » : « développeur »), sans tenir compte des accents.
-    const query = variants.map((v) => s`plainto_tsquery('french', decode_fold(${v}))`).reduce((acc, c) => s`${acc} || ${c}`);
-    conditions.push(s`to_tsvector('french', decode_fold(title || ' ' || coalesce(company, '') || ' ' || coalesce(city, ''))) @@ (${query})`);
-  }
+  // Chaque mot tapé (ou un synonyme) dans l'intitulé, l'entreprise, la ville ou le texte de l'annonce.
+  const query = tsQuery ? s`to_tsquery('french', ${tsQuery})` : null;
+  if (query) conditions.push(s`search_doc @@ ${query}`);
   const where = conditions.reduce((acc, c) => s`${acc} and ${c}`);
   const page = Math.max(1, filters.page ?? 1);
+  const sorted =
+    filters.sort === 'recent'
+      ? s`published_at desc`
+      : filters.sort === 'salary'
+        ? s`salary_monthly_cents desc nulls last, published_at desc`
+        : query && relaxed
+          ? s`ts_rank(search_doc, ${query}) desc, ${TOP_ORDER(s)}`
+          : query
+            ? // Le métier dans l'intitulé passe avant un mot croisé au détour du texte.
+              s`(to_tsvector('french', decode_fold(title)) @@ ${query}) desc, ${TOP_ORDER(s)}`
+            : TOP_ORDER(s);
+  const distance = near ? s`, case when lat is null then null else ${DISTANCE(s, near)} end as distance_km` : s``;
 
   const [rows, count] = await Promise.all([
-    s<OfferRow[]>`select * from offers_unique where ${where} order by ${filters.sort === 'recent' ? s`published_at desc` : filters.sort === 'salary' ? s`salary_monthly_cents desc nulls last, published_at desc` : TOP_ORDER(s)} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
+    s<OfferRow[]>`select *${distance} from offers_unique where ${where} order by ${sorted} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
     s<{ n: number }[]>`select count(*)::int as n from offers_unique where ${where}`,
   ]);
   return { offers: rows.map(toOffer), total: count[0]?.n ?? 0, page, pageSize: PAGE_SIZE, mode: 'base' };
@@ -297,11 +345,14 @@ export async function markAtsBoard(board: AtsBoard, result: { offers: number } |
   else await s`update ats_boards set failures = 0, offers = ${result.offers}, checked_at = now() where provider = ${board.provider} and slug = ${board.slug}`;
 }
 
+/** La clé d'une recherche : « workday » a sa propre clé, pour chercher aussi les employeurs déjà essayés ailleurs. */
+const probeKey = (company: string, scope: string) => (scope ? `${scope}:${normalizeText(company)}` : normalizeText(company));
+
 /**
  * Les employeurs à chercher cette nuit : ceux de la liste de départ puis ceux qui publient le plus d'offres en base,
  * sauf ceux déjà cherchés depuis moins de 30 jours.
  */
-export async function companiesToProbe(seeds: string[], limit: number): Promise<{ company: string; size: CompanySizeTag | null }[]> {
+export async function companiesToProbe(seeds: string[], limit: number, scope = ''): Promise<{ company: string; size: CompanySizeTag | null }[]> {
   const s = db();
   const probed = new Set((await s<{ company_key: string }[]>`select company_key from ats_probes where probed_at > now() - interval '30 days'`).map((r) => r.company_key));
   const frequent = await s<{ company: string; size: CompanySizeTag | null }[]>`
@@ -311,8 +362,8 @@ export async function companiesToProbe(seeds: string[], limit: number): Promise<
   const out: { company: string; size: CompanySizeTag | null }[] = [];
   const seen = new Set<string>();
   for (const c of [...seeds.map((company) => ({ company, size: 'grande' as CompanySizeTag })), ...frequent]) {
-    const key = normalizeText(c.company);
-    if (!key || probed.has(key) || seen.has(key)) continue;
+    const key = probeKey(c.company, scope);
+    if (!normalizeText(c.company) || probed.has(key) || seen.has(key)) continue;
     seen.add(key);
     out.push(c);
     if (out.length >= limit) break;
@@ -320,9 +371,78 @@ export async function companiesToProbe(seeds: string[], limit: number): Promise<
   return out;
 }
 
-export async function markProbed(company: string, found: boolean): Promise<void> {
+export async function markProbed(company: string, found: boolean, scope = ''): Promise<void> {
   const s = db();
   await s`
-    insert into ats_probes (company_key, company, found) values (${normalizeText(company)}, ${company}, ${found})
+    insert into ats_probes (company_key, company, found) values (${probeKey(company, scope)}, ${company}, ${found})
     on conflict (company_key) do update set probed_at = now(), found = excluded.found`;
+}
+
+/**
+ * Place sur la carte les offres dont la source ne donne que la ville : chaque lieu est cherché une fois (geo_places),
+ * puis toutes ses offres reçoivent le centre de la commune. Au plus `limit` lieux nouveaux par appel.
+ */
+export async function geocodeStoredOffers(
+  geocode: (p: { postalCode: string | null; city: string | null; department: string | null }) => Promise<{ lat: number; lon: number } | null>,
+  keyOf: (p: { postalCode: string | null; city: string | null; department: string | null }) => string,
+  limit: number,
+): Promise<{ places: number; found: number; offers: number }> {
+  const s = db();
+  const places = await s<{ postal_code: string | null; city: string | null; department: string | null }[]>`
+    select distinct postal_code, city, department from offers
+    where lat is null and (postal_code is not null or city is not null)
+    limit ${limit * 3}`;
+  const known = new Map(
+    (await s<{ key: string; lat: number | null; lon: number | null }[]>`select key, lat, lon from geo_places where key = any(${places.map((p) => keyOf({ postalCode: p.postal_code, city: p.city, department: p.department }))})`).map((r) => [r.key, r]),
+  );
+  let looked = 0;
+  let found = 0;
+  let offers = 0;
+  for (const p of places) {
+    const place = { postalCode: p.postal_code, city: p.city, department: p.department };
+    const key = keyOf(place);
+    let hit = known.get(key);
+    if (!hit) {
+      // Un lieu déjà cherché sans succès n'est pas recherché à nouveau.
+      if (looked >= limit) continue;
+      looked += 1;
+      const point = await geocode(place).catch(() => undefined);
+      if (point === undefined) continue;
+      hit = { key, lat: point?.lat ?? null, lon: point?.lon ?? null };
+      await s`insert into geo_places (key, lat, lon) values (${key}, ${hit.lat}, ${hit.lon}) on conflict (key) do update set lat = excluded.lat, lon = excluded.lon, checked_at = now()`;
+    }
+    if (hit.lat == null || hit.lon == null) continue;
+    found += 1;
+    const result = await s`
+      update offers set lat = ${hit.lat}, lon = ${hit.lon}, geo_precision = 'ville'
+      where lat is null and postal_code is not distinct from ${p.postal_code} and city is not distinct from ${p.city}
+        and department is not distinct from ${p.department}`;
+    offers += result.count;
+  }
+  return { places: looked, found, offers };
+}
+
+/**
+ * Le salaire que chaque entreprise écrit dans ses annonces : la médiane de ses offres chiffrées, pour les
+ * entreprises qui en ont au moins `minOffers`. Sert aux offres de la même entreprise qui ne chiffrent rien.
+ */
+export async function announcedPayByCompany(minOffers: number): Promise<Map<string, { count: number; medianCents: number }>> {
+  const s = db();
+  const rows = await s<{ company: string; cents: number }[]>`
+    select company, salary_monthly_cents as cents from offers_unique
+    where company is not null and salary_monthly_cents is not null and cardinality(school_flags) = 0`;
+  const byCompany = new Map<string, number[]>();
+  for (const r of rows) {
+    const key = companyKey(r.company);
+    if (key.length < 2) continue;
+    byCompany.set(key, [...(byCompany.get(key) ?? []), r.cents]);
+  }
+  const out = new Map<string, { count: number; medianCents: number }>();
+  for (const [key, list] of byCompany) {
+    if (list.length < minOffers) continue;
+    const v = [...list].sort((a, b) => a - b);
+    const mid = Math.floor(v.length / 2);
+    out.set(key, { count: v.length, medianCents: v.length % 2 ? v[mid]! : Math.round((v[mid - 1]! + v[mid]!) / 2) });
+  }
+  return out;
 }

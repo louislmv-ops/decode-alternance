@@ -27,7 +27,7 @@ export interface LbaJob {
     siret?: string | null;
     domain?: { idcc?: number | null; naf?: { code?: string } | null };
     size?: string | null;
-    location?: { address?: string };
+    location?: { address?: string; geopoint?: { type?: string; coordinates?: number[] } | null };
   };
   apply?: { url?: string; recipient_id?: string | null };
   contract?: { type?: string[]; start?: string | null };
@@ -52,6 +52,10 @@ export function lbaToOffer(job: LbaJob): Offer | null {
   const address = job.workplace?.location?.address ?? '';
   const postalCode = address.match(/\b\d{5}\b/)?.[0] ?? null;
   const city = address.replace(/^.*\b\d{5}\b\s*/, '').trim() || null;
+  // GeoJSON : longitude d'abord. L'adresse est précise quand elle donne une rue avant le code postal.
+  const [lon, lat] = job.workplace?.location?.geopoint?.coordinates ?? [];
+  const placed = typeof lat === 'number' && typeof lon === 'number' && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 && (lat !== 0 || lon !== 0);
+  const street = /\S.*\b\d{5}\b/.test(address);
   const types = job.contract?.type ?? [];
   const contract: OfferContract = types.length === 1 ? (types[0] === 'Professionnalisation' ? 'professionnalisation' : 'apprentissage') : 'alternance';
   const level = Number(job.offer?.target_diploma?.european);
@@ -88,6 +92,9 @@ export function lbaToOffer(job: LbaJob): Offer | null {
     alsoOn: [],
     romeCode: job.offer?.rome_codes?.[0] ?? null,
     easyApply: Boolean(job.apply?.recipient_id),
+    lat: placed ? lat : null,
+    lon: placed ? lon : null,
+    geoPrecision: placed ? (street ? 'adresse' : 'ville') : null,
     idcc: job.workplace?.domain?.idcc ? String(job.workplace.domain.idcc).padStart(4, '0') : null,
     companySite: job.workplace?.website ?? null,
     companySiren: /^\d{14}$/.test(job.workplace?.siret ?? '') ? job.workplace!.siret!.slice(0, 9) : null,

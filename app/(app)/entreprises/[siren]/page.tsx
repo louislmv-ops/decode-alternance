@@ -7,6 +7,11 @@ import { CampaignCard } from '@/components/campaigns/CampaignCard';
 import { Contribute } from '@/components/companies/Contribute';
 import { SpontaneousCta } from '@/components/companies/SpontaneousCta';
 import { ReviewCard } from '@/components/companies/ReviewCard';
+import { ConventionGrid } from '@/components/companies/ConventionGrid';
+import { gridFor } from '@/lib/rules/convention-grids';
+import { AgreementExcerpts } from '@/components/companies/AgreementExcerpts';
+import { agreementsForSiren } from '@/lib/agreements/store';
+import { isDatabaseConfigured } from '@/lib/offers/store';
 import { Score } from '@/components/companies/Stars';
 import { companyBySiren, type CompanyRef } from '@/lib/companies/search';
 import { isTopForApprentices } from '@/lib/companies/shared';
@@ -51,9 +56,10 @@ export default async function CompanyPageView({ params }: Props) {
   const data = await load(siren);
   if (!data) notFound();
   const { company, page } = data;
-  const [offers, campaigns] = await Promise.all([
+  const [offers, campaigns, agreements] = await Promise.all([
     offersOf(company.name),
     isCommunityOpen() ? campaignsForSiren(siren).catch((): Campaign[] => []) : Promise.resolve([] as Campaign[]),
+    isDatabaseConfigured() ? agreementsForSiren(siren).catch(() => []) : Promise.resolve([]),
   ]);
   const s = page?.salaries;
   const r = page?.reviews;
@@ -147,6 +153,18 @@ export default async function CompanyPageView({ params }: Props) {
         </section>
 
         <SpontaneousCta name={company.name} />
+
+        {agreements.length > 0 && (
+          <section className="e-block" aria-labelledby="accords">
+            <h2 id="accords">Ce que disent ses accords sur la paie des alternants</h2>
+            <AgreementExcerpts agreements={agreements} />
+          </section>
+        )}
+
+        {(() => {
+          const grid = (company.idcc ?? []).map(gridFor).find((g) => g !== null);
+          return grid ? <ConventionGrid grid={grid} /> : null;
+        })()}
 
         {isCommunityOpen() && <Contribute siren={company.siren} name={company.name} />}
 

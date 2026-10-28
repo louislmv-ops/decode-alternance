@@ -24,10 +24,20 @@ export function AutoSubmit({ formId }: { formId: string }) {
         if (typeof value !== 'string' || value === '' || (key === 'tri' && value === 'top')) continue;
         params.append(key, value);
       }
+      // Un nouveau lieu choisi (PlacePicker) remplace l'ancien : des départements ou un rayon, jamais les deux.
+      if (form.dataset.dep || form.dataset.near) {
+        for (const key of ['dep', 'autour', 'km', 'ville']) params.delete(key);
+      }
       if (form.dataset.dep) {
-        params.delete('dep');
         for (const d of form.dataset.dep.split('.')) params.append('dep', d);
         delete form.dataset.dep;
+      }
+      if (form.dataset.near) {
+        const [center, km, label] = form.dataset.near.split('|');
+        params.set('autour', center ?? '');
+        params.set('km', km ?? '');
+        params.set('ville', label ?? '');
+        delete form.dataset.near;
       }
       router.push(`${form.getAttribute('action') ?? ''}?${params}`);
     };

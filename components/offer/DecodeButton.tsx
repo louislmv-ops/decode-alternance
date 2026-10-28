@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { OfferMap } from './OfferMap';
+import { CompanyInsight } from './CompanyInsight';
 import { Mascotte } from '@/components/Mascotte';
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { Emoji } from '@/components/Emoji';
 import { useProfile } from '@/components/useProfile';
 import { relativeDays } from '@/lib/format';
-import { contractForOffer, minimumSalary } from '@/lib/rules/salary';
+import { contractForOffer, conventionMinimum, minimumSalary } from '@/lib/rules/salary';
+import { ConventionPay } from './ConventionPay';
 import { DecodedView, type OfferMeta } from './DecodedView';
 import { MatchPanel } from './Match';
 import { OfferFacts } from './OfferFacts';
@@ -35,7 +38,10 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (state.status === 'done') return <DecodedView decoded={state.decoded} offer={offer} />;
-  const minimum = minimumSalary({ contract: contractForOffer(offer.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro });
+  const salaryInput = { contract: contractForOffer(offer.contractKind, profile.contract), age: profile.age, year: profile.year, hasBacPro: profile.hasBacPro };
+  const legalMinimum = minimumSalary(salaryInput);
+  const conv = conventionMinimum(salaryInput, offer.pay?.conventions.map((c) => c.idcc) ?? [], offer.diplomaLevel ?? null);
+  const minimum = conv ? { ...legalMinimum, cents: conv.cents } : legalMinimum;
 
   async function decode(auto = false) {
     setState({ status: 'loading' });
@@ -85,8 +91,10 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         place={offer.city}
         rhythm={null}
         contract={offer.contract}
-        lean={offer.lean ?? null}
       />
+      {conv && <ConventionPay conv={conv} legalCents={legalMinimum.cents} />}
+      {!offer.isExample && offer.company && <CompanyInsight company={offer.company} context={offer.pay ?? null} />}
+      {offer.place && <OfferMap place={offer.place} />}
       <MatchPanel offer={{ title: offer.title, department: offer.department, diplomaLevel: offer.diplomaLevel }} />
       <PerksPanel perks={offer.perks ?? []} />
       {!offer.isExample && <ApplyKit offer={{ title: offer.title, company: offer.company, sourceUrl: offer.sourceUrl }} />}
@@ -94,14 +102,13 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         announcedCents={offer.salaryCents}
         announcedMaxCents={offer.salaryMaxCents ?? null}
         context={offer.pay ?? null}
-        company={offer.company}
         sourceLabel={offer.sourceLabel}
         offerContract={offer.contractKind ?? null}
-        lean={offer.lean ?? null}
+        folded
       />
       {state.status === 'idle' && (
         <div className="decode-pitch">
-          <p>L’offre en clair, les pièges, comment sortir du lot.</p>
+          <p>Ce que tu feras vraiment, les pièges, et comment sortir du lot.</p>
         </div>
       )}
       {state.status === 'error' && (
@@ -113,8 +120,8 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         <div className="decode-wait" role="status">
           <Mascotte pose="loupe" size={72} className="decode-wait__mascotte" />
           <div>
-            <p className="decode-wait__title">Décode lit l’annonce pour toi…</p>
-            <p className="decode-wait__sub">Missions en clair, pièges, salaire : une vingtaine de secondes.</p>
+            <p className="decode-wait__title">Décode lit l’annonce à ta place…</p>
+            <p className="decode-wait__sub">Missions, salaire, pièges : une vingtaine de secondes.</p>
             <span className="decode-wait__bar" aria-hidden="true" />
           </div>
         </div>

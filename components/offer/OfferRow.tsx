@@ -24,12 +24,14 @@ const CONTRACT_LABELS = { apprentissage: 'Apprentissage', professionnalisation: 
 
 /** Une offre, une ligne : l'entreprise, le poste en grand, une ligne d'infos, la paie. Rien d'autre. */
 export function OfferRow({ offer, h }: { offer: Offer; h: Highlights }) {
-  const pay = payDisplay(h.estimate, h.minimumCents, h.lean);
+  const pay = payDisplay(h.estimate, h.minimumCents);
   const { remote } = detailsOf(offer);
   // Le télétravail est déjà dans la ligne d'infos : pas besoin de le répéter en étiquette.
   const allPerks = extractPerks(offer.description);
   const perks = allPerks.filter((p) => !(remote && remote !== 'aucun' && /t[ée]l[ée]travail/i.test(p)));
-  const place = offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null);
+  const town = offer.city ?? (offer.department ? DEPARTMENT_NAMES[offer.department] : null);
+  // Dans une recherche « autour de » : la distance, à vol d'oiseau.
+  const place = town && offer.distanceKm != null ? `${town} (${offer.distanceKm < 1 ? 'moins de 1' : offer.distanceKm} km)` : town;
   return (
     <li className={`orow${h.pepite ? ' is-pepite' : ''}${offer.sponsored ? ' is-sponsored' : ''}`}>
       {offer.sponsored && offer.sponsorId && <SponsorBeacon id={offer.sponsorId} />}

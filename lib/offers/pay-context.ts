@@ -5,6 +5,8 @@ import { communityPayFor, companyPage, findCompanySiren, MIN_TO_SHOW } from '@/l
 import { companyBySiren, searchCompanies } from '@/lib/companies/search';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { CONVENTION_NAMES } from '@/lib/rules/conventions';
+import { agreementsForSiren } from '@/lib/agreements/store';
+import { isDatabaseConfigured } from './store';
 import { sameName } from './logo-resolve';
 import { mentionsLegalGrid, type PayContext } from './pay-estimate';
 import type { Offer } from './types';
@@ -28,7 +30,10 @@ export async function payContext(offer: Offer): Promise<PayContext> {
   const conventions = [...new Set([...(offer.idcc ? [offer.idcc] : []), ...idcc])].map((code) => ({ idcc: code, name: CONVENTION_NAMES[code] ?? null }));
   const withSiren = { ...offer, companySiren: siren };
   const community = (await communityPayFor([withSiren])).get(offer.id) ?? null;
-  const page = siren && isAccountsConfigured() ? await companyPage(siren).catch(() => null) : null;
+  const [page, agreements] = await Promise.all([
+    siren && isAccountsConfigured() ? companyPage(siren).catch(() => null) : null,
+    siren && isDatabaseConfigured() ? agreementsForSiren(siren).catch(() => []) : [],
+  ]);
   return {
     community,
     legalGrid,
@@ -37,5 +42,7 @@ export async function payContext(offer: Offer): Promise<PayContext> {
     reviewCount: page?.reviews.count ?? 0,
     companyHref: page ? `/entreprises/${page.company.siren}` : null,
     conventions,
+    employer: offer.employerPay ?? null,
+    agreements,
   };
 }

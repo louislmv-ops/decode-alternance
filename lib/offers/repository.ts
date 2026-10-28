@@ -3,14 +3,16 @@ import { unstable_cache } from 'next/cache';
 
 import type { DecodedOffer } from '@/lib/decode/schema';
 import { DEMO_DECODES, DEMO_OFFERS } from './demo';
-import { dedupe, filterOffers, matchesFilters } from './filter';
+import { dedupe, filterOffers, matchesFilters, withDistance } from './filter';
 import { diversify, sortOffers } from './rank';
 import { canonicalQuery } from './query';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { injectSponsored, sponsorOf } from '@/lib/sponsors/match';
 import { activeSponsors } from '@/lib/sponsors/store';
 import { companyRatingOf } from '@/lib/companies/store';
-import { countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
+import { announcedPayByCompany, countStoredOffers, getCachedDecode, getOffer, isDatabaseConfigured, searchOffers } from './store';
+import { EMPLOYER_MIN_OFFERS } from './pay-estimate';
+import { companyKey } from './normalize';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer, rememberSeen } from './aggregators';
 import { isLiveConfigured, liveOffer, liveSearch } from './live';
 import type { Offer, OfferFilters, OfferPage } from './types';
@@ -47,8 +49,15 @@ async function hasStoredLba(): Promise<boolean> {
   return value;
 }
 
-/** Les API ne connaissent pas nos synonymes : elles reçoivent la forme la plus courante (« compta » : « comptable »). */
-const forApis = (filters: OfferFilters): OfferFilters => ({ ...filters, q: canonicalQuery(filters.q) });
+/**
+ * Les API ne connaissent pas nos synonymes : elles reçoivent la forme la plus courante (« compta » : « comptable »).
+ * Ni nos rayons : elles cherchent dans le département du centre, et le rayon est vérifié ensuite.
+ */
+const forApis = (filters: OfferFilters): OfferFilters => ({
+  ...filters,
+  q: canonicalQuery(filters.q),
+  ...(filters.near ? { departments: [filters.near.department] } : {}),
+});
 
 async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
@@ -94,7 +103,24 @@ async function sponsoredFor(filters: OfferFilters, pageOffers: Offer[]): Promise
 export async function listOffers(filters: OfferFilters): Promise<OfferPage> {
   const page = await cachedSearch(JSON.stringify(filters));
   rememberSeen(page.offers);
-  return page;
+  return { ...page, offers: await withEmployerPay(page.offers) };
+}
+
+/** Le salaire écrit dans les autres annonces de chaque entreprise, recalculé au plus toutes les heures. */
+let employerPay: { until: number; value: Promise<Map<string, { count: number; medianCents: number }>> } | null = null;
+
+/** Aux offres sans salaire, ajoute celui que leur entreprise écrit dans ses autres annonces, quand on le connaît. */
+export async function withEmployerPay(offers: Offer[]): Promise<Offer[]> {
+  if (!offers.some((o) => o.salaryMonthlyCents === null && o.company) || !(await hasStoredOffers())) return offers;
+  if (!employerPay || employerPay.until < Date.now()) {
+    employerPay = { until: Date.now() + 3_600_000, value: announcedPayByCompany(EMPLOYER_MIN_OFFERS).catch(() => new Map()) };
+  }
+  const index = await employerPay.value;
+  return offers.map((o) => {
+    if (o.salaryMonthlyCents !== null || !o.company || o.source === 'exemple') return o;
+    const hit = index.get(companyKey(o.company));
+    return hit ? { ...o, employerPay: hit } : o;
+  });
 }
 
 async function fetchOffers(filters: OfferFilters): Promise<OfferPage> {
@@ -112,7 +138,7 @@ async function fetchOffers(filters: OfferFilters): Promise<OfferPage> {
   const pageSize = primary?.pageSize ?? 20;
   const extra = await aggregatorSearch(forApis(filters), primary ? Math.ceil(pageSize / 2) : pageSize, withLba);
   // Les agrégateurs ne savent filtrer ni la taille, ni le secteur, ni le salaire : on le fait ici.
-  const kept = extra.offers.filter((o) => matchesFilters(o, filters));
+  const kept = extra.offers.filter((o) => matchesFilters(o, filters)).map((o) => withDistance(o, filters.near));
   const offers = sortOffers(dedupe([...(primary?.offers ?? []), ...kept]), filters.sort, filters.sort === 'reviews' ? await companyRatingOf() : undefined);
   return {
     offers,
