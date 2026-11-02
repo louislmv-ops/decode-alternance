@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useTransition } from 'react';
 import { Waiting } from '@/components/states/Waiting';
+import { track } from '@/lib/analytics';
 
 /**
  * Les filtres en pastilles s'appliquent dès qu'on les change, sans chercher le bouton. Sauf dans un panneau à
@@ -17,6 +18,13 @@ export function AutoSubmit({ formId }: { formId: string }) {
     if (!form) return;
     const onChange = (e: Event) => {
       const target = e.target as HTMLElement;
+      // Un filtre touché par la personne (le texte cherché est compté avec la recherche).
+      if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement) {
+        if (target.name && target.name !== 'q') {
+          const value = target instanceof HTMLInputElement && (target.type === 'checkbox' || target.type === 'radio') ? (target.checked ? target.value : null) : target.value;
+          track('filter_used', { filter: target.name, value: value || null });
+        }
+      }
       if (target.closest('[data-manual]')) return;
       if (target.matches('select, input[type="checkbox"]')) form.requestSubmit();
     };

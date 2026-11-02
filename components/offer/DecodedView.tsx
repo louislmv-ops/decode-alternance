@@ -171,7 +171,15 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
             {alreadyTracked ? 'Dans ton suivi' : 'Ajouter à mon suivi'}
           </button>
           {realSource && (
-            <a className="ui-btn ui-btn--primary" href={offer!.sourceUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              className="ui-btn ui-btn--primary"
+              href={offer!.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="apply_clicked"
+              data-offer-id={offer!.id}
+              data-placement="titre"
+            >
               Postuler sur le site d’origine <IconOut />
             </a>
           )}
@@ -478,7 +486,7 @@ export function DecodedView({ decoded, offer }: { decoded: DecodedOffer; offer: 
               {offer.excerpt && <p className="panel__note">Extrait donné par {offer.sourceLabel} : le texte complet est sur leur site.</p>}
               <JargonText text={offer.description} ai={decoded.jargon} />
               {realSource && (
-                <a className="link raw-text__src" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer">
+                <a className="link raw-text__src" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer" data-track="apply_clicked" data-offer-id={offer.id} data-placement="annonce">
                   Voir sur {offer.sourceLabel}
                 </a>
               )}

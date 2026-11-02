@@ -11,9 +11,9 @@ export const CONSENT_OPEN_EVENT = 'decode:consent-open';
 /** Le choix vient de changer. */
 export const CONSENT_CHANGE_EVENT = 'decode:consent';
 
-/** La mesure d'audience est-elle branchée sur ce site ? Sans clé, ni bandeau ni outil. */
+/** La mesure d'audience est-elle branchée sur ce site ? Sans jeton PostHog ni hôte, ni bandeau ni outil. */
 export function isAnalyticsConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+  return Boolean(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST);
 }
 
 export function readConsent(cookie: string = typeof document === 'undefined' ? '' : document.cookie): Consent | null {
