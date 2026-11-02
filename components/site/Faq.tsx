@@ -4,9 +4,9 @@ import { faqJsonLd } from '@/lib/seo';
 
 const SOURCES: Record<OfferPage['mode'], string> = {
   exemples:
-    'Pour l’instant, des exemples fictifs. Les vraies offres de France Travail arrivent très vite.',
-  direct: 'De France Travail, à jour. Tu postules sur la page d’origine.',
-  base: 'De France Travail et des sites carrière, à jour chaque nuit.',
+    'Pour l’instant, des exemples fictifs. Les vraies offres arrivent très vite.',
+  direct: 'De La bonne alternance et d’agrégateurs d’offres, à jour. Tu postules sur la page d’origine.',
+  base: 'De La bonne alternance, d’agrégateurs d’offres et des sites carrière des entreprises, à jour chaque nuit.',
 };
 
 const CARDS = [

@@ -13,16 +13,9 @@ Pour passer au domaine sans accent :
 
 Ne change jamais `NEXT_PUBLIC_SITE_URL` vers un domaine qui ne s'ouvre pas encore : le site deviendrait inaccessible.
 
-## 1. Les vraies offres (France Travail)
+## 1. France Travail : retiré
 
-1. Sur francetravail.io : finir la création du compte (cocher les CGU, valider l'e-mail).
-2. Créer une application « Décode » et l'abonner à l'API **Offres d'emploi v2**.
-3. Ouvrir l'application et copier l'**Identifiant client** et la **Clé secrète**.
-4. Vercel, projet decode-alternance, Settings, Environment Variables
-   (https://vercel.com/karma16/decode-alternance/settings/environment-variables), deux variables, « Sensitive » coché :
-   - Key `FRANCE_TRAVAIL_CLIENT_ID`, Value : l'identifiant client
-   - Key `FRANCE_TRAVAIL_CLIENT_SECRET`, Value : la clé secrète
-5. Save, puis Deployments, « ⋯ » sur le dernier, Redeploy.
+France Travail n'est plus une source. Si des variables `FRANCE_TRAVAIL_CLIENT_ID` ou `FRANCE_TRAVAIL_CLIENT_SECRET` existent dans Vercel ou dans les secrets GitHub, elles peuvent être supprimées.
 
 ## 0. Toutes les offres d'alternance, chaque matin (Neon + GitHub, gratuit)
 
@@ -41,7 +34,7 @@ Jeton personnel obtenu sur api.apprentissage.beta.gouv.fr → `LBA_API_TOKEN` da
 
 ## 1 bis. Plus d'offres, tout de suite : Adzuna et Jooble (gratuit)
 
-Deux agrégateurs qui regroupent les annonces de centaines de sites. Leurs offres s'ajoutent à celles de France Travail ou de la base, sans doublons ni offres d'écoles. Il n'y a pas d'API qui donne 100 % des offres : personne ne les a toutes.
+Deux agrégateurs qui regroupent les annonces de centaines de sites. Leurs offres s'ajoutent à celles de la base, sans doublons ni offres d'écoles. Il n'y a pas d'API qui donne 100 % des offres : personne ne les a toutes.
 
 1. Adzuna : compte sur **developer.adzuna.com** (clé immédiate) → `ADZUNA_APP_ID` et `ADZUNA_APP_KEY` dans Vercel.
 2. Jooble : demande de clé sur **jooble.org/api/about** (réponse par e-mail) → `JOOBLE_API_KEY`.
@@ -86,7 +79,7 @@ Décode est gratuit pour les alternants. Ce qui se vend : la mise en avant, un a
 
 ## 4 bis. Encore plus d'offres : les partenariats
 
-La collecte lit déjà France Travail, La bonne alternance, les logiciels de recrutement des entreprises (Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee, Personio) et les sites carrière. Pour aller plus loin, il faut l'accord des plateformes, jamais leur aspiration :
+La collecte lit déjà La bonne alternance, les logiciels de recrutement des entreprises (Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee, Personio) et les sites carrière. Pour aller plus loin, il faut l'accord des plateformes, jamais leur aspiration :
 
 1. **Welcome to the Jungle** : leur logiciel Welcome Kit a une API pour les entreprises clientes. Proposer un partenariat de diffusion (Décode leur envoie des candidats).
 2. **JobTeaser** : partenariat écoles et entreprises ; demander un flux d'offres d'alternance.

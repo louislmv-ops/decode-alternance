@@ -31,7 +31,6 @@ import { Mascotte } from '@/components/Mascotte';
 /** Les sources à citer sous la liste, comme leurs conditions le demandent. */
 const VIA = [
   { source: 'la-bonne-alternance', label: 'La bonne alternance', href: 'https://labonnealternance.apprentissage.beta.gouv.fr' },
-  { source: 'france-travail', label: 'France Travail', href: 'https://www.francetravail.fr' },
   { source: 'adzuna', label: 'Adzuna', href: 'https://www.adzuna.fr' },
   { source: 'jooble', label: 'Jooble', href: 'https://fr.jooble.org' },
 ] as const;

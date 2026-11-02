@@ -1,9 +1,9 @@
-// Une collecte : La bonne alternance et France Travail (tous les départements ou une partie), puis les sites
+// Une collecte : La bonne alternance (tous les départements ou une partie), puis les sites
 // carrière renseignés dans companies.ts et les tableaux des logiciels de recrutement (connectors/ats.ts). Les offres sont écrites au fil de l'eau. Une offre qu'aucune collecte n'a revue depuis
 // STALE_HOURS est retirée : elle a été pourvue ou dépubliée.
 
 import { careerSites } from './companies';
-import { DEPARTMENTS, fetchFranceTravail } from './connectors/france-travail';
+import { DEPARTMENT_CODES as DEPARTMENTS } from '@/lib/departments';
 import { crawlCareerSite } from './connectors/job-posting';
 import { isLbaConfigured } from './connectors/la-bonne-alternance';
 import { harvestLba, type LbaHarvestReport } from './connectors/lba-harvest';
@@ -78,7 +78,6 @@ export function departmentsForSlot(slot: number): string[] {
 
 export interface IngestReport {
   laBonneAlternance: LbaHarvestReport | { skipped: string };
-  franceTravail: { fetched: number; truncated: string[] } | { skipped: string };
   careerSites: { company: string; offers: number; pagesRead: number; error?: string }[];
   ats: { boards: number; offers: number; discovered: number; probed: number; failed: number } | { skipped: string };
   geocoded?: number;
@@ -89,7 +88,7 @@ export async function runIngest(
   opts: { log?: (line: string) => void; departments?: string[]; careerSites?: boolean; ats?: boolean; probeLimit?: number } = {},
 ): Promise<IngestReport> {
   const log = opts.log ?? console.log;
-  const report: IngestReport = { laBonneAlternance: { skipped: '' }, franceTravail: { skipped: '' }, careerSites: [], ats: { skipped: '' }, removed: 0 };
+  const report: IngestReport = { laBonneAlternance: { skipped: '' }, careerSites: [], ats: { skipped: '' }, removed: 0 };
   await ensureOfferSchema();
 
   if (isLbaConfigured()) {
@@ -98,17 +97,6 @@ export async function runIngest(
   } else {
     report.laBonneAlternance = { skipped: 'LBA_API_TOKEN manquant' };
     log('La bonne alternance : ignorée (LBA_API_TOKEN manquant)');
-  }
-
-  const clientId = process.env.FRANCE_TRAVAIL_CLIENT_ID;
-  const clientSecret = process.env.FRANCE_TRAVAIL_CLIENT_SECRET;
-  if (clientId && clientSecret) {
-    const result = await fetchFranceTravail({ clientId, clientSecret, departments: opts.departments, onBatch: upsertOffers, log });
-    report.franceTravail = { fetched: result.fetched, truncated: result.truncated };
-    log(`France Travail : ${result.fetched} offres lues`);
-  } else {
-    report.franceTravail = { skipped: 'FRANCE_TRAVAIL_CLIENT_ID ou FRANCE_TRAVAIL_CLIENT_SECRET manquant' };
-    log('France Travail : ignoré (identifiants manquants)');
   }
 
   if (opts.careerSites !== false) {
@@ -142,7 +130,6 @@ export async function runIngest(
   // (quelques départements) non plus : elle n'a pas revu les autres.
   const full = !opts.departments;
   if (full && !('skipped' in report.laBonneAlternance) && report.laBonneAlternance.fetched > 0) report.removed += await removeStale('la-bonne-alternance', cutoff);
-  if (full && !('skipped' in report.franceTravail) && report.franceTravail.fetched > 0) report.removed += await removeStale('france-travail', cutoff);
   report.removed += await removeStale('site-carriere', cutoff);
   log(`${report.removed} offres retirées (non revues depuis ${STALE_HOURS} h)`);
   return report;

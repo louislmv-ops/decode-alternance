@@ -14,7 +14,6 @@ import { announcedPayByCompany, countStoredOffers, getCachedDecode, getOffer, is
 import { EMPLOYER_MIN_OFFERS } from './pay-estimate';
 import { companyKey } from './normalize';
 import { aggregatorSearch, isAggregatorsConfigured, recallAggregatorOffer, rememberSeen } from './aggregators';
-import { isLiveConfigured, liveOffer, liveSearch } from './live';
 import type { Offer, OfferFilters, OfferPage } from './types';
 
 /**
@@ -61,14 +60,13 @@ const forApis = (filters: OfferFilters): OfferFilters => ({
 
 async function primarySearch(filters: OfferFilters): Promise<OfferPage | null> {
   if (await hasStoredOffers()) return searchOffers(filters);
-  if (isLiveConfigured()) return liveSearch(forApis(filters));
   return null;
 }
 
 /**
  * Les mêmes recherches reviennent sans cesse (l'accueil, les départements, les métiers courants) :
  * le résultat est gardé cinq minutes dans le cache partagé du serveur, au lieu d'interroger
- * France Travail et les agrégateurs à chaque visite.
+ * les agrégateurs à chaque visite.
  */
 const cachedSearch = unstable_cache(
   async (key: string) => {
@@ -156,7 +154,6 @@ export async function findOffer(id: string): Promise<Offer | null> {
     const offer = await getOffer(id).catch(() => null);
     if (offer) return offer;
   }
-  if (isLiveConfigured() && id.startsWith('france-travail:')) return liveOffer(id.slice('france-travail:'.length));
   if (id.startsWith('adzuna:') || id.startsWith('jooble:') || id.startsWith('la-bonne-alternance:')) return recallAggregatorOffer(id);
   return null;
 }
@@ -178,5 +175,5 @@ export function rememberDecode(id: string, decoded: DecodedOffer) {
 
 /** De vraies offres peuvent-elles s'afficher ? Sans aucune source, le site montre les exemples fictifs. */
 export function hasRealOfferSource(): boolean {
-  return isDatabaseConfigured() || isLiveConfigured() || isAggregatorsConfigured(true);
+  return isDatabaseConfigured() || isAggregatorsConfigured(true);
 }

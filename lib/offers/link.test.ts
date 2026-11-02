@@ -17,6 +17,6 @@ describe('lien de secours vers l’annonce d’origine', () => {
   });
   it('laisse les offres de la base sans paramètre', async () => {
     const { offerHref } = await import('./link');
-    expect(offerHref({ id: 'france-travail:1', source: 'france-travail', sourceUrl: 'https://x' })).toBe('/offres/france-travail%3A1');
+    expect(offerHref({ id: 'site-carriere:1', source: 'site-carriere', sourceUrl: 'https://x' })).toBe('/offres/site-carriere%3A1');
   });
 });

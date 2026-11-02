@@ -69,7 +69,6 @@ export default function LegalPage() {
 
         <h2 id="sources">Sources des offres et des règles</h2>
         <ul className="bullets">
-          <li>Offres France Travail : API Offres d’emploi, réutilisées selon la licence de France Travail, sans les coordonnées de contact.</li>
           <li>
             Offres La bonne alternance : API Apprentissage du ministère du Travail, réutilisées selon ses conditions, avec lien vers
             l’offre pour postuler.
@@ -87,7 +86,7 @@ export default function LegalPage() {
             (mission-apprentissage/labonnealternance), © 2023 La bonne alternance, licence MIT.
           </li>
           <li>Département à partir de ta position : API Géo de l’État (geo.api.gouv.fr). La position n’est pas conservée.</li>
-          <li>Secteurs : codes ROME du métier, donnés par France Travail et La bonne alternance.</li>
+          <li>Secteurs : codes ROME du métier (référentiel de France Travail), donnés par La bonne alternance.</li>
           <li>SMIC : {SMIC.source}.</li>
           <li>Rémunération : articles D6222-26, L6325-8 et D6325-15 du Code du travail.</li>
           <li>Aides à l’employeur : décret n° 2026-168 du 6 mars 2026 (aide exceptionnelle) et aide unique aux employeurs d’apprentis.</li>

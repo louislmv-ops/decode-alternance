@@ -1,3 +1,15 @@
+/** Tous les départements, dans l'ordre des codes : la collecte les parcourt un par un. */
+export const DEPARTMENT_CODES = [
+  ...Array.from({ length: 95 }, (_, i) => String(i + 1).padStart(2, '0')).filter((d) => d !== '20'),
+  '2A',
+  '2B',
+  '971',
+  '972',
+  '973',
+  '974',
+  '976',
+];
+
 export const DEPARTMENT_NAMES: Record<string, string> = {
   '01': 'Ain', '02': 'Aisne', '03': 'Allier', '04': 'Alpes-de-Haute-Provence', '05': 'Hautes-Alpes', '06': 'Alpes-Maritimes',
   '07': 'Ardèche', '08': 'Ardennes', '09': 'Ariège', '10': 'Aube', '11': 'Aude', '12': 'Aveyron', '13': 'Bouches-du-Rhône',
