@@ -24,4 +24,4 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsx scripts/probe-careers.ts scripts/career-candidates.json 40
+      - run: pnpm exec tsx scripts/probe-careers.ts scripts/career-candidates.json 60
