@@ -40,7 +40,7 @@ export const CAC40: Cac40Entry[] = [
   { company: 'Orange', careersUrl: 'https://orange.jobs' },
   { company: 'Pernod Ricard', careersUrl: null },
   { company: 'Publicis', careersUrl: null },
-  { company: 'Renault', careersUrl: null },
+  { company: 'Renault', careersUrl: 'https://alliancewd.wd3.myworkdayjobs.com' },
   { company: 'Safran', careersUrl: null },
   { company: 'Saint-Gobain', careersUrl: null },
   { company: 'Sanofi', careersUrl: 'https://jobs.sanofi.com' },
@@ -90,10 +90,15 @@ export const KNOWN_ATS_BOARDS: AtsBoard[] = [
   { provider: 'workday', slug: 'valeo.wd3/valeo_jobs', company: 'Valeo', size: 'grande' },
   { provider: 'workday', slug: 'airliquidehr.wd3/AirLiquideExternalCareer', company: 'Air Liquide', size: 'grande' },
   { provider: 'workday', slug: 'sanofi.wd3/SanofiCareers', company: 'Sanofi', size: 'grande' },
+  { provider: 'workday', slug: 'pernodricard.wd3/pernod-ricard', company: 'Pernod Ricard', size: 'grande' },
 ];
 
 /** Grands recruteurs d'alternants hors CAC 40 dont le site carrière a été vérifié de la même façon. */
-const OTHER_CAREER_SITES: { company: string; careersUrl: string }[] = [{ company: 'Decathlon', careersUrl: 'https://joinus.decathlon.fr' }];
+const OTHER_CAREER_SITES: { company: string; careersUrl: string }[] = [
+  { company: 'Decathlon', careersUrl: 'https://joinus.decathlon.fr' },
+  { company: 'Leroy Merlin', careersUrl: 'https://recrute.leroymerlin.fr' },
+  { company: 'Sopra Steria', careersUrl: 'https://careers.soprasteria.com' },
+];
 
 /** Les sites prêts à être lus : ceux dont l'adresse a été vérifiée. */
 export function careerSites(): CareerSite[] {
