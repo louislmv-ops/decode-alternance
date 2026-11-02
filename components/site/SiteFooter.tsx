@@ -64,8 +64,8 @@ export function SiteFooter() {
           <Link className="link" href="/mentions-legales">
             Mentions légales
           </Link>
-          <Link className="link" href="/mentions-legales#donnees">
-            Données personnelles
+          <Link className="link" href="/confidentialite">
+            Confidentialité
           </Link>
           <Link className="link" href="/mentions-legales#sources">
             Sources des offres et des règles

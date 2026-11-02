@@ -8,11 +8,11 @@ afterEach(() => {
 
 describe('informations de l’éditeur', () => {
   it('sans variable : rien, et un seul avertissement', async () => {
-    vi.stubEnv('LEGAL_ADDRESS', '');
+    vi.stubEnv('LEGAL_SIREN', '');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const { legalAddress } = await import('./legal');
-    expect(legalAddress()).toBeNull();
-    expect(legalAddress()).toBeNull();
+    const { legalSiren } = await import('./legal');
+    expect(legalSiren()).toBeNull();
+    expect(legalSiren()).toBeNull();
     expect(warn).toHaveBeenCalledTimes(1);
   });
   it('lit CONTACT_EMAIL, puis les anciennes variables en secours', async () => {

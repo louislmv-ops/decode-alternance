@@ -18,6 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['/aides', 0.7],
     ['/alternance', 0.8],
     ['/mentions-legales', 0.2],
+    ['/confidentialite', 0.2],
   ];
   // Ces pages ont besoin des comptes : sans eux, elles ne montreraient qu'un « bientôt ».
   if (isAccountsConfigured()) {
