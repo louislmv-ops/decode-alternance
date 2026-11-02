@@ -89,7 +89,7 @@ export function TabBar() {
   const pathname = usePathname();
   const swiping = isActive(pathname, '/offres/swipe');
   return (
-    <nav aria-label="Outils" className="tabbar">
+    <nav aria-label="Raccourcis" className="tabbar">
       {NAV.filter((n) => n.tab).map(({ href, short, icon: Icon, needs, tab }) => (
         <Fragment key={href}>
           <Link
