@@ -11,6 +11,7 @@ import {
   fingerprint,
   htmlToText,
   isAlternance,
+  normalizeText,
   parseSalaryRange,
   schoolBaitFlags,
 } from '../normalize';
@@ -90,11 +91,18 @@ function salaryFromLd(ld: JobPostingLd): { text: string | null; cents: number | 
   return { text, cents: range?.minCents ?? null, maxCents: range?.maxCents ?? null };
 }
 
-/** Le pays d'une offre est-il la France ? Sans pays indiqué, on garde l'offre (le site carrière est français). */
-export function inFrance(country: string | { name?: string } | undefined): boolean {
+/** Pays étrangers que les sites carrière glissent dans le lieu quand ils ne remplissent pas addressCountry. */
+const FOREIGN_PLACE =
+  /\b(germany|deutschland|allemagne|united kingdom|uk|england|scotland|royaume uni|spain|espana|espagne|italy|italia|italie|belgium|belgique|switzerland|suisse|netherlands|pays bas|portugal|poland|pologne|austria|autriche|singapore|singapour|china|chine|india|inde|japan|japon|usa|united states|etats unis|canada|brazil|bresil|mexico|mexique|morocco|maroc|tunisia|tunisie|australia|australie|uae|dubai)\b/;
+
+/**
+ * Le pays d'une offre est-il la France ? Sans pays indiqué, on regarde si le lieu nomme un pays étranger
+ * (« Hamburg, Germany ») ; sinon on garde l'offre, le site carrière étant français.
+ */
+export function inFrance(country: string | { name?: string } | undefined, place = ''): boolean {
   const name = typeof country === 'object' ? country?.name : country;
-  if (!name) return true;
-  return /^(fr|fra|france|fr-fr)$/i.test(name.trim());
+  if (name) return /^(fr|fra|france|fr-fr)$/i.test(name.trim());
+  return !FOREIGN_PLACE.test(normalizeText(place));
 }
 
 export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: CareerSite): Offer | null {
@@ -107,7 +115,8 @@ export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: Caree
   const location = asArray(ld.jobLocation)[0];
   const address = typeof location?.address === 'object' ? location.address : undefined;
   // Les grands groupes publient leurs offres du monde entier sur le même site : on ne garde que la France.
-  if (!inFrance(address?.addressCountry)) return null;
+  const placeText = [address?.addressLocality, typeof location?.address === 'string' ? location.address : ''].filter(Boolean).join(' ');
+  if (!inFrance(address?.addressCountry, placeText)) return null;
   const city = address?.addressLocality?.trim() || (typeof location?.address === 'string' ? location.address : null);
   const postalCode = address?.postalCode?.trim() || null;
   const sourceUrl = ld.url && /^https?:\/\//.test(ld.url) ? ld.url : pageUrl;
@@ -146,29 +155,65 @@ export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: Caree
   };
 }
 
-/** Les adresses d'un sitemap, en suivant les index de sitemaps sur deux niveaux. */
-export async function readSitemap(url: string, rules: RobotsRules, depth = 0): Promise<string[]> {
-  if (depth > 2 || !isAllowed(rules, url)) return [];
+/** Un sitemap qui a l'air de lister des offres plutôt que des produits ou des articles. */
+const JOB_SITEMAP = /(job|career|carriere|emploi|offre|offer|vacanc|recrut|position|poste)/i;
+
+/**
+ * Plafonds de lecture des sitemaps : certains sites en déclarent des centaines (un par pays et par rubrique,
+ * des millions d'adresses en tout). On lit d'abord ceux qui parlent d'emploi, et on s'arrête à ces plafonds.
+ */
+export const SITEMAP_LIMITS = { files: 40, urls: 60_000 };
+
+/** Les adresses d'un sitemap, en suivant les index de sitemaps sur deux niveaux, dans la limite de `budget`. */
+export async function readSitemap(
+  url: string,
+  rules: RobotsRules,
+  depth = 0,
+  budget = { files: SITEMAP_LIMITS.files, urls: SITEMAP_LIMITS.urls },
+): Promise<string[]> {
+  if (depth > 2 || budget.files <= 0 || budget.urls <= 0 || !isAllowed(rules, url)) return [];
+  budget.files -= 1;
   const res = await fetchText(url);
   if (res.status !== 200) return [];
   const locs = [...res.text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)].map((m) => (m[1] ?? '').replace(/&amp;/g, '&'));
   if (/<sitemapindex/i.test(res.text)) {
     const nested: string[] = [];
-    for (const loc of locs) {
-      nested.push(...(await readSitemap(loc, rules, depth + 1)));
+    for (const loc of sortJobFirst(locs, JOB_SITEMAP)) {
+      if (budget.files <= 0 || budget.urls <= 0) break;
+      nested.push(...(await readSitemap(loc, rules, depth + 1, budget)));
       await sleep(rules.crawlDelayMs);
     }
     return nested;
   }
-  return locs;
+  const kept = locs.slice(0, Math.max(0, budget.urls));
+  budget.urls -= kept.length;
+  return kept;
+}
+
+/** Les adresses qui correspondent au motif d'abord, les autres ensuite, chacune dans son ordre. */
+function sortJobFirst(urls: string[], pattern: RegExp): string[] {
+  return [...urls.filter((u) => pattern.test(u)), ...urls.filter((u) => !pattern.test(u))];
 }
 
 const JOB_URL_HINT = /(altern|apprenti|apprentissage|work-?study|apprentice|contrat-pro)/i;
+/** Une adresse de page d'offre, quel que soit le contrat. */
+const JOB_PAGE = /(\/jobs?\/|\/offres?\/|\/emplois?\/|\/postes?\/|\/vacanc|\/careers?\/[^/]+\/|job[-_]?id|\/details?\/)/i;
 
 /**
  * Les offres d'alternance d'un site carrière. Sans indice dans les adresses, on lit au plus
  * `maxPages` pages d'offres pour rester raisonnable envers le site.
  */
+/**
+ * Les pages à lire : d'abord celles dont l'adresse dit « alternance », puis les autres pages d'offres (beaucoup
+ * de sites n'écrivent que l'identifiant de l'offre dans l'adresse), puis le reste, jusqu'au plafond.
+ */
+export function pickPages(urls: string[], max: number): string[] {
+  const hinted = urls.filter((u) => JOB_URL_HINT.test(u));
+  const jobs = urls.filter((u) => !JOB_URL_HINT.test(u) && JOB_PAGE.test(u));
+  const rest = urls.filter((u) => !JOB_URL_HINT.test(u) && !JOB_PAGE.test(u));
+  return [...hinted, ...jobs, ...(hinted.length + jobs.length > 0 ? [] : rest)].slice(0, max);
+}
+
 export async function crawlCareerSite(
   site: CareerSite,
   opts: { maxPages?: number; log?: (line: string) => void } = {},
@@ -177,15 +222,16 @@ export async function crawlCareerSite(
   const origin = new URL(site.careersUrl).origin;
   const robotsRes = await fetchText(`${origin}/robots.txt`).catch(() => null);
   const rules = parseRobots(robotsRes?.status === 200 ? robotsRes.text : '');
-  const sitemapUrls = [...new Set([...rules.sitemaps, ...(site.sitemaps ?? []), `${origin}/sitemap.xml`])];
+  const sitemapUrls = sortJobFirst([...new Set([...rules.sitemaps, ...(site.sitemaps ?? []), `${origin}/sitemap.xml`])], JOB_SITEMAP);
 
   const urls: string[] = [];
+  const budget = { ...SITEMAP_LIMITS };
   for (const sitemap of sitemapUrls) {
-    urls.push(...(await readSitemap(sitemap, rules).catch(() => [])));
+    if (budget.files <= 0 || budget.urls <= 0) break;
+    urls.push(...(await readSitemap(sitemap, rules, 0, budget).catch(() => [])));
   }
   const unique = [...new Set(urls)];
-  const hinted = unique.filter((u) => JOB_URL_HINT.test(u));
-  const candidates = (hinted.length > 0 ? hinted : unique).slice(0, opts.maxPages ?? 300);
+  const candidates = pickPages(unique, opts.maxPages ?? 300);
   log(`${site.company} : ${unique.length} adresses dans les sitemaps, ${candidates.length} pages à lire`);
 
   const offers: Offer[] = [];

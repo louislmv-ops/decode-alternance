@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isAllowed, parseRobots } from './http';
-import { extractJobPostings, inFrance, jobPostingToOffer } from './job-posting';
+import { extractJobPostings, inFrance, jobPostingToOffer, pickPages } from './job-posting';
 
 const site = { company: 'Groupe Exemple', careersUrl: 'https://carrieres.exemple.fr', size: 'grande' as const };
 
@@ -71,5 +71,16 @@ describe('sites carrière : seulement la France', () => {
     expect(inFrance(undefined)).toBe(true);
     expect(inFrance('DE')).toBe(false);
     expect(inFrance({ name: 'Singapore' })).toBe(false);
+    expect(inFrance(undefined, '25hours Hotel Hamburg HafenCity, Hamburg, Germany')).toBe(false);
+    expect(inFrance(undefined, 'Vélizy-Villacoublay')).toBe(true);
+  });
+});
+
+describe('sites carrière : pages à lire', () => {
+  it('lit d’abord l’alternance, puis les autres pages d’offres, jamais les articles quand il y a des offres', () => {
+    const urls = ['https://x.fr/blog/a', 'https://x.fr/jobs/123', 'https://x.fr/offres/alternance-rh-9', 'https://x.fr/jobs/456'];
+    expect(pickPages(urls, 10)).toEqual(['https://x.fr/offres/alternance-rh-9', 'https://x.fr/jobs/123', 'https://x.fr/jobs/456']);
+    expect(pickPages(urls, 2)).toEqual(['https://x.fr/offres/alternance-rh-9', 'https://x.fr/jobs/123']);
+    expect(pickPages(['https://x.fr/a', 'https://x.fr/b'], 5)).toEqual(['https://x.fr/a', 'https://x.fr/b']);
   });
 });

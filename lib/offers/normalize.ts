@@ -59,10 +59,10 @@ const ALTERNANCE_PATTERN =
 
 /** « Apprentissage » au sens de l'intelligence artificielle (« apprentissage automatique », « fédéré »…), pas d'un contrat. */
 const MACHINE_LEARNING =
-  /\bapprentissage (automatique|profond|federe|par renforcement|supervise|non supervise|statistique|machine|robotique|actif|continu|de representations?|multi ?taches?)\b/g;
+  /\bapprentissage (automatique|profond|federe|par renforcement|supervise|non supervise|statistique|machine|robotique|semi supervise|auto supervise|par transfert|actif|continu|de representations?|multi ?taches?)\b/g;
 
-/** Un intitulé de stage ou de CDI/CDD : seule l'alternance écrite dans l'intitulé le fait passer. */
-const OTHER_CONTRACT_TITLE = /^(stage|stagiaire|internship|intern|cdi|cdd|vie|v i e)\b/;
+/** Un intitulé de stage ou de CDI/CDD (« ATR - Internship ») : seule l'alternance écrite dans l'intitulé le fait passer. */
+const OTHER_CONTRACT_TITLE = /\b(stage|stagiaire|internship|intern|cdi|cdd|vie|v i e)\b/;
 
 /** L'annonce parle-t-elle bien d'alternance (et pas seulement d'un stage ou d'un CDI) ? */
 export function isAlternance(title: string, description = '', employmentType = ''): boolean {

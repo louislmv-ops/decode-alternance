@@ -2,7 +2,7 @@
 // carrière renseignés dans companies.ts et les tableaux des logiciels de recrutement (connectors/ats.ts). Les offres sont écrites au fil de l'eau. Une offre qu'aucune collecte n'a revue depuis
 // STALE_HOURS est retirée : elle a été pourvue ou dépubliée.
 
-import { careerSites } from './companies';
+import { careerSites, KNOWN_ATS_BOARDS } from './companies';
 import { DEPARTMENT_CODES as DEPARTMENTS } from '@/lib/departments';
 import { crawlCareerSite } from './connectors/job-posting';
 import { isLbaConfigured } from './connectors/la-bonne-alternance';
@@ -11,7 +11,7 @@ import { discoverAts, discoverWorkday, SEED_COMPANIES } from './ats-discovery';
 import { BoardMismatchError, fetchAtsBoard } from './connectors/ats';
 import { sleep } from './connectors/http';
 import { geocodePlace, placeKey } from './geocode';
-import { companiesToProbe, geocodeStoredOffers, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
+import { seedAtsBoard, companiesToProbe, geocodeStoredOffers, ensureOfferSchema, listAtsBoards, markAtsBoard, markProbed, removeStale, saveAtsBoard, upsertOffers } from './store';
 
 export const STALE_HOURS = 36;
 
@@ -47,6 +47,7 @@ async function ingestAts(log: (line: string) => void, probeLimit: number): Promi
     }
     probed += companies.length;
   }
+  for (const board of KNOWN_ATS_BOARDS) await seedAtsBoard(board);
   const boards = await listAtsBoards();
   let offers = 0;
   let failed = 0;

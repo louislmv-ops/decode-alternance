@@ -34,6 +34,9 @@ describe('isAlternance', () => {
     expect(isAlternance('Stage - Physical AI : simulation et apprentissage robotique (H/F)')).toBe(false);
     expect(isAlternance('Apprentissage fédéré pour l’adaptation des modèles prédictifs de QoS F/H', 'Thèse en apprentissage automatique')).toBe(false);
     expect(isAlternance('Stage data', 'Possibilité de poursuivre en alternance')).toBe(false);
+    expect(isAlternance('ATR - Internship – Supply Chain Engineer', 'Internship or apprenticeship possible')).toBe(false);
+    expect(isAlternance('STAGE - Ingénieur.e Recherche - Apprentissage semi-supervisé (F/H)')).toBe(false);
+    expect(isAlternance('Stage ou alternance - Assistant marketing')).toBe(true);
     expect(isAlternance('APPRENTISSAGE – Analyste des processus métier IS (F/H)')).toBe(true);
     expect(isAlternance('Data scientist', 'Contrat d’apprentissage de 24 mois, apprentissage automatique')).toBe(true);
   });

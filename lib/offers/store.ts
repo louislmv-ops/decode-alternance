@@ -344,6 +344,14 @@ export async function closeDb(): Promise<void> {
   sql = null;
 }
 
+/** Ajoute un tableau vérifié à la main s'il n'est pas déjà connu (ses échecs éventuels restent comptés). */
+export async function seedAtsBoard(board: AtsBoard): Promise<void> {
+  const s = db();
+  await s`
+    insert into ats_boards (provider, slug, company, company_size) values (${board.provider}, ${board.slug}, ${board.company}, ${board.size ?? null})
+    on conflict (provider, slug) do nothing`;
+}
+
 /** Les tableaux d'offres connus, sauf ceux qui échouent depuis cinq collectes. */
 export async function listAtsBoards(): Promise<AtsBoard[]> {
   const s = db();

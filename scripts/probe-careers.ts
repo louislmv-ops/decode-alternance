@@ -4,14 +4,38 @@
 //   pnpm tsx scripts/probe-careers.ts [fichier.json] [pages par site]
 
 import { readFileSync } from 'node:fs';
+import { discover } from '@/lib/offers/ats-discovery';
 import { type AtsProvider, fetchAtsBoard } from '@/lib/offers/connectors/ats';
-import { crawlCareerSite } from '@/lib/offers/connectors/job-posting';
+import { fetchText, parseRobots } from '@/lib/offers/connectors/http';
+import { crawlCareerSite, extractJobPostings } from '@/lib/offers/connectors/job-posting';
 
 interface Candidate {
   company: string;
   urls?: string[];
   /** Tableaux de logiciels de recrutement à essayer, « fournisseur:identifiant » (« workday:ag.wd3/Airbus »). */
   boards?: string[];
+  /** Chercher aussi ses tableaux chez les logiciels de recrutement, comme la collecte de nuit (Workday compris). */
+  discover?: boolean;
+}
+
+/** Pourquoi un site ne donne rien : réponses du site et de robots.txt, sitemaps, balisage, liens d'offres. */
+async function diagnose(url: string): Promise<string> {
+  const parts: string[] = [];
+  const origin = new URL(url).origin;
+  const robots = await fetchText(`${origin}/robots.txt`).catch((e: Error) => ({ status: 0, text: e.message, headers: new Headers() }));
+  const rules = parseRobots(robots.status === 200 ? robots.text : '');
+  parts.push(`robots ${robots.status}`, `sitemaps déclarés ${rules.sitemaps.length}`);
+  for (const sm of [...rules.sitemaps, `${origin}/sitemap.xml`].slice(0, 3)) {
+    const r = await fetchText(sm).catch(() => null);
+    parts.push(`${sm.replace(origin, '')} ${r?.status ?? 'échec'} (${r ? (r.text.match(/<loc>/g) ?? []).length : 0} adresses)`);
+  }
+  const page = await fetchText(url).catch((e: Error) => ({ status: 0, text: e.message, headers: new Headers() }));
+  const links = [...page.text.matchAll(/href=["']([^"'#]+)["']/g)].map((m) => m[1] ?? '');
+  const jobLinks = links.filter((l) => /(offre|offer|job|emploi|poste|vacanc|career|carriere)/i.test(l) && /\d{3,}|altern|apprenti/i.test(l));
+  parts.push(`page ${page.status} (${page.text.length} car.)`, `JobPosting ${extractJobPostings(page.text).length}`, `liens d'offres ${jobLinks.length}`);
+  if (jobLinks[0]) parts.push(`ex. ${jobLinks[0].slice(0, 120)}`);
+  if (/cloudflare|captcha|access denied|datadome/i.test(page.text.slice(0, 5000))) parts.push('protection anti-robots');
+  return parts.join(' · ');
 }
 
 const file = process.argv[2] ?? 'scripts/career-candidates.json';
@@ -46,11 +70,29 @@ async function probeBoard(company: string, board: string) {
   }
 }
 
+/** Les tableaux que la recherche de nuit trouverait pour cet employeur, et ce qu'ils donnent. */
+async function probeDiscover(company: string) {
+  try {
+    const boards = await discover(company);
+    let offers = 0;
+    const names: string[] = [];
+    for (const b of boards) {
+      const found = await fetchAtsBoard(b).catch(() => []);
+      offers += found.length;
+      names.push(`${b.provider}:${b.slug} (${found.length})`);
+    }
+    return { company, url: 'recherche des tableaux', ok: offers > 0, offers, pages: 0, robots: 0, note: names.join(', ') || 'aucun tableau trouvé', sample: [] as string[] };
+  } catch (error) {
+    return { company, url: 'recherche des tableaux', ok: false, offers: 0, pages: 0, robots: 0, note: (error as Error).message, sample: [] as string[] };
+  }
+}
+
 async function main() {
   const candidates = JSON.parse(readFileSync(file, 'utf8')) as Candidate[];
   const jobs = candidates.flatMap((c) => [
     ...(c.urls ?? []).map((url) => ({ company: c.company, url, run: () => probe(c.company, url) })),
     ...(c.boards ?? []).map((board) => ({ company: c.company, url: board, run: () => probeBoard(c.company, board) })),
+    ...(c.discover ? [{ company: c.company, url: 'recherche des tableaux', run: () => probeDiscover(c.company) }] : []),
   ]);
   const results: { company: string; url: string; ok: boolean; offers: number; pages: number }[] = [];
   let next = 0;
@@ -62,6 +104,7 @@ async function main() {
         results.push(r);
         console.log(`${r.ok ? 'OK  ' : 'RIEN'} ${r.company} · ${r.url} · ${r.offers} offres d'alternance, ${r.pages} pages lues, ${r.robots} interdites · ${r.note}`);
         for (const s of r.sample) console.log(`       - ${s}`);
+        if (!r.ok && /^https?:/.test(job.url)) console.log(`       diagnostic : ${await diagnose(job.url).catch((e: Error) => e.message)}`);
       }
     }),
   );
