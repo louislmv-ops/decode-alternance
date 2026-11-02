@@ -25,8 +25,6 @@ const VERCEL_HOST = 'decode-alternance.vercel.app';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  // La photo de l'accueil est servie en qualité 85 : nette sur écran Retina, toujours légère.
-  images: { qualities: [75, 85] },
   async redirects() {
     return [
       ...OTHER_HOSTS.map((host) => ({
