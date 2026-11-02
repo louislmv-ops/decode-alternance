@@ -18,6 +18,7 @@ import { PerksPanel } from './Perks';
 import { ApplyKit } from './ApplyKit';
 import { BullshitBingo, JargonText } from './BullshitBingo';
 import { LikeButton } from './LikeButton';
+import { requestDecode } from './decode-request';
 
 /** Même plafond que la route de traduction (MAX_OFFER_CHARS), qui n'est pas importable côté navigateur. */
 const MAX_TEXT = 12_000;
@@ -46,15 +47,9 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
   async function decode(auto = false) {
     setState({ status: 'loading' });
     try {
-      const res = await fetch('/api/decode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Le texte part avec l'identifiant : une offre d'agrégateur n'est gardée qu'en mémoire, pas toujours là où tourne la traduction.
-        body: JSON.stringify({ offerId: offer.id, text: [offer.title, offer.company ?? '', offer.city ?? '', '', description].join('\n').slice(0, MAX_TEXT) }),
-      });
-      const data = (await res.json()) as { decoded?: DecodedOffer; error?: string };
-      if (!res.ok || !data.decoded) throw new Error(data.error ?? 'La traduction a échoué.');
-      setState({ status: 'done', decoded: data.decoded });
+      // Le texte part avec l'identifiant : une offre d'agrégateur n'est gardée qu'en mémoire, pas toujours là où tourne la traduction.
+      const decoded = await requestDecode({ offerId: offer.id, text: [offer.title, offer.company ?? '', offer.city ?? '', '', description].join('\n').slice(0, MAX_TEXT) });
+      setState({ status: 'done', decoded });
     } catch (error) {
       setState(auto ? { status: 'idle' } : { status: 'error', message: (error as Error).message });
     }
@@ -108,7 +103,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
       />
       {state.status === 'idle' && (
         <div className="decode-pitch">
-          <p>Ce que tu feras vraiment, les pièges, et comment sortir du lot.</p>
+          <p>Ce que tu feras vraiment, les points de vigilance, et comment sortir du lot.</p>
         </div>
       )}
       {state.status === 'error' && (
@@ -121,7 +116,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
           <Mascotte pose="loupe" size={72} className="decode-wait__mascotte" />
           <div>
             <p className="decode-wait__title">Décode lit l’annonce à ta place…</p>
-            <p className="decode-wait__sub">Missions, salaire, pièges : une vingtaine de secondes.</p>
+            <p className="decode-wait__sub">Missions, salaire, points de vigilance : une vingtaine de secondes.</p>
             <span className="decode-wait__bar" aria-hidden="true" />
           </div>
         </div>

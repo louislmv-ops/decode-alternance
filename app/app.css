@@ -1494,6 +1494,11 @@
   align-items: start;
 }
 
+.employer__hint {
+  font-weight: 400;
+  color: var(--muted);
+}
+
 .employer__controls {
   display: flex;
   flex-direction: column;

@@ -3,13 +3,23 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import type { DecodedOffer } from '@/lib/decode/schema';
+import { requestDecode } from './decode-request';
 import { DecodedView } from './DecodedView';
 import { Mascotte } from '@/components/Mascotte';
 
 const MIN = 120;
 const MAX = 12_000;
 
-export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examples: { id: string; title: string; company: string }[] }) {
+export function DecoderView({
+  aiEnabled,
+  provider,
+  examples,
+}: {
+  aiEnabled: boolean;
+  /** Le fournisseur d'IA réellement branché (lib/legal), pour dire à qui part le texte. */
+  provider: { name: string; freeTier: boolean } | null;
+  examples: { id: string; title: string; company: string }[];
+}) {
   const [text, setText] = useState('');
   const [state, setState] = useState<{ status: 'idle' | 'loading' } | { status: 'error'; message: string } | { status: 'done'; decoded: DecodedOffer }>({
     status: 'idle',
@@ -34,14 +44,8 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
     e.preventDefault();
     setState({ status: 'loading' });
     try {
-      const res = await fetch('/api/decode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      const data = (await res.json()) as { decoded?: DecodedOffer; error?: string };
-      if (!res.ok || !data.decoded) throw new Error(data.error ?? 'La traduction a échoué.');
-      setState({ status: 'done', decoded: data.decoded });
+      const decoded = await requestDecode({ text });
+      setState({ status: 'done', decoded });
       window.scrollTo({ top: 0 });
     } catch (error) {
       setState({ status: 'error', message: (error as Error).message });
@@ -96,7 +100,13 @@ export function DecoderView({ aiEnabled, examples }: { aiEnabled: boolean; examp
               {state.message}
             </p>
           )}
-          <p className="panel__note">Traduit par une IA, rien n’est gardé.</p>
+          {provider && (
+            <p className="panel__note">
+              Le texte est envoyé à un fournisseur d’IA ({provider.name}). N’y mets jamais tes coordonnées.
+              {provider.freeTier && ' Avec l’offre gratuite du fournisseur, ce texte peut servir à améliorer ses modèles.'} Décode ne
+              garde pas ce texte, mais le fournisseur le traite.
+            </p>
+          )}
         </form>
 
         <section className="panel decoder__examples" aria-labelledby="examples-title">

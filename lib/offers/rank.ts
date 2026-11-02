@@ -5,8 +5,8 @@
 // Une offre d'il y a un mois passe derrière une offre correcte du jour.
 
 import { SMIC } from '@/lib/rules/reference';
-import { CAC40, isCac40 } from './companies';
-import { normalizeText } from './normalize';
+import { CAC40, CAC40_FOLDED, cac40Group, isCac40 } from './companies';
+import { companyKey, normalizeText } from './normalize';
 import type { Offer } from './types';
 
 export type OfferSort = 'top' | 'recent' | 'salary' | 'reviews';
@@ -67,9 +67,15 @@ export function attractiveness(
 
 /**
  * Trie les offres. Salaire et avis : les offres sans montant ou sans note passent après les autres,
- * elles-mêmes rangées des plus attirantes aux moins attirantes.
+ * elles-mêmes rangées des plus attirantes aux moins attirantes. « Les plus attirantes » applique en plus
+ * le plafond par employeur sur chaque page de `pageSize` offres (capPerEmployer).
  */
-export function sortOffers<T extends Offer>(offers: T[], sort: OfferSort = 'top', ratingOf?: RatingOf): T[] {
+export function sortOffers<T extends Offer>(offers: T[], sort: OfferSort = 'top', ratingOf?: RatingOf, pageSize = 20): T[] {
+  if (sort === 'top') return capPerEmployer(rankOffers(offers, sort, ratingOf), EMPLOYER_CAP.perPage, pageSize);
+  return rankOffers(offers, sort, ratingOf);
+}
+
+function rankOffers<T extends Offer>(offers: T[], sort: OfferSort, ratingOf?: RatingOf): T[] {
   if (sort === 'recent') return [...offers].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   const now = Date.now();
   const key = (o: T): number | null =>
@@ -104,6 +110,67 @@ export function diversify<T extends Pick<Offer, 'company'>>(offers: T[], head = 
   }
   return [...top, ...later];
 }
+
+/**
+ * Plafond par employeur dans le tri « Les plus attirantes » : au plus `perPage` offres d'un même employeur sur
+ * chaque page, les suivantes repoussées à la page d'après. Sur l'accueil, une seule offre par employeur.
+ * Les offres sponsorisées ont leurs propres règles (lib/sponsors/match.ts) et ne comptent pas ici.
+ */
+export const EMPLOYER_CAP = { perPage: 2, home: 1 } as const;
+
+/**
+ * Range les offres page par page : sur chaque page de `pageSize`, au plus `cap` offres d'un même employeur ;
+ * celles qui dépassent passent en tête de la page suivante, dans leur ordre. S'il ne reste pas assez
+ * d'employeurs différents pour remplir une page, elle est complétée dans l'ordre, sans laisser de trou.
+ * Une offre sans employeur nommé n'est jamais plafonnée.
+ */
+/** Qui est l'employeur : le groupe pour une filiale du CAC 40 (Capgemini Invent compte comme Capgemini), sinon son nom réduit. */
+export function employerKey(company: string | null | undefined): string {
+  return cac40Group(company) ?? companyKey(company);
+}
+
+export function capPerEmployer<T extends Pick<Offer, 'company'>>(offers: T[], cap: number = EMPLOYER_CAP.perPage, pageSize = 20): T[] {
+  const out: T[] = [];
+  let queue = offers;
+  while (queue.length > 0) {
+    const page: T[] = [];
+    const rest: T[] = [];
+    const counts = new Map<string, number>();
+    for (const o of queue) {
+      const key = employerKey(o.company);
+      const n = key ? (counts.get(key) ?? 0) : 0;
+      if (page.length < pageSize && (!key || n < cap)) {
+        page.push(o);
+        if (key) counts.set(key, n + 1);
+      } else rest.push(o);
+    }
+    while (page.length < pageSize && rest.length > 0) page.push(rest.shift()!);
+    out.push(...page);
+    queue = rest;
+  }
+  return out;
+}
+
+/** Une seule offre par employeur (l'accueil) : la première de chacun, dans l'ordre. */
+export function onePerEmployer<T extends Pick<Offer, 'company'>>(offers: T[], cap: number = EMPLOYER_CAP.home): T[] {
+  const counts = new Map<string, number>();
+  return offers.filter((o) => {
+    const key = employerKey(o.company);
+    if (!key) return true;
+    const n = counts.get(key) ?? 0;
+    counts.set(key, n + 1);
+    return n < cap;
+  });
+}
+
+/**
+ * La même clé d'employeur en SQL : le groupe du CAC 40 s'il y en a un, sinon le nom sans forme juridique ni
+ * ponctuation ; une offre sans employeur forme son propre groupe (jamais plafonnée).
+ */
+export const EMPLOYER_KEY_SQL = {
+  generic: '\\m(sas|sasu|sa|sarl|se|group|groupe|france|holding|international|services)\\M',
+  cac40: `^(${CAC40_FOLDED.join('|')})( |$)`,
+};
 
 /** Postgres ne replie pas toujours la casse des lettres accentuées : « SÉCURITÉ » doit aussi correspondre. */
 function withUpperAccents(pattern: string): string {

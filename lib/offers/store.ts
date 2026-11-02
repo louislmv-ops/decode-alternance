@@ -10,7 +10,7 @@ import { boundingBox } from '@/lib/geo';
 import type { DiplomaLevel } from '@/lib/rules/employer';
 import { SMIC } from '@/lib/rules/reference';
 import { PAGE_SIZE } from './filter';
-import { CAC40_SQL, LOW_ROLE_SQL, STRONG_ROLE_SQL } from './rank';
+import { CAC40_SQL, EMPLOYER_CAP, EMPLOYER_KEY_SQL, LOW_ROLE_SQL, STRONG_ROLE_SQL } from './rank';
 import type { CompanySizeTag, GeoPrecision, Offer, OfferContract, OfferFilters, OfferPage, OfferSource } from './types';
 
 let sql: postgres.Sql | null = null;
@@ -263,13 +263,35 @@ async function searchWith(filters: OfferFilters, tsQuery: string | null, relaxed
               s`(to_tsvector('french', decode_fold(title)) @@ ${query}) desc, ${TOP_ORDER(s)}`
             : TOP_ORDER(s);
   const distance = near ? s`, case when lat is null then null else ${DISTANCE(s, near)} end as distance_km` : s``;
+  const titleHit = query && !relaxed ? s`(to_tsvector('french', decode_fold(title)) @@ ${query})` : s`true`;
+  const within = query && relaxed ? s`ts_rank(search_doc, ${query}) desc, ${TOP_ORDER(s)}` : TOP_ORDER(s);
 
   const [rows, count] = await Promise.all([
-    s<OfferRow[]>`select *${distance} from offers_unique where ${where} order by ${sorted} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
+    (filters.sort ?? 'top') === 'top'
+      ? // « Les plus attirantes » avec le plafond par employeur. Chaque offre reçoit son rang chez son employeur ;
+        // on trie par tranche de rang (les deux meilleures de chaque employeur, puis les deux suivantes…), puis
+        // par score. Une page tirée d'une seule tranche a au plus EMPLOYER_CAP.perPage offres d'un employeur ;
+        // seule la page où l'on passe d'une tranche à la suivante peut en avoir davantage. Avec une recherche,
+        // le métier dans l'intitulé passe toujours avant, et le plafond joue à l'intérieur de chaque groupe.
+        s<OfferRow[]>`select * from (
+          select *${distance}, ${titleHit} as title_hit,
+            row_number() over (partition by ${titleHit}, ${EMPLOYER_KEY(s)} order by ${within}) as employer_rank
+          from offers_unique where ${where}
+        ) ranked
+        order by title_hit desc, (employer_rank - 1) / ${EMPLOYER_CAP.perPage}, ${within}
+        limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`
+      : s<OfferRow[]>`select *${distance} from offers_unique where ${where} order by ${sorted} limit ${PAGE_SIZE} offset ${(page - 1) * PAGE_SIZE}`,
     s<{ n: number }[]>`select count(*)::int as n from offers_unique where ${where}`,
   ]);
   return { offers: rows.map(toOffer), total: count[0]?.n ?? 0, page, pageSize: PAGE_SIZE, mode: 'base' };
 }
+
+/** L'employeur d'une offre en SQL, comme employerKey (lib/offers/rank.ts). */
+const EMPLOYER_KEY = (s: ReturnType<typeof db>) => s`coalesce(
+    substring(trim(regexp_replace(decode_fold(coalesce(company, '')), '[^a-z0-9]+', ' ', 'g')) from ${EMPLOYER_KEY_SQL.cac40}),
+    nullif(regexp_replace(regexp_replace(trim(regexp_replace(decode_fold(coalesce(company, '')), '[^a-z0-9]+', ' ', 'g')), ${EMPLOYER_KEY_SQL.generic}, '', 'g'), ' ', '', 'g'), ''),
+    id
+  )`;
 
 export async function getOffer(id: string): Promise<Offer | null> {
   const s = db();

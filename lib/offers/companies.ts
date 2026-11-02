@@ -70,6 +70,16 @@ export function isCac40(company: string | null | undefined): boolean {
   return CAC40_NAMES.some((n) => name === n || name.startsWith(`${n} `));
 }
 
+/** Le groupe du CAC 40 de l'employeur, nom replié (« capgemini » pour « Capgemini Engineering »), ou null. */
+export function cac40Group(company: string | null | undefined): string | null {
+  if (!company) return null;
+  const name = fold(company);
+  return CAC40_NAMES.find((n) => name === n || name.startsWith(`${n} `)) ?? null;
+}
+
+/** Les noms repliés des groupes du CAC 40, pour reconnaître le groupe en SQL. */
+export const CAC40_FOLDED = CAC40_NAMES;
+
 /** Les sites prêts à être lus : ceux dont l'adresse a été vérifiée. */
 export function careerSites(): CareerSite[] {
   return CAC40.filter((c): c is Cac40Entry & { careersUrl: string } => Boolean(c.careersUrl)).map((c) => ({

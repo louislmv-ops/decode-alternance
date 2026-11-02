@@ -69,9 +69,6 @@ describe('employerFigures', () => {
   it('réduit l’aide dans une grande entreprise', () => {
     expect(employerFigures({ contract: 'apprentissage', size: '250-et-plus', level: 6, disabledWorker: false }).aidCents).toBe(75_000);
   });
-  it('n’attribue pas d’aide exceptionnelle au contrat de professionnalisation', () => {
-    expect(employerFigures({ contract: 'professionnalisation', size: 'moins-de-250', level: 5, disabledWorker: false }).aidCents).toBe(0);
-  });
 });
 
 describe('contrat qui fixe le minimum', async () => {

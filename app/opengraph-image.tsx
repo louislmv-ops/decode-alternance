@@ -45,7 +45,7 @@ export default async function OpengraphImage() {
             </div>
           </div>
           <div style={{ display: 'flex', marginTop: 32, fontSize: 34, fontWeight: 400, color: '#3a3a3c' }}>
-            Les offres traduites, ton salaire calculé, les pièges écartés.
+            Les offres traduites, ton salaire calculé, les fausses offres d’écoles écartées.
           </div>
         </div>
       </div>

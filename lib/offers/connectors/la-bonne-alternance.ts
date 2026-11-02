@@ -160,6 +160,6 @@ export function pageOf(
   ratingOf?: RatingOf,
 ): { offers: Offer[]; total: number } {
   const matching = q ? offers.filter((o) => matchesQuery(`${o.title} ${o.company ?? ''} ${o.city ?? ''} ${o.description.slice(0, 600)}`, q)) : offers;
-  const sorted = sortOffers(matching, sort, ratingOf);
+  const sorted = sortOffers(matching, sort, ratingOf, perPage);
   return { offers: sorted.slice((page - 1) * perPage, page * perPage), total: sorted.length };
 }
