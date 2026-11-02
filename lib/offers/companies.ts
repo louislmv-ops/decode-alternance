@@ -1,9 +1,9 @@
 // Les entreprises du CAC 40 dont on lit le site carrière directement.
 //
 // La composition de l'indice change chaque trimestre : vérifier la liste sur euronext.com avant de lancer
-// une collecte. `careersUrl` est vide tant que l'adresse n'a pas été vérifiée à la main : ouvrir le site,
-// confirmer qu'il publie ses offres avec le balisage JobPosting (`pnpm ingest --site <url>` le dit),
-// puis renseigner l'adresse. Un site non renseigné est simplement ignoré.
+// une collecte. `careersUrl` n'est renseigné qu'après vérification : le workflow « Sites carrière »
+// (scripts/career-candidates.json) dit quelles adresses donnent des offres d'alternance avec le balisage
+// JobPosting. Vérifiées le 2 novembre 2026. Un site non renseigné est simplement ignoré.
 
 import type { CareerSite } from './connectors/job-posting';
 
@@ -13,11 +13,11 @@ interface Cac40Entry {
 }
 
 export const CAC40: Cac40Entry[] = [
-  { company: 'Accor', careersUrl: null },
+  { company: 'Accor', careersUrl: 'https://careers.accor.com' },
   { company: 'Air Liquide', careersUrl: null },
   { company: 'Airbus', careersUrl: null },
   { company: 'ArcelorMittal', careersUrl: null },
-  { company: 'AXA', careersUrl: null },
+  { company: 'AXA', careersUrl: 'https://recrutement.axa.fr' },
   { company: 'BNP Paribas', careersUrl: null },
   { company: 'Bouygues', careersUrl: null },
   { company: 'Bureau Veritas', careersUrl: null },
@@ -25,7 +25,7 @@ export const CAC40: Cac40Entry[] = [
   { company: 'Carrefour', careersUrl: null },
   { company: 'Crédit Agricole', careersUrl: null },
   { company: 'Danone', careersUrl: null },
-  { company: 'Dassault Systèmes', careersUrl: null },
+  { company: 'Dassault Systèmes', careersUrl: 'https://www.3ds.com/careers' },
   { company: 'Edenred', careersUrl: null },
   { company: 'Engie', careersUrl: null },
   { company: 'EssilorLuxottica', careersUrl: null },
@@ -33,25 +33,25 @@ export const CAC40: Cac40Entry[] = [
   { company: 'Hermès', careersUrl: null },
   { company: 'Kering', careersUrl: null },
   { company: 'Legrand', careersUrl: null },
-  { company: 'L’Oréal', careersUrl: null },
+  { company: 'L’Oréal', careersUrl: 'https://careers.loreal.com' },
   { company: 'LVMH', careersUrl: null },
   { company: 'Michelin', careersUrl: null },
-  { company: 'Orange', careersUrl: null },
+  { company: 'Orange', careersUrl: 'https://orange.jobs' },
   { company: 'Pernod Ricard', careersUrl: null },
   { company: 'Publicis', careersUrl: null },
   { company: 'Renault', careersUrl: null },
   { company: 'Safran', careersUrl: null },
   { company: 'Saint-Gobain', careersUrl: null },
-  { company: 'Sanofi', careersUrl: null },
+  { company: 'Sanofi', careersUrl: 'https://jobs.sanofi.com' },
   { company: 'Schneider Electric', careersUrl: null },
   { company: 'Société Générale', careersUrl: null },
   { company: 'Stellantis', careersUrl: null },
   { company: 'STMicroelectronics', careersUrl: null },
-  { company: 'Thales', careersUrl: null },
+  { company: 'Thales', careersUrl: 'https://careers.thalesgroup.com' },
   { company: 'TotalEnergies', careersUrl: null },
   { company: 'Unibail-Rodamco-Westfield', careersUrl: null },
-  { company: 'Veolia', careersUrl: null },
-  { company: 'Vinci', careersUrl: null },
+  { company: 'Veolia', careersUrl: 'https://jobs.veolia.com' },
+  { company: 'Vinci', careersUrl: 'https://jobs.vinci.com' },
 ];
 
 const fold = (s: string) =>
@@ -80,9 +80,12 @@ export function cac40Group(company: string | null | undefined): string | null {
 /** Les noms repliés des groupes du CAC 40, pour reconnaître le groupe en SQL. */
 export const CAC40_FOLDED = CAC40_NAMES;
 
+/** Grands recruteurs d'alternants hors CAC 40 dont le site carrière a été vérifié de la même façon. */
+const OTHER_CAREER_SITES: { company: string; careersUrl: string }[] = [{ company: 'Decathlon', careersUrl: 'https://joinus.decathlon.fr' }];
+
 /** Les sites prêts à être lus : ceux dont l'adresse a été vérifiée. */
 export function careerSites(): CareerSite[] {
-  return CAC40.filter((c): c is Cac40Entry & { careersUrl: string } => Boolean(c.careersUrl)).map((c) => ({
+  return [...CAC40.filter((c): c is Cac40Entry & { careersUrl: string } => Boolean(c.careersUrl)), ...OTHER_CAREER_SITES].map((c) => ({
     company: c.company,
     careersUrl: c.careersUrl,
     size: 'grande',

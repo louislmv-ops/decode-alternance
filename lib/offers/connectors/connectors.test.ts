@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isAllowed, parseRobots } from './http';
-import { extractJobPostings, jobPostingToOffer } from './job-posting';
+import { extractJobPostings, inFrance, jobPostingToOffer } from './job-posting';
 
 const site = { company: 'Groupe Exemple', careersUrl: 'https://carrieres.exemple.fr', size: 'grande' as const };
 
@@ -61,5 +61,15 @@ Sitemap: https://carrieres.exemple.fr/sitemap-jobs.xml
   it('préfère le groupe qui nomme notre robot', () => {
     const specific = parseRobots('User-agent: *\nDisallow:\n\nUser-agent: DecodeBot\nDisallow: /');
     expect(isAllowed(specific, 'https://x.fr/page')).toBe(false);
+  });
+});
+
+describe('sites carrière : seulement la France', () => {
+  it('écarte une offre dont le pays n’est pas la France', () => {
+    expect(inFrance('FR')).toBe(true);
+    expect(inFrance({ name: 'France' })).toBe(true);
+    expect(inFrance(undefined)).toBe(true);
+    expect(inFrance('DE')).toBe(false);
+    expect(inFrance({ name: 'Singapore' })).toBe(false);
   });
 });
