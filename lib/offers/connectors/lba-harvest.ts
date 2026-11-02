@@ -1,13 +1,17 @@
 // Collecte complète de La bonne alternance, pour la base : chaque département, chaque niveau de diplôme,
 // et, quand une recherche touche le plafond de l'API (150 offres par source, 450 en tout), un nouveau
-// découpage par métier (codes ROME vus dans le département). Un appel toutes les 1,2 seconde : 50 par
+// découpage par métier (codes ROME vus dans le département). Le plafond se repère source par source :
+// une source coupée à 150 pendant que les autres en renvoient peu passait inaperçue avec le seul total. Un appel toutes les 1,2 seconde : 50 par
 // minute, sous la limite de 60. Compter 15 à 30 minutes pour toute la France.
 
 import type { Offer } from '../types';
-import { fetchLba, type LbaQuery, lbaQueries } from './la-bonne-alternance';
+import { fetchLbaPage, type LbaQuery, lbaQueries } from './la-bonne-alternance';
 
-/** Au-delà, la recherche a sans doute été coupée par le plafond : on la redécoupe. */
+/** Au-delà en tout, la recherche a sans doute été coupée par le plafond : on la redécoupe. */
 export const NEAR_CAP = 400;
+
+/** Ce que renvoie un appel : les offres, et si une source a touché son plafond (inconnu : on se fie au total). */
+type Page = Offer[] | { offers: Offer[]; capped: boolean };
 const ROMES_PER_CALL = 15;
 
 export interface LbaHarvestReport {
@@ -23,21 +27,24 @@ export async function harvestLba(opts: {
   log?: (line: string) => void;
   /** Pause entre deux appels, en millisecondes (1 200 par défaut ; 0 dans les tests). */
   spacingMs?: number;
-  fetcher?: (q: LbaQuery) => Promise<Offer[]>;
+  fetcher?: (q: LbaQuery) => Promise<Page>;
 }): Promise<LbaHarvestReport> {
   const log = opts.log ?? console.log;
-  const fetcher = opts.fetcher ?? fetchLba;
+  const fetcher = opts.fetcher ?? fetchLbaPage;
   const spacing = opts.spacingMs ?? 1200;
   const report: LbaHarvestReport = { fetched: 0, calls: 0, stillTruncated: [] };
   let last = 0;
 
-  const call = async (q: LbaQuery): Promise<Offer[] | null> => {
+  const call = async (q: LbaQuery): Promise<{ offers: Offer[]; capped: boolean } | null> => {
     const wait = last + spacing - Date.now();
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     last = Date.now();
     report.calls += 1;
     try {
-      return await fetcher(q);
+      const page = await fetcher(q);
+      const offers = Array.isArray(page) ? page : page.offers;
+      const capped = (!Array.isArray(page) && page.capped) || offers.length >= NEAR_CAP;
+      return { offers, capped };
     } catch (error) {
       log(`La bonne alternance : échec ${JSON.stringify(q)} (${(error as Error).message})`);
       return null;
@@ -48,10 +55,10 @@ export async function harvestLba(opts: {
     const byId = new Map<string, Offer>();
     const truncated: LbaQuery[] = [];
     for (const q of lbaQueries(dep, [])) {
-      const offers = await call(q);
-      if (!offers) continue;
-      for (const o of offers) byId.set(o.id, o);
-      if (offers.length >= NEAR_CAP) truncated.push(q);
+      const page = await call(q);
+      if (!page) continue;
+      for (const o of page.offers) byId.set(o.id, o);
+      if (page.capped) truncated.push(q);
     }
     // Une recherche coupée : on la refait métier par métier, avec les codes ROME vus dans le département.
     if (truncated.length > 0) {
@@ -59,10 +66,10 @@ export async function harvestLba(opts: {
       for (const q of truncated) {
         for (let i = 0; i < romes.length; i += ROMES_PER_CALL) {
           const sub = { ...q, romes: romes.slice(i, i + ROMES_PER_CALL) };
-          const offers = await call(sub);
-          if (!offers) continue;
-          for (const o of offers) byId.set(o.id, o);
-          if (offers.length >= NEAR_CAP) report.stillTruncated.push(`${dep}${q.level ? ` niveau ${q.level}` : ''} ${sub.romes.join(',')}`);
+          const page = await call(sub);
+          if (!page) continue;
+          for (const o of page.offers) byId.set(o.id, o);
+          if (page.capped) report.stillTruncated.push(`${dep}${q.level ? ` niveau ${q.level}` : ''} ${sub.romes.join(',')}`);
         }
       }
     }
