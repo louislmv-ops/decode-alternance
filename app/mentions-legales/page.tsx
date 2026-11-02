@@ -81,8 +81,8 @@ export default function LegalPage() {
             jamais en base, et elle est effacée à son redémarrage. L’hébergeur tient ses propres journaux techniques. Base légale : l’intérêt légitime de protéger le service.
           </li>
           <li>
-            <strong>Décode Pro</strong>, si tu t’abonnes : le paiement est traité par Stripe ; Décode ne voit jamais ton numéro de carte.
-            Les factures sont gardées le temps imposé par la loi.
+            <strong>La mise en avant payante</strong>, pour les entreprises qui s’abonnent : le paiement est traité par Stripe ; Décode ne
+            voit jamais le numéro de carte. Les factures sont gardées le temps imposé par la loi.
           </li>
         </ul>
         <p>Supprimer ton compte depuis Mon compte efface aussi ton CV, tes avis, tes salaires déposés, ton profil de la commu et tes messages.</p>
@@ -97,7 +97,7 @@ export default function LegalPage() {
               ' Avec l’offre gratuite de ce fournisseur, le texte envoyé peut servir à améliorer ses modèles : n’y colle jamais tes coordonnées. Ton CV n’est jamais envoyé à une IA gratuite.'}
           </li>
           <li>Resend (envoi des e-mails) et Brevo (envoi des SMS), seulement si tu actives ces alertes.</li>
-          <li>Stripe (paiement de Décode Pro), seulement si tu t’abonnes.</li>
+          <li>Stripe (paiement de la mise en avant), seulement pour les entreprises abonnées.</li>
         </ul>
         <p>
           Tes données ne sont ni vendues ni transmises à des recruteurs : c’est toi qui postules, sur le site de l’offre. Plusieurs de ces

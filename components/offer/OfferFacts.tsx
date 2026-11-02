@@ -41,7 +41,7 @@ export function OfferFacts({
                 : e.source === 'alternants'
                   ? `${shown.word} · d’après ${e.count} alternants`
                   : e.source === 'entreprise'
-                    ? `${shown.word} · ses autres offres affichent ${formatEuros(e.cents, 0)}`
+                    ? `${shown.word} · ses autres offres affichent ${formatEuros(e.cents, 0)} en médiane`
                     : 'Non précisé dans l’annonce'}
           </span>
         </dd>

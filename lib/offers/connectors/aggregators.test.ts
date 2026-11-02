@@ -25,6 +25,21 @@ describe('Adzuna', () => {
     expect(offer?.salaryMonthlyCents).toBe(130_000);
   });
 
+  it('garde la fourchette écrite, sans supposer brut ou net', () => {
+    const offer = adzunaToOffer({
+      id: 7,
+      title: 'Alternance chargé de communication',
+      redirect_url: 'https://www.adzuna.fr/land/ad/7',
+      created: '2026-10-20T10:00:00Z',
+      salary_min: 15600,
+      salary_max: 19200,
+      salary_is_predicted: 0,
+    });
+    expect(offer?.salaryMonthlyCents).toBe(130_000);
+    expect(offer?.salaryMaxCents).toBe(160_000);
+    expect(offer?.salaryText).toBe('Salaire indiqué sur Adzuna : 15\u202f600 à 19\u202f200 € par an');
+  });
+
   it('ignore un salaire estimé par Adzuna et une offre qui n’est pas de l’alternance', () => {
     const base = { id: 1, redirect_url: 'https://www.adzuna.fr/land/ad/1', created: '2026-10-20T10:00:00Z' };
     expect(adzunaToOffer({ ...base, title: 'Alternance comptable', salary_min: 30000, salary_is_predicted: '1' })?.salaryMonthlyCents).toBeNull();

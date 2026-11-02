@@ -23,6 +23,7 @@ export interface AdzunaJob {
   company?: { display_name?: string };
   location?: { display_name?: string; area?: string[] };
   salary_min?: number;
+  salary_max?: number;
   salary_is_predicted?: string | number;
   latitude?: number;
   longitude?: number;
@@ -33,9 +34,16 @@ export function adzunaToOffer(job: AdzunaJob, department: string | null = null):
   const description = htmlToText(job.description ?? '');
   const area = job.location?.area ?? [];
   const city = area.length > 0 ? area[area.length - 1]! : (job.location?.display_name?.split(',')[0]?.trim() ?? null);
-  // Adzuna estime parfois le salaire : on ne garde que celui écrit dans l'annonce. Il est annuel.
-  const announced = job.salary_min && String(job.salary_is_predicted) !== '1' ? job.salary_min : null;
-  const monthly = announced ? plausibleMonthly((announced > 6000 ? announced / 12 : announced) * 100) : null;
+  // Adzuna estime parfois le salaire : on ne garde que celui écrit dans l'annonce, fourchette comprise.
+  // Il est le plus souvent annuel ; un montant de 6 000 ou moins ne peut être qu'un salaire mensuel.
+  const written = String(job.salary_is_predicted) !== '1';
+  const low = written && job.salary_min ? job.salary_min : null;
+  const high = written && job.salary_max && low && job.salary_max > low ? job.salary_max : null;
+  const yearly = low !== null && low > 6000;
+  const toMonthly = (v: number) => plausibleMonthly((yearly ? v / 12 : v) * 100);
+  const monthly = low ? toMonthly(low) : null;
+  const monthlyMax = monthly && high ? toMonthly(high) : null;
+  const shown = (v: number) => Math.round(v).toLocaleString('fr-FR');
   return aggregatorOffer({
     source: 'adzuna',
     sourceId: String(job.id),
@@ -45,8 +53,12 @@ export function adzunaToOffer(job: AdzunaJob, department: string | null = null):
     city,
     department: departmentFromPlace([...area.slice(2).reverse(), job.location?.display_name]) ?? department,
     description,
-    salaryText: monthly ? `${Math.round(monthly / 100)} € brut par mois` : null,
+    // Le salaire tel qu'Adzuna le donne, sans supposer brut ou net.
+    salaryText: monthly
+      ? `Salaire indiqué sur Adzuna : ${monthlyMax ? `${shown(low!)} à ${shown(high!)}` : shown(low!)} € par ${yearly ? 'an' : 'mois'}`
+      : null,
     salaryMonthlyCents: monthly ?? salaryFromDescription(description),
+    salaryMaxCents: monthly ? monthlyMax : null,
     publishedAt: job.created ?? '',
     lat: typeof job.latitude === 'number' ? job.latitude : null,
     lon: typeof job.longitude === 'number' ? job.longitude : null,

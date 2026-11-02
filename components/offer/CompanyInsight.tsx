@@ -48,7 +48,7 @@ export function CompanyInsight({ company, context }: { company: string; context:
             <li key={j.jobTitle}>
               <span>{j.jobTitle}</span>
               <span className="num">
-                {j.medianCents !== null ? formatEuros(j.medianCents, 0) : '–'} <small>touchés en vrai, {j.count} alternants</small>
+                {j.medianCents !== null ? formatEuros(j.medianCents, 0) : '–'} <small>en médiane, déclaré par {j.count} alternants</small>
               </span>
             </li>
           ))}
