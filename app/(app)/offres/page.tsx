@@ -9,6 +9,7 @@ import { offerHref } from '@/lib/offers/link';
 import { CampaignStrip } from '@/components/campaigns/CampaignStrip';
 import { Emoji } from '@/components/Emoji';
 import { AutoSubmit } from '@/components/offer/AutoSubmit';
+import { Track } from '@/components/consent/Track';
 import { ForYou } from '@/components/offer/ForYou';
 import { LocationPrompt } from '@/components/offer/LocationPrompt';
 import { MoreFilters } from '@/components/offer/MoreFilters';
@@ -30,7 +31,6 @@ import { Mascotte } from '@/components/Mascotte';
 /** Les sources à citer sous la liste, comme leurs conditions le demandent. */
 const VIA = [
   { source: 'la-bonne-alternance', label: 'La bonne alternance', href: 'https://labonnealternance.apprentissage.beta.gouv.fr' },
-  { source: 'france-travail', label: 'France Travail', href: 'https://www.francetravail.fr' },
   { source: 'adzuna', label: 'Adzuna', href: 'https://www.adzuna.fr' },
   { source: 'jooble', label: 'Jooble', href: 'https://fr.jooble.org' },
 ] as const;
@@ -146,6 +146,19 @@ export default async function OffersPage({ searchParams }: { searchParams: Promi
         </div>
       </form>
       <AutoSubmit formId="osearch" />
+      <Track
+        event="search_performed"
+        props={{
+          q: filters.q?.slice(0, 80) ?? null,
+          departments: filters.departments ?? [],
+          near: Boolean(filters.near),
+          filters: Object.keys(params).filter((k) => !['q', 'page'].includes(k)),
+          sort: filters.sort ?? 'top',
+          page: result.page,
+          results: result.total,
+          mode: result.mode,
+        }}
+      />
 
       {askPlace ? <LocationPrompt /> : <ForYou />}
 

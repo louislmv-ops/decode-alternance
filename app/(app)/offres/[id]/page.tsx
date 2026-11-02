@@ -12,6 +12,7 @@ import { BackLink } from '@/components/BackLink';
 import { InterviewPrep } from '@/components/pro/InterviewPrep';
 import { isAccountsConfigured } from '@/lib/account/store';
 import { UndecodedOffer } from '@/components/offer/DecodeButton';
+import { Track } from '@/components/consent/Track';
 import { findOffer, withEmployerPay } from '@/lib/offers/repository';
 import { payContext } from '@/lib/offers/pay-context';
 import { isTrustedSourceLink } from '@/lib/offers/link';
@@ -115,6 +116,17 @@ export default async function OfferPage({ params, searchParams }: Props) {
       </div>
       {/* La traduction par l'IA n'est jamais rendue côté serveur : chargée par le navigateur (et jamais pour un robot), elle n'est pas indexée. */}
       <UndecodedOffer offer={meta} description={offer.description} />
+      <Track
+        event="offer_viewed"
+        props={{
+          offer_id: offer.id,
+          source: offer.source,
+          company: offer.company,
+          contract: offer.contract,
+          has_salary: offer.salaryMonthlyCents !== null,
+          example: offer.source === 'exemple',
+        }}
+      />
       {offer.source !== 'exemple' && isAccountsConfigured() && <InterviewPrep offerId={offer.id} />}
     </>
   );

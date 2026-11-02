@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Conditions de vente de la mise en av
 
 const LEGAL = {
   editor: legalEditor() ?? '[NOM OU RAISON SOCIALE]',
-  address: legalAddress() ?? '[ADRESSE]',
+  address: legalAddress(),
   siren: legalSiren() ?? '[NUMÉRO SIREN]',
   contact: contactEmail() ?? '[ADRESSE E-MAIL]',
 };
@@ -19,7 +19,7 @@ export default function SalesTermsPage() {
       <main className="prose-page">
         <h1>Conditions de vente de la mise en avant</h1>
         <p>
-          Vendeur : {LEGAL.editor}, {LEGAL.address}, SIREN {LEGAL.siren}. Contact : {LEGAL.contact}.
+          Vendeur : {[LEGAL.editor, LEGAL.address, `SIREN ${LEGAL.siren}`].filter(Boolean).join(', ')}. Contact : {LEGAL.contact}.
         </p>
         <p>
           Décode est gratuit pour les alternants : rien ne leur est vendu. Seules les entreprises peuvent acheter la mise en avant, dans le

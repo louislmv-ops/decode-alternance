@@ -3,14 +3,13 @@ import type { RemotePolicy } from './details';
 import type { OfferSort } from './rank';
 
 /** D'où vient une offre. L'ordre de `SOURCE_PRIORITY` décide laquelle garder quand une offre est publiée deux fois. */
-export type OfferSource = 'site-carriere' | 'france-travail' | 'la-bonne-alternance' | 'adzuna' | 'jooble' | 'exemple';
+export type OfferSource = 'site-carriere' | 'la-bonne-alternance' | 'adzuna' | 'jooble' | 'exemple';
 
 // Les agrégateurs passent en dernier : ils reprennent des offres publiées ailleurs.
-export const SOURCE_PRIORITY: OfferSource[] = ['site-carriere', 'france-travail', 'la-bonne-alternance', 'adzuna', 'jooble', 'exemple'];
+export const SOURCE_PRIORITY: OfferSource[] = ['site-carriere', 'la-bonne-alternance', 'adzuna', 'jooble', 'exemple'];
 
 export const SOURCE_LABELS: Record<OfferSource, string> = {
   'site-carriere': 'Site carrière de l’entreprise',
-  'france-travail': 'France Travail',
   'la-bonne-alternance': 'La bonne alternance',
   adzuna: 'Adzuna',
   jooble: 'Jooble',

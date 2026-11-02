@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Mascotte } from '@/components/Mascotte';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/JsonLd';
 import { OfferRow } from '@/components/offer/OfferRow';
@@ -204,9 +205,12 @@ export default async function LandingPage({ params }: Props) {
             ))}
           </ul>
         ) : (
-          <p className="land__empty">
-            Aucune offre en ce moment. <Link href={searchHref}>Élargis la recherche</Link>.
-          </p>
+          <div className="empty">
+            <Mascotte pose="pense" size={112} className="empty__mascotte" />
+            <p>
+              Aucune offre en ce moment. <Link href={searchHref}>Élargis la recherche</Link>.
+            </p>
+          </div>
         )}
         <p className="land__more">
           <Link href={searchHref} className="ui-btn ui-btn--primary">

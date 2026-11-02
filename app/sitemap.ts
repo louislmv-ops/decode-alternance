@@ -18,13 +18,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['/aides', 0.7],
     ['/alternance', 0.8],
     ['/mentions-legales', 0.2],
+    ['/confidentialite', 0.2],
   ];
   // Ces pages ont besoin des comptes : sans eux, elles ne montreraient qu'un « bientôt ».
   if (isAccountsConfigured()) {
     pages.push(['/entreprises', 0.8], ['/campagnes', 0.7], ['/communaute', 0.6], ['/pro', 0.6], ['/recruter', 0.5]);
   }
   const now = new Date();
-  const entries: MetadataRoute.Sitemap = pages.map(([path, priority]) => ({ url: `${SITE_URL}${path}`, lastModified: now, changeFrequency: 'daily', priority }));
+  // Une date de modification seulement pour les pages qui changent avec les offres : pour les autres, une date
+  // fausse (« maintenant » à chaque génération) pousse Google à ignorer toutes les dates du sitemap.
+  const LIVE = new Set(['', '/offres', '/alternance', '/entreprises', '/communaute']);
+  const entries: MetadataRoute.Sitemap = pages.map(([path, priority]) => ({
+    url: `${SITE_URL}${path}`,
+    ...(LIVE.has(path) ? { lastModified: now, changeFrequency: 'daily' as const } : {}),
+    priority,
+  }));
   // Les pages « métier + ville » : seulement avec de vraies offres, sinon elles ne montrent que des exemples (et ne sont pas indexées).
   if (hasRealOfferSource()) {
     for (const l of allLandings()) {

@@ -3,6 +3,7 @@ import { DEMO_OFFERS } from '../demo';
 import type { Offer } from '../types';
 import type { LbaQuery } from './la-bonne-alternance';
 import { harvestLba, NEAR_CAP } from './lba-harvest';
+import { lbaCapped, LBA_PER_SOURCE_CAP } from './la-bonne-alternance';
 
 const base = DEMO_OFFERS[0]!;
 const make = (id: string, rome: string): Offer => ({ ...base, id: `la-bonne-alternance:${id}`, source: 'la-bonne-alternance', romeCode: rome });
@@ -26,6 +27,20 @@ describe('collecte complète de La bonne alternance', () => {
     expect(report.stillTruncated).toHaveLength(1);
   });
 
+  it('redécoupe aussi quand une seule source touche son plafond, même loin des 450', async () => {
+    const queries: LbaQuery[] = [];
+    // Sans niveau : 150 offres d'une source (plafond) et 20 d'une autre : 170 en tout, bien sous NEAR_CAP.
+    const fetcher = async (q: LbaQuery) => {
+      queries.push(q);
+      if (q.romes) return { offers: q.romes.map((r) => make(`r-${r}`, r)), capped: false };
+      if (!q.level) return { offers: Array.from({ length: 170 }, (_, i) => make(`b${i}`, 'M1705')), capped: true };
+      return { offers: [], capped: false };
+    };
+    const report = await harvestLba({ departments: ['75'], onBatch: async () => {}, spacingMs: 0, fetcher, log: () => {} });
+    expect(queries.filter((q) => q.romes)).toHaveLength(1);
+    expect(report.stillTruncated).toHaveLength(0);
+  });
+
   it('continue quand un appel échoue', async () => {
     const fetcher = async (q: LbaQuery) => {
       if (q.level === '5') throw new Error('HTTP 500');
@@ -33,5 +48,13 @@ describe('collecte complète de La bonne alternance', () => {
     };
     const report = await harvestLba({ departments: ['69'], onBatch: async () => {}, spacingMs: 0, fetcher, log: () => {} });
     expect(report.fetched).toBe(5);
+  });
+});
+
+describe('plafond par source de La bonne alternance', () => {
+  const job = (label: string) => ({ identifier: { partner_label: label } });
+  it('repère une source arrivée à 150, pas un total de 300 réparti', () => {
+    expect(lbaCapped([...Array.from({ length: LBA_PER_SOURCE_CAP }, () => job('France Travail')), job('La bonne alternance')])).toBe(true);
+    expect(lbaCapped([...Array.from({ length: 149 }, () => job('France Travail')), ...Array.from({ length: 149 }, () => job('Autre'))])).toBe(false);
   });
 });

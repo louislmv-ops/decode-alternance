@@ -83,7 +83,7 @@ export function ApplyKit({ offer }: { offer: { title: string; company: string | 
         {external && (
           <li>
             <span className="apply-kit__n">3</span>
-            <a className="ui-btn ui-btn--primary" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer">
+            <a className="ui-btn ui-btn--primary" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer" data-track="apply_clicked" data-placement="kit">
               Postuler sur le site d’origine
             </a>
           </li>

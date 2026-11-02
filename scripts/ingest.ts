@@ -1,6 +1,6 @@
 // Collecte en ligne de commande.
-//   pnpm ingest                    collecte complète (France Travail + sites carrière renseignés)
-//   pnpm ingest --dep 35,56        seulement ces départements pour France Travail
+//   pnpm ingest                    collecte complète (La bonne alternance + sites carrière + logiciels de recrutement)
+//   pnpm ingest --dep 35,56        seulement ces départements pour La bonne alternance
 //   pnpm ingest --site <url>       teste un site carrière sans rien écrire en base
 //   pnpm ingest --ats lever:qonto  lit un tableau d'un logiciel de recrutement, sans rien écrire en base
 //                                  (Workday : --ats workday:thales.wd3/Careers)

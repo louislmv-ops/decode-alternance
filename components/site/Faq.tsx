@@ -4,9 +4,9 @@ import { faqJsonLd } from '@/lib/seo';
 
 const SOURCES: Record<OfferPage['mode'], string> = {
   exemples:
-    'Pour l’instant, des exemples fictifs. Les vraies offres de France Travail arrivent très vite.',
-  direct: 'De France Travail, à jour. Tu postules sur la page d’origine.',
-  base: 'De France Travail et des sites carrière, à jour chaque nuit.',
+    'Pour l’instant, des exemples fictifs. Les vraies offres arrivent très vite.',
+  direct: 'De La bonne alternance et d’agrégateurs d’offres, à jour. Tu postules sur la page d’origine.',
+  base: 'De La bonne alternance, d’agrégateurs d’offres et des sites carrière des entreprises, à jour chaque nuit.',
 };
 
 const CARDS = [
@@ -23,12 +23,12 @@ const CARDS = [
   {
     tab: 'Données',
     q: 'Qu’est-ce que vous gardez sur moi ?',
-    a: 'Le strict minimum. Ton profil reste sur ton téléphone, sauf si tu crées un compte.',
+    a: 'Le strict minimum. Ton profil reste dans ton navigateur, sauf si tu crées un compte ; seuls ton âge, ton année et ton type de contrat passent par un cookie, pour calculer ton minimum.',
   },
   {
     tab: 'Prix',
     q: 'C’est vraiment gratuit ?',
-    a: 'Oui, entièrement et pour toujours : offres, décodage, alertes, suivi, prépa entretien. Ce sont les entreprises qui financent Décode en mettant certaines offres en avant, toujours marquées « Sponsorisé ».',
+    a: 'Oui : offres, décodage, alertes, suivi et prépa entretien sont gratuits pour les alternants. Ce sont les entreprises qui financent Décode en mettant certaines offres en avant, toujours marquées « Sponsorisé ».',
   },
 ];
 

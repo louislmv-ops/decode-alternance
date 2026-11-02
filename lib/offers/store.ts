@@ -319,7 +319,7 @@ export async function sitemapOffers(limit = 5000): Promise<{ id: string; publish
   const s = db();
   const rows = await s<{ id: string; published_at: Date }[]>`
     select id, published_at from offers_unique
-    where cardinality(school_flags) = 0 and source in ('france-travail', 'la-bonne-alternance', 'site-carriere')
+    where cardinality(school_flags) = 0 and source in ('la-bonne-alternance', 'site-carriere')
       and published_at > now() - interval '60 days'
     order by published_at desc limit ${limit}`;
   return rows.map((r) => ({ id: r.id, publishedAt: r.published_at }));

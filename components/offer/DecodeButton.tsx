@@ -125,7 +125,7 @@ export function UndecodedOffer({ offer, description }: { offer: OfferMeta; descr
         <div className="panel__head">
           <h2 id="raw-title">L’annonce telle qu’elle est publiée</h2>
           {/^https?:\/\//.test(offer.sourceUrl) && (
-            <a className="panel__link" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer">
+            <a className="panel__link" href={offer.sourceUrl} target="_blank" rel="noopener noreferrer" data-track="apply_clicked" data-offer-id={offer.id} data-placement="annonce">
               Voir sur le site d’origine
             </a>
           )}

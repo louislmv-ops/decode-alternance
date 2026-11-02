@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Mascotte } from '@/components/Mascotte';
 import { useEffect, useState } from 'react';
 import type { CompanyRef } from '@/lib/companies/search';
 
@@ -41,7 +42,12 @@ export function CompanySearch({ initial = '' }: { initial?: string }) {
         aria-label="Chercher une entreprise"
       />
       {error && <p className="c-note c-note--error">{error}</p>}
-      {shown && shown.length === 0 && !error && <p className="c-empty">Aucune entreprise trouvée.</p>}
+      {shown && shown.length === 0 && !error && (
+        <div className="empty">
+          <Mascotte pose="loupe" size={112} className="empty__mascotte" />
+          <p>Aucune entreprise trouvée. Essaie son nom le plus court.</p>
+        </div>
+      )}
       {shown && shown.length > 0 && (
         <ul className="e-results" role="list">
           {shown.map((c) => (

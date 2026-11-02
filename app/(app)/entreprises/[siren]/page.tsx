@@ -116,7 +116,7 @@ export default async function CompanyPageView({ params }: Props) {
                   ))}
                 </ul>
               )}
-              <p className="c-post__meta">{s.count} déclarations</p>
+              <p className="c-post__meta">{s.count} déclarations d’alternants, sans justificatif de paie</p>
             </>
           ) : (
             <p className="c-empty e-empty">

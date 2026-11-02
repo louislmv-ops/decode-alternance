@@ -1,5 +1,5 @@
 // Les sources interrogées en direct à chaque recherche, en plus de la source principale (la base ou
-// France Travail) : La bonne alternance, Adzuna, Jooble. Elles n'ont pas toutes d'adresse pour relire
+// la base) : La bonne alternance, Adzuna, Jooble. Elles n'ont pas toutes d'adresse pour relire
 // une offre seule : celles qu'on a montrées sont gardées en mémoire pour leur fiche.
 
 import { isAdzunaConfigured, searchAdzuna } from './connectors/adzuna';

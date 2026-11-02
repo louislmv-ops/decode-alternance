@@ -122,8 +122,24 @@ export interface LbaQuery {
   romes?: string[];
 }
 
-/** Un appel : l'API renvoie au plus 150 offres par source (450 en tout), d'où le découpage fait par l'appelant. */
-export async function fetchLba(query: LbaQuery = {}): Promise<Offer[]> {
+/** L'API renvoie au plus ce nombre d'offres par source (La bonne alternance, France Travail, partenaires…). */
+export const LBA_PER_SOURCE_CAP = 150;
+
+/**
+ * Une recherche a-t-elle été coupée ? Dès qu'une source atteint son plafond, il manque sans doute des
+ * offres de cette source, même si le total reste loin des 450.
+ */
+export function lbaCapped(jobs: Pick<LbaJob, 'identifier'>[]): boolean {
+  const bySource = new Map<string, number>();
+  for (const job of jobs) {
+    const label = job.identifier?.partner_label ?? 'inconnue';
+    bySource.set(label, (bySource.get(label) ?? 0) + 1);
+  }
+  return [...bySource.values()].some((n) => n >= LBA_PER_SOURCE_CAP);
+}
+
+/** Un appel, et si une de ses sources a touché le plafond (le découpage est fait par l'appelant). */
+export async function fetchLbaPage(query: LbaQuery = {}): Promise<{ offers: Offer[]; capped: boolean }> {
   const params = new URLSearchParams();
   for (const d of query.departements ?? []) params.append('departements', d);
   if (query.level) params.set('target_diploma_level', query.level);
@@ -135,7 +151,13 @@ export async function fetchLba(query: LbaQuery = {}): Promise<Offer[]> {
   if (res.status !== 200) throw new Error(`La bonne alternance : HTTP ${res.status} ${res.text.slice(0, 200)}`);
   const data = JSON.parse(res.text) as { jobs?: LbaJob[]; warnings?: { message: string }[] };
   if (data.warnings?.length) console.warn('La bonne alternance :', data.warnings.map((w) => w.message).join(' · '));
-  return (data.jobs ?? []).map(lbaToOffer).filter((o): o is Offer => o !== null);
+  const jobs = data.jobs ?? [];
+  return { offers: jobs.map(lbaToOffer).filter((o): o is Offer => o !== null), capped: lbaCapped(jobs) };
+}
+
+/** Un appel, les offres seulement. */
+export async function fetchLba(query: LbaQuery = {}): Promise<Offer[]> {
+  return (await fetchLbaPage(query)).offers;
 }
 
 /**

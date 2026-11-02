@@ -3,7 +3,7 @@ import { APPRENTISSAGE_RATES, NO_EMPLOYER_GRACE_MONTHS, PROFESSIONNALISATION_RAT
 
 /** Les pages du site que l'assistant peut conseiller, avec ce qu'on y trouve. */
 const PAGES = [
-  ['/offres', 'les offres d’alternance de France Travail, La bonne alternance, Adzuna, Jooble et des sites carrière, sans les fausses offres d’écoles'],
+  ['/offres', 'les offres d’alternance de La bonne alternance, Adzuna, Jooble et des sites carrière, sans les fausses offres d’écoles'],
   ['/offres/swipe', 'les offres une par une, à garder ou passer'],
   ['/decoder', 'coller n’importe quelle annonce : missions en clair, semaine type, points de vigilance, salaire comparé au minimum, questions à poser'],
   ['/salaire', 'le calcul du salaire minimum selon l’âge, l’année et le contrat'],

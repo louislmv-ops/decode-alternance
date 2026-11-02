@@ -44,7 +44,7 @@ export function faqJsonLd(items: { q: string; a: string }[]) {
 }
 
 /** Sources dont l'annonce est complète : seules celles-là peuvent être déclarées à Google for Jobs. */
-const FULL_TEXT: Offer['source'][] = ['france-travail', 'la-bonne-alternance', 'site-carriere'];
+const FULL_TEXT: Offer['source'][] = ['la-bonne-alternance', 'site-carriere'];
 
 /** L'offre au format JobPosting, ou null quand l'annonce n'est qu'un extrait ou un exemple. */
 export function jobPostingJsonLd(offer: Offer, url: string) {

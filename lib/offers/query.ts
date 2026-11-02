@@ -125,7 +125,7 @@ export function queryTerms(q: string | undefined): string[][] {
   return terms;
 }
 
-/** Pour les sources qui ne prennent qu'une recherche (France Travail, agrégateurs) : la forme la plus courante dans les annonces. */
+/** Pour les sources qui ne prennent qu'une recherche (agrégateurs) : la forme la plus courante dans les annonces. */
 export function canonicalQuery(q: string | undefined): string | undefined {
   if (!q?.trim()) return q;
   const whole = SYNONYMS[normalizeText(q)]?.[0];

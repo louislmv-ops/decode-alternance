@@ -37,21 +37,17 @@ Voir `.env.example`. Les trois qui changent tout :
 | Variable | Sans elle |
 | --- | --- |
 | `ANTHROPIC_API_KEY` | Le bouton « Décoder » est désactivé ; seuls les exemples sont traduits. |
-| `DATABASE_URL` | La page Offres interroge France Travail en direct si ses identifiants sont là, sinon montre les exemples fictifs. |
-| `FRANCE_TRAVAIL_CLIENT_ID` et `_SECRET` | Pas de vraies offres sans base ; la collecte saute France Travail. |
+| `DATABASE_URL` | Sans base, la page Offres interroge les agrégateurs en direct s'ils sont configurés, sinon montre les exemples fictifs. |
+| `LBA_API_TOKEN` | La collecte saute La bonne alternance, la principale source d'offres. |
 
 ## Brancher les vraies offres
 
-Le plus court : créer une application sur francetravail.io abonnée à l’API Offres d’emploi v2, puis mettre `FRANCE_TRAVAIL_CLIENT_ID` et `FRANCE_TRAVAIL_CLIENT_SECRET` dans Vercel. Sans base, chaque recherche interroge l’API en direct (cache de 10 minutes) : toutes les offres d’apprentissage et de professionnalisation publiées sur France Travail, à jour sans collecte. Limites : pas de sites carrière, pas de dédoublonnage, et l’API ne pagine pas au-delà de 3 150 offres par recherche (il faut alors filtrer).
-
-Avec une base, en plus des sites carrière :
+France Travail n'est plus une source : son connecteur a été retiré. Les offres viennent de La bonne alternance (collecte de nuit), des logiciels de recrutement et des sites carrière des entreprises, et des agrégateurs (Adzuna, Jooble).
 
 1. Créer une base Postgres et lancer `psql "$DATABASE_URL" -f db/schema.sql`.
-2. Créer un compte sur francetravail.io et une application abonnée à l’API Offres d’emploi v2. Mettre les identifiants dans `.env.local`.
+2. Mettre `LBA_API_TOKEN` dans `.env.local`.
 3. Tester sur deux départements : `pnpm ingest --dep 35,56`. Le script affiche le nombre d’offres lues.
-4. Collecte quotidienne : le workflow GitHub Actions `.github/workflows/ingest.yml` lance `pnpm ingest` chaque jour à 4 h 17 (UTC), et on peut le lancer à la main depuis l’onglet Actions. Créer les secrets `DATABASE_URL`, `FRANCE_TRAVAIL_CLIENT_ID`, `FRANCE_TRAVAIL_CLIENT_SECRET` et `BOT_CONTACT` dans les réglages du dépôt. Une offre qui n’est plus revue pendant 36 h est retirée. Le plan Hobby de Vercel n’autorise qu’un cron par jour et des fonctions courtes, d’où ce choix ; la route `/api/cron/ingest` (une tranche de départements par appel, protégée par `CRON_SECRET`) reste disponible pour un plan Pro.
-
-Points à vérifier au premier lancement, que je n’ai pas pu tester depuis l’environnement de développement (aucun accès réseau sortant) : l’adresse du jeton OAuth, le nom du scope et le format des réponses de l’API France Travail. Le connecteur lit les codes de contrat d’alternance dans le référentiel de l’API plutôt que de les coder en dur.
+4. Collecte quotidienne : le workflow GitHub Actions `.github/workflows/ingest.yml` lance `pnpm ingest` chaque jour, et on peut le lancer à la main depuis l’onglet Actions. Créer les secrets `DATABASE_URL`, `LBA_API_TOKEN` et `BOT_CONTACT` dans les réglages du dépôt. Une offre qui n’est plus revue pendant 36 h est retirée.
 
 ### Les sites carrière du CAC 40
 
@@ -61,8 +57,8 @@ Pour chaque entreprise : trouver l’adresse du site carrière, lancer `pnpm ing
 
 ## Ce qu’il faut savoir côté légal
 
-- **API La bonne alternance : non utilisée.** Ses conditions réservent l’API aux usages non lucratifs et interdisent de faire payer l’accès aux candidats. Un Pass payant serait incompatible. Si tu veux ces offres, écris d’abord à l’équipe La bonne alternance.
-- **France Travail** : la licence autorise la rediffusion des offres, pas des coordonnées de contact. Le connecteur ne les lit pas.
+- **API La bonne alternance : utilisée, à vérifier.** Une version précédente de ce fichier notait que ses conditions réservent l’API aux usages non lucratifs et interdisent de faire payer l’accès aux candidats. Les candidats ne paient rien sur Décode, mais la mise en avant payante pour les entreprises doit être confirmée compatible avec ces conditions auprès de l’équipe La bonne alternance.
+- **France Travail** : source retirée.
 - **Autres sites d’emploi** (Indeed, HelloWork, Welcome to the Jungle, LinkedIn) : pas d’aspiration. Une base d’annonces est protégée par le droit des producteurs de bases de données. Il faut passer par un partenariat ou un flux officiel. En attendant, la fonction « colle une offre » couvre tous les sites sans risque.
 - **LinkedIn** : Décode ne lit rien et n’écrit à personne. Il génère des liens de recherche que la personne ouvre avec son propre compte. La CNIL a sanctionné l’aspiration de coordonnées LinkedIn (Kaspr, 240 000 €, 2024).
 - **Données** : le profil et le suivi restent dans le navigateur. Le texte collé part chez Anthropic pour la traduction et n’est pas conservé par Décode. `app/mentions-legales` contient des champs `[ENTRE CROCHETS]` à remplir avant la mise en ligne.
@@ -91,10 +87,10 @@ Direction Apple (Human Interface Guidelines et verre liquide d'iOS 26, transpos�
 
 Personne n'a 100 % des offres, ni Welcome to the Jungle, ni LinkedIn : chacun a celles que les entreprises lui confient. Décode les additionne par les voies légales :
 
-1. **France Travail** et **La bonne alternance** : la très grande majorité des offres d'alternance publiées en France.
-2. **Les logiciels de recrutement des entreprises** (`lib/offers/connectors/ats.ts`) : Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee et Personio publient les offres de leurs clients par une API publique, faite pour être affichée ailleurs. C'est là que les start-up et beaucoup de grands groupes publient d'abord. Chaque nuit, la collecte cherche les tableaux de 120 employeurs de plus (`ats-discovery.ts` : ceux de la liste de départ, puis ceux qui ont le plus d'offres en base), les vérifie (nom ou offres en France), puis lit tous les tableaux connus. Un tableau qui échoue cinq nuits de suite n'est plus lu. Tester à la main : `pnpm ingest --discover Qonto` ou `pnpm ingest --ats lever:qonto`.
+1. **La bonne alternance** : les offres qu'elle recense (les siennes et celles de ses partenaires).
+2. **Les logiciels de recrutement des entreprises** (`lib/offers/connectors/ats.ts`) : Greenhouse, Lever, SmartRecruiters, Ashby, Recruitee et Personio publient les offres de leurs clients par une API publique, faite pour être affichée ailleurs. C'est là que les start-up et beaucoup de grands groupes publient d'abord. Chaque nuit, la collecte cherche les tableaux de 250 employeurs de plus (`ats-discovery.ts` : ceux de la liste de départ, puis ceux qui ont le plus d'offres en base), les vérifie (nom ou offres en France), puis lit tous les tableaux connus. Un tableau qui échoue cinq nuits de suite n'est plus lu. Tester à la main : `pnpm ingest --discover Qonto` ou `pnpm ingest --ats lever:qonto`.
 
-   **Workday** (`connectors/workday.ts`), le logiciel de la plupart des grands groupes, n'a pas d'API publique documentée : on lit le flux JSON que leur propre page carrière appelle, en respectant robots.txt, une requête à la fois, avec le lien pour postuler chez l'employeur. Le serveur (wd1, wd3, wd103…) et le site se trouvent dans le robots.txt du groupe ; un site n'est gardé que si ses annonces sont publiées par l'employeur cherché. 60 employeurs par nuit. Tester : `pnpm ingest --discover Thales` puis `pnpm ingest --ats workday:<groupe>.<serveur>/<site>`.
+   **Workday** (`connectors/workday.ts`), le logiciel de la plupart des grands groupes, n'a pas d'API publique documentée : on lit le flux JSON que leur propre page carrière appelle, en respectant robots.txt, une requête à la fois, avec le lien pour postuler chez l'employeur. Le serveur (wd1, wd3, wd103…) et le site se trouvent dans le robots.txt du groupe ; un site n'est gardé que si ses annonces sont publiées par l'employeur cherché. 120 employeurs par nuit. Tester : `pnpm ingest --discover Thales` puis `pnpm ingest --ats workday:<groupe>.<serveur>/<site>`.
 3. **Les sites carrière** qui publient le balisage `JobPosting` (`companies.ts`).
 4. **Adzuna et Jooble**, agrégateurs avec API officielle.
 

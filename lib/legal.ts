@@ -14,9 +14,9 @@ function required(name: string, value: string | undefined): string | null {
   return null;
 }
 
-/** Adresse de l'éditeur (une domiciliation, pas l'adresse personnelle). */
+/** Adresse de l'éditeur, facultative : sans elle, les mentions n'en affichent aucune (jamais l'adresse personnelle). */
 export function legalAddress(): string | null {
-  return required('LEGAL_ADDRESS', process.env.LEGAL_ADDRESS);
+  return process.env.LEGAL_ADDRESS?.trim() || null;
 }
 
 /** Adresse e-mail de contact. Les anciennes variables restent lues tant qu'elles existent dans Vercel. */

@@ -1,19 +1,30 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useTransition } from 'react';
+import { Waiting } from '@/components/states/Waiting';
+import { track } from '@/lib/analytics';
 
 /**
  * Les filtres en pastilles s'appliquent dès qu'on les change, sans chercher le bouton. Sauf dans un panneau à
  * valider (data-manual). L'adresse produite ne garde que les filtres choisis, sans les valeurs vides.
+ * Pendant que la nouvelle page se charge, un bandeau le dit : loading.tsx ne s'affiche pas quand seuls les filtres changent.
  */
 export function AutoSubmit({ formId }: { formId: string }) {
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
   useEffect(() => {
     const form = document.getElementById(formId) as HTMLFormElement | null;
     if (!form) return;
     const onChange = (e: Event) => {
       const target = e.target as HTMLElement;
+      // Un filtre touché par la personne (le texte cherché est compté avec la recherche).
+      if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement) {
+        if (target.name && target.name !== 'q') {
+          const value = target instanceof HTMLInputElement && (target.type === 'checkbox' || target.type === 'radio') ? (target.checked ? target.value : null) : target.value;
+          track('filter_used', { filter: target.name, value: value || null });
+        }
+      }
       if (target.closest('[data-manual]')) return;
       if (target.matches('select, input[type="checkbox"]')) form.requestSubmit();
     };
@@ -39,7 +50,7 @@ export function AutoSubmit({ formId }: { formId: string }) {
         params.set('ville', label ?? '');
         delete form.dataset.near;
       }
-      router.push(`${form.getAttribute('action') ?? ''}?${params}`);
+      startTransition(() => router.push(`${form.getAttribute('action') ?? ''}?${params}`));
     };
     form.addEventListener('change', onChange);
     form.addEventListener('submit', onSubmit);
@@ -48,5 +59,9 @@ export function AutoSubmit({ formId }: { formId: string }) {
       form.removeEventListener('submit', onSubmit);
     };
   }, [formId, router]);
-  return null;
+  return pending ? (
+    <div className="search-pending">
+      <Waiting title="Décode cherche les offres…" />
+    </div>
+  ) : null;
 }
