@@ -5326,6 +5326,17 @@ a:hover .wordmark__mascotte,
   background: var(--mint);
 }
 
+.search-pending {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  z-index: 40;
+  max-width: 480px;
+  margin-inline: auto;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
+  border-radius: var(--radius-card, 16px);
+}
+
 .decode-wait__title {
   font-weight: 700;
 }
@@ -5398,6 +5409,11 @@ a:hover .wordmark__mascotte,
 
 .lost__mascotte {
   margin: 0 auto 8px;
+}
+
+.lost__ref {
+  color: var(--muted);
+  font-size: var(--step-small);
 }
 
 .lost__links {
