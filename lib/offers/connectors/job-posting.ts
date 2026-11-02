@@ -90,6 +90,13 @@ function salaryFromLd(ld: JobPostingLd): { text: string | null; cents: number | 
   return { text, cents: range?.minCents ?? null, maxCents: range?.maxCents ?? null };
 }
 
+/** Le pays d'une offre est-il la France ? Sans pays indiqué, on garde l'offre (le site carrière est français). */
+export function inFrance(country: string | { name?: string } | undefined): boolean {
+  const name = typeof country === 'object' ? country?.name : country;
+  if (!name) return true;
+  return /^(fr|fra|france|fr-fr)$/i.test(name.trim());
+}
+
 export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: CareerSite): Offer | null {
   const title = (ld.title ?? ld.name ?? '').trim();
   if (!title) return null;
@@ -99,6 +106,8 @@ export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: Caree
 
   const location = asArray(ld.jobLocation)[0];
   const address = typeof location?.address === 'object' ? location.address : undefined;
+  // Les grands groupes publient leurs offres du monde entier sur le même site : on ne garde que la France.
+  if (!inFrance(address?.addressCountry)) return null;
   const city = address?.addressLocality?.trim() || (typeof location?.address === 'string' ? location.address : null);
   const postalCode = address?.postalCode?.trim() || null;
   const sourceUrl = ld.url && /^https?:\/\//.test(ld.url) ? ld.url : pageUrl;

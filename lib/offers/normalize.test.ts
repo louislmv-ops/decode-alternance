@@ -30,6 +30,12 @@ describe('isAlternance', () => {
   it('écarte un CDI ou un stage', () => {
     expect(isAlternance('Contrôleur de gestion CDI', 'Poste en CDI à pourvoir immédiatement')).toBe(false);
     expect(isAlternance('Stage marketing 6 mois')).toBe(false);
+    // L'apprentissage de l'intelligence artificielle n'est pas un contrat d'apprentissage.
+    expect(isAlternance('Stage - Physical AI : simulation et apprentissage robotique (H/F)')).toBe(false);
+    expect(isAlternance('Apprentissage fédéré pour l’adaptation des modèles prédictifs de QoS F/H', 'Thèse en apprentissage automatique')).toBe(false);
+    expect(isAlternance('Stage data', 'Possibilité de poursuivre en alternance')).toBe(false);
+    expect(isAlternance('APPRENTISSAGE – Analyste des processus métier IS (F/H)')).toBe(true);
+    expect(isAlternance('Data scientist', 'Contrat d’apprentissage de 24 mois, apprentissage automatique')).toBe(true);
   });
 });
 
