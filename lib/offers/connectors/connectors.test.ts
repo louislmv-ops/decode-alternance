@@ -71,5 +71,7 @@ describe('sites carrière : seulement la France', () => {
     expect(inFrance(undefined)).toBe(true);
     expect(inFrance('DE')).toBe(false);
     expect(inFrance({ name: 'Singapore' })).toBe(false);
+    expect(inFrance(undefined, '25hours Hotel Hamburg HafenCity, Hamburg, Germany')).toBe(false);
+    expect(inFrance(undefined, 'Vélizy-Villacoublay')).toBe(true);
   });
 });

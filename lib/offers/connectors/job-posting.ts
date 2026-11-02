@@ -11,6 +11,7 @@ import {
   fingerprint,
   htmlToText,
   isAlternance,
+  normalizeText,
   parseSalaryRange,
   schoolBaitFlags,
 } from '../normalize';
@@ -90,11 +91,18 @@ function salaryFromLd(ld: JobPostingLd): { text: string | null; cents: number | 
   return { text, cents: range?.minCents ?? null, maxCents: range?.maxCents ?? null };
 }
 
-/** Le pays d'une offre est-il la France ? Sans pays indiqué, on garde l'offre (le site carrière est français). */
-export function inFrance(country: string | { name?: string } | undefined): boolean {
+/** Pays étrangers que les sites carrière glissent dans le lieu quand ils ne remplissent pas addressCountry. */
+const FOREIGN_PLACE =
+  /\b(germany|deutschland|allemagne|united kingdom|uk|england|scotland|royaume uni|spain|espana|espagne|italy|italia|italie|belgium|belgique|switzerland|suisse|netherlands|pays bas|portugal|poland|pologne|austria|autriche|singapore|singapour|china|chine|india|inde|japan|japon|usa|united states|etats unis|canada|brazil|bresil|mexico|mexique|morocco|maroc|tunisia|tunisie|australia|australie|uae|dubai)\b/;
+
+/**
+ * Le pays d'une offre est-il la France ? Sans pays indiqué, on regarde si le lieu nomme un pays étranger
+ * (« Hamburg, Germany ») ; sinon on garde l'offre, le site carrière étant français.
+ */
+export function inFrance(country: string | { name?: string } | undefined, place = ''): boolean {
   const name = typeof country === 'object' ? country?.name : country;
-  if (!name) return true;
-  return /^(fr|fra|france|fr-fr)$/i.test(name.trim());
+  if (name) return /^(fr|fra|france|fr-fr)$/i.test(name.trim());
+  return !FOREIGN_PLACE.test(normalizeText(place));
 }
 
 export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: CareerSite): Offer | null {
@@ -107,7 +115,8 @@ export function jobPostingToOffer(ld: JobPostingLd, pageUrl: string, site: Caree
   const location = asArray(ld.jobLocation)[0];
   const address = typeof location?.address === 'object' ? location.address : undefined;
   // Les grands groupes publient leurs offres du monde entier sur le même site : on ne garde que la France.
-  if (!inFrance(address?.addressCountry)) return null;
+  const placeText = [address?.addressLocality, typeof location?.address === 'string' ? location.address : ''].filter(Boolean).join(' ');
+  if (!inFrance(address?.addressCountry, placeText)) return null;
   const city = address?.addressLocality?.trim() || (typeof location?.address === 'string' ? location.address : null);
   const postalCode = address?.postalCode?.trim() || null;
   const sourceUrl = ld.url && /^https?:\/\//.test(ld.url) ? ld.url : pageUrl;

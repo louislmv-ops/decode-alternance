@@ -5,6 +5,7 @@
 // (scripts/career-candidates.json) dit quelles adresses donnent des offres d'alternance avec le balisage
 // JobPosting. Vérifiées le 2 novembre 2026. Un site non renseigné est simplement ignoré.
 
+import type { AtsBoard } from './connectors/ats';
 import type { CareerSite } from './connectors/job-posting';
 
 interface Cac40Entry {
@@ -79,6 +80,17 @@ export function cac40Group(company: string | null | undefined): string | null {
 
 /** Les noms repliés des groupes du CAC 40, pour reconnaître le groupe en SQL. */
 export const CAC40_FOLDED = CAC40_NAMES;
+
+/**
+ * Tableaux de logiciels de recrutement vérifiés par le workflow « Sites carrière », que la recherche automatique
+ * ne trouve pas seule (identifiant sans rapport avec le nom : Airbus est « ag »). Ajoutés à chaque collecte.
+ */
+export const KNOWN_ATS_BOARDS: AtsBoard[] = [
+  { provider: 'workday', slug: 'ag.wd3/Airbus', company: 'Airbus', size: 'grande' },
+  { provider: 'workday', slug: 'valeo.wd3/valeo_jobs', company: 'Valeo', size: 'grande' },
+  { provider: 'workday', slug: 'airliquidehr.wd3/AirLiquideExternalCareer', company: 'Air Liquide', size: 'grande' },
+  { provider: 'workday', slug: 'sanofi.wd3/SanofiCareers', company: 'Sanofi', size: 'grande' },
+];
 
 /** Grands recruteurs d'alternants hors CAC 40 dont le site carrière a été vérifié de la même façon. */
 const OTHER_CAREER_SITES: { company: string; careersUrl: string }[] = [{ company: 'Decathlon', careersUrl: 'https://joinus.decathlon.fr' }];
