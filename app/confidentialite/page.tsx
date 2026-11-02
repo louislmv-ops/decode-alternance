@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
+import { ManageCookies } from '@/components/consent/ManageCookies';
+import { isAnalyticsConfigured } from '@/lib/consent';
 import { aiProvider, contactEmail, databaseHost } from '@/lib/legal';
 
 export const metadata: Metadata = {
@@ -26,8 +28,8 @@ export default function PrivacyPage() {
         <h2>Sans compte</h2>
         <p>
           Ton profil, ton suivi de candidatures et tes likes restent dans ton navigateur (stockage local) et ne sont pas envoyés à
-          Décode. Un cookie technique garde ton âge, ton année et ton type de contrat pour comparer les salaires à ton minimum, un autre
-          ton département si tu le choisis. Le site n’utilise ni cookie publicitaire ni outil de mesure d’audience ; les vues et clics des offres sponsorisées sont comptés en total par jour, sans rien qui t’identifie.
+          Décode. Des cookies techniques gardent ton âge, ton année et ton type de contrat (pour comparer les salaires à ton minimum) et ton
+          département si tu le choisis : la liste complète est plus bas, dans Cookies.
         </p>
 
         <h2>Ce que Décode traite, pourquoi, et combien de temps</h2>
@@ -99,6 +101,31 @@ export default function PrivacyPage() {
           sont pas respectés, tu peux adresser une réclamation à la CNIL (cnil.fr).
         </p>
         <p>Décode ne lit aucune donnée sur LinkedIn et ne contacte personne à ta place.</p>
+
+        <h2 id="cookies">Cookies</h2>
+        <p>Ces cookies servent au fonctionnement du site. Ils ne demandent pas ton accord et ne suivent rien d’autre :</p>
+        <ul className="bullets">
+          <li>decode_profil : ton âge, ton année et ton type de contrat, pour calculer ton minimum. 1 an.</li>
+          <li>decode_lieu : le département ou la ville que tu as choisis. 1 an.</li>
+          <li>decode_session et decode_connecte : ta connexion, si tu as un compte. 90 jours.</li>
+          {isAnalyticsConfigured() && <li>decode_mesure : ton choix sur la mesure d’audience. 6 mois, puis on te redemande.</li>}
+        </ul>
+        {isAnalyticsConfigured() ? (
+          <>
+            <p>
+              Avec ton accord seulement, Décode mesure son audience avec PostHog (PostHog Inc., données hébergées dans l’Union
+              européenne) : pages vues, page d’arrivée, recherches, offres ouvertes, clics sur « Postuler » et filtres utilisés. Pas de
+              publicité, pas d’enregistrement de ta session, adresse IP anonymisée. PostHog dépose alors ses propres cookies (ph_…),
+              gardés jusqu’à 1 an. Base légale : ton consentement. Si tu refuses ou retires ton accord, rien n’est envoyé et ces cookies
+              sont effacés.
+            </p>
+            <p>
+              <ManageCookies className="ui-btn" />
+            </p>
+          </>
+        ) : (
+          <p>Aucun outil de mesure d’audience ni cookie publicitaire n’est utilisé. Les vues et clics des offres sponsorisées sont comptés en total par jour, sans rien qui t’identifie.</p>
+        )}
       </main>
       <SiteFooter />
     </>

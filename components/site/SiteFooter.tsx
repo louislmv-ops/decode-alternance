@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Wordmark } from '@/components/Wordmark';
+import { ManageCookies } from '@/components/consent/ManageCookies';
 import { CITIES, landingHref } from '@/lib/landing';
 
 export function SiteFooter() {
@@ -67,6 +68,7 @@ export function SiteFooter() {
           <Link className="link" href="/confidentialite">
             Confidentialité
           </Link>
+          <ManageCookies />
           <Link className="link" href="/mentions-legales#sources">
             Sources des offres et des règles
           </Link>

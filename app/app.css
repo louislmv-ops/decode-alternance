@@ -8483,3 +8483,55 @@ a:hover .wordmark__o,
   padding-left: 12px;
   border-left: 3px solid var(--accent);
 }
+
+/* ==========================================================================
+   Consentement : un bandeau en bas, deux boutons de même poids.
+   ========================================================================== */
+
+.consent {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 60;
+  max-width: 560px;
+  margin-inline: auto;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card, 16px);
+  background: var(--surface, #14112b);
+  color: var(--ink);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.35);
+}
+
+.consent__title {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.consent__text {
+  margin: 0 0 14px;
+  font-size: var(--step-small);
+  color: var(--muted);
+}
+
+.consent__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.consent__manage {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  text-align: start;
+}
+
+@media (min-width: 900px) {
+  .consent {
+    inset-inline: auto 24px;
+    bottom: 24px;
+  }
+}
