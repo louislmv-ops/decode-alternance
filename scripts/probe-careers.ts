@@ -4,11 +4,14 @@
 //   pnpm tsx scripts/probe-careers.ts [fichier.json] [pages par site]
 
 import { readFileSync } from 'node:fs';
+import { type AtsProvider, fetchAtsBoard } from '@/lib/offers/connectors/ats';
 import { crawlCareerSite } from '@/lib/offers/connectors/job-posting';
 
 interface Candidate {
   company: string;
-  urls: string[];
+  urls?: string[];
+  /** Tableaux de logiciels de recrutement à essayer, « fournisseur:identifiant » (« workday:ag.wd3/Airbus »). */
+  boards?: string[];
 }
 
 const file = process.argv[2] ?? 'scripts/career-candidates.json';
@@ -32,16 +35,30 @@ async function probe(company: string, url: string) {
   }
 }
 
+/** Un tableau de logiciel de recrutement : combien d'offres d'alternance en France il donne. */
+async function probeBoard(company: string, board: string) {
+  const [provider, slug] = board.split(/:(.*)/s) as [AtsProvider, string];
+  try {
+    const offers = await fetchAtsBoard({ provider, slug, company });
+    return { company, url: board, ok: offers.length > 0, offers: offers.length, pages: 0, robots: 0, note: 'tableau lu', sample: offers.slice(0, 2).map((o) => `${o.title} · ${o.city ?? '?'}`) };
+  } catch (error) {
+    return { company, url: board, ok: false, offers: 0, pages: 0, robots: 0, note: (error as Error).message, sample: [] as string[] };
+  }
+}
+
 async function main() {
   const candidates = JSON.parse(readFileSync(file, 'utf8')) as Candidate[];
-  const jobs = candidates.flatMap((c) => c.urls.map((url) => ({ company: c.company, url })));
-  const results: Awaited<ReturnType<typeof probe>>[] = [];
+  const jobs = candidates.flatMap((c) => [
+    ...(c.urls ?? []).map((url) => ({ company: c.company, url, run: () => probe(c.company, url) })),
+    ...(c.boards ?? []).map((board) => ({ company: c.company, url: board, run: () => probeBoard(c.company, board) })),
+  ]);
+  const results: { company: string; url: string; ok: boolean; offers: number; pages: number }[] = [];
   let next = 0;
   await Promise.all(
     Array.from({ length: PARALLEL }, async () => {
       while (next < jobs.length) {
         const job = jobs[next++]!;
-        const r = await probe(job.company, job.url);
+        const r = await job.run();
         results.push(r);
         console.log(`${r.ok ? 'OK  ' : 'RIEN'} ${r.company} · ${r.url} · ${r.offers} offres d'alternance, ${r.pages} pages lues, ${r.robots} interdites · ${r.note}`);
         for (const s of r.sample) console.log(`       - ${s}`);
