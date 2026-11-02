@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Mascotte } from '@/components/Mascotte';
 import { useState } from 'react';
 import { CopyButton } from '@/components/offer/CopyButton';
 import { useProfile } from '@/components/useProfile';
@@ -145,9 +146,12 @@ export function TrackerView() {
         </form>
 
         {apps.length === 0 ? (
-          <p className="empty">
-            Rien pour l’instant. Ajoute-en une, ou garde une <Link href="/offres/swipe">offre au swipe</Link> : elle arrive dans « À postuler ».
-          </p>
+          <div className="empty">
+            <Mascotte pose="diplome" size={112} className="empty__mascotte" />
+            <p>
+              Rien pour l’instant. Ajoute-en une, ou garde une <Link href="/offres/swipe">offre au swipe</Link> : elle arrive dans « À postuler ».
+            </p>
+          </div>
         ) : (
           <KanbanBoard apps={apps} today={today} onMove={(id, column) => {
             const app = apps.find((a) => a.id === id);

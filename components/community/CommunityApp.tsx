@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Mascotte } from '@/components/Mascotte';
 import { useCallback, useEffect, useState } from 'react';
 import { KIND_LABELS, KINDS, type Post, type PostKind } from '@/lib/community/shared';
 import { call, Composer, JoinForm, MemberRow, PostCard, type PublicMember } from './ui';
@@ -121,7 +122,10 @@ export function CommunityApp({ open }: { open: boolean }) {
           {posts === null ? (
             <p className="c-empty">Chargement…</p>
           ) : posts.length === 0 ? (
-            <p className="c-empty">{scope === 'abonnements' ? 'Suis des membres pour voir leurs messages ici.' : 'Rien encore. Lance la discussion.'}</p>
+            <div className="empty">
+              <Mascotte pose="content" size={112} className="empty__mascotte" />
+              <p>{scope === 'abonnements' ? 'Suis des membres pour voir leurs messages ici.' : 'Rien encore. Lance la discussion.'}</p>
+            </div>
           ) : (
             <div className="c-feed">
               {posts.map((p) => (
