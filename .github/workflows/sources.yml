@@ -1,0 +1,27 @@
+# Sites carrière : teste les adresses de scripts/career-candidates.json (sans rien écrire en base) dès qu'une PR
+# les modifie, ou à la main depuis l'onglet Actions. Le résultat dit lesquelles renseigner dans lib/offers/companies.ts.
+name: Sites carrière
+
+on:
+  pull_request:
+    paths:
+      - scripts/career-candidates.json
+      - scripts/probe-careers.ts
+      - lib/offers/connectors/job-posting.ts
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/probe-careers.ts scripts/career-candidates.json 40
