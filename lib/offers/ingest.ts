@@ -15,12 +15,15 @@ import { companiesToProbe, geocodeStoredOffers, ensureOfferSchema, listAtsBoards
 
 export const STALE_HOURS = 36;
 
-/** Employeurs cherchés chez les logiciels de recrutement à chaque collecte : quelques minutes de requêtes. */
-export const ATS_PROBES_PER_NIGHT = 120;
+/**
+ * Employeurs cherchés chez les logiciels de recrutement à chaque collecte. Mesuré en novembre 2026 : 180 recherches
+ * (120 + 60 Workday) prennent environ 25 minutes ; le double tient largement dans les 4 heures du workflow.
+ */
+export const ATS_PROBES_PER_NIGHT = 250;
 /** Lieux nouveaux placés sur la carte par nuit : l'API Géo est gratuite, on la ménage. */
 export const GEOCODE_PER_NIGHT = 4000;
 /** Workday demande plus d'appels par employeur (un par serveur possible) : moins d'employeurs par nuit. */
-export const WORKDAY_PROBES_PER_NIGHT = 60;
+export const WORKDAY_PROBES_PER_NIGHT = 120;
 
 /**
  * Les logiciels de recrutement : d'abord chercher les tableaux de quelques employeurs de plus, puis lire tous les
