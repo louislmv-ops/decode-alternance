@@ -13,7 +13,7 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       BOT_CONTACT: ${{ secrets.BOT_CONTACT }}
     steps:
